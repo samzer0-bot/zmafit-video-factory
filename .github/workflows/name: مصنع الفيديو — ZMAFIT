@@ -1,0 +1,138 @@
+name: مصنع الفيديو — ZMAFIT
+
+on:
+  schedule:
+    - cron: "0 9 * * 1,3,5"
+    - cron: "0 9 * * 0"
+  workflow_dispatch:
+    inputs:
+      format:
+        description: "الصيغة"
+        type: choice
+        options: [shorts, long]
+        default: shorts
+      topic:
+        description: "موضوع محدد"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+concurrency:
+  group: video-factory
+  cancel-in-progress: false
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      MAKE_WEBHOOK: ${{ secrets.MAKE_WEBHOOK }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: تحديد الصيغة
+        id: cfg
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            if [ "${{ github.event.schedule }}" = "0 9 * * 0" ]; then
+              echo "format=long" >> $GITHUB_OUTPUT
+            else
+              echo "format=shorts" >> $GITHUB_OUTPUT
+            fi
+            echo "topic=" >> $GITHUB_OUTPUT
+          else
+            echo "format=${{ inputs.format }}" >> $GITHUB_OUTPUT
+            echo "topic=${{ inputs.topic }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: تثبيت ffmpeg
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: تثبيت المكتبات
+        run: pip install --quiet edge-tts
+
+      - name: إنتاج الفيديو
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+          TTS_VOICE: ${{ vars.TTS_VOICE || 'ar-EG-ShakirNeural' }}
+          TTS_RATE: ${{ vars.TTS_RATE || '+8%' }}
+        run: |
+          MAIN=main.py
+          [ -f scripts/main.py ] && MAIN=scripts/main.py
+          if [ -n "${{ steps.cfg.outputs.topic }}" ]; then
+            python "$MAIN" --format "${{ steps.cfg.outputs.format }}" --topic "${{ steps.cfg.outputs.topic }}"
+          else
+            python "$MAIN" --format "${{ steps.cfg.outputs.format }}"
+          fi
+
+      - name: قراءة بيانات الفيديو
+        id: meta
+        run: |
+          NAME=$(python -c "import json,glob,os;p=sorted(glob.glob('out/*.json'));p=[x for x in p if not x.endswith('latest.json')];print(os.path.basename(p[-1])[:-5])")
+          echo "name=$NAME" >> $GITHUB_OUTPUT
+          echo "tag=v$(date -u +%Y%m%d-%H%M%S)" >> $GITHUB_OUTPUT
+          python - <<'PY' >> $GITHUB_OUTPUT
+          import json
+          m = json.load(open('out/latest.json', encoding='utf-8'))
+          print("title=" + m["title"].replace("\n", " "))
+          print("duration=" + str(m["duration"]))
+          PY
+
+      - name: نشر الإصدار
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ steps.meta.outputs.tag }}" \
+            "out/${{ steps.meta.outputs.name }}.mp4" \
+            "out/${{ steps.meta.outputs.name }}.jpg" \
+            "out/${{ steps.meta.outputs.name }}.json" \
+            --title "${{ steps.meta.outputs.title }}" \
+            --notes "مدة: ${{ steps.meta.outputs.duration }}s"
+          REPO="${{ github.repository }}"
+          TAG="${{ steps.meta.outputs.tag }}"
+          BASE="https://github.com/$REPO/releases/download/$TAG"
+          echo "video_url=$BASE/${{ steps.meta.outputs.name }}.mp4" >> $GITHUB_OUTPUT
+          echo "thumb_url=$BASE/${{ steps.meta.outputs.name }}.jpg" >> $GITHUB_OUTPUT
+
+      - name: إشعار Make للرفع على يوتيوب
+        if: env.MAKE_WEBHOOK != ''
+        env:
+          VIDEO_URL: ${{ steps.release.outputs.video_url }}
+          THUMB_URL: ${{ steps.release.outputs.thumb_url }}
+        run: |
+          python - <<'PY'
+          import json, os, urllib.request
+          m = json.load(open('out/latest.json', encoding='utf-8'))
+          m["video_url"] = os.environ["VIDEO_URL"]
+          m["thumb_url"] = os.environ["THUMB_URL"]
+          m["tags_text"] = ",".join(m.get("tags", []))
+          data = json.dumps(m, ensure_ascii=False).encode()
+          req = urllib.request.Request(os.environ["MAKE_WEBHOOK"], data=data,
+                                       headers={"Content-Type": "application/json"})
+          print(urllib.request.urlopen(req, timeout=120).read().decode()[:200])
+          PY
+
+      - name: حفظ قائمة المواضيع
+        run: |
+          git config user.name "video-factory"
+          git config user.email "actions@github.com"
+          git add queue.txt done.txt topics/queue.txt topics/done.txt 2>/dev/null || true
+          git commit -m "تحديث قائمة المواضيع [skip ci]" || echo "لا تغييرات"
+          git push || true
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.meta.outputs.name }}
+          path: out/*
+          retention-days: 14
