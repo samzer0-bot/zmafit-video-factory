@@ -2,6 +2,7 @@
 import json
 import os
 import re
+import time
 import urllib.request
 import urllib.error
 
@@ -17,7 +18,14 @@ MODEL_CANDIDATES = [
     "gemini-1.5-flash",
 ]
 
-_RESOLVED = None
+_MODELS = None
+RETRY_CODES = (429, 500, 502, 503, 504)
+BACKOFF = [8, 20, 45]
+
+
+class Busy(Exception):
+    """الخادم مشغول مؤقتاً — يستحق إعادة المحاولة."""
+
 
 SCHEMA = {
     "type": "object",
@@ -68,11 +76,15 @@ def _post(url: str, payload: dict) -> dict:
     data = json.dumps(payload).encode("utf-8")
     req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
     try:
-        with urllib.request.urlopen(req, timeout=120) as r:
+        with urllib.request.urlopen(req, timeout=180) as r:
             return json.loads(r.read().decode("utf-8"))
     except urllib.error.HTTPError as e:
-        body = e.read().decode("utf-8", "replace")[:600]
+        body = e.read().decode("utf-8", "replace")[:400]
+        if e.code in RETRY_CODES:
+            raise Busy(f"HTTP {e.code}") from None
         raise RuntimeError(f"Gemini HTTP {e.code}: {body}") from None
+    except (urllib.error.URLError, TimeoutError) as e:
+        raise Busy(f"شبكة: {e}") from None
 
 
 def _get(url: str) -> dict:
@@ -99,8 +111,8 @@ def _score(name: str) -> int:
     return 50
 
 
-def pick_model(available: list) -> str:
-    """يختار موديلاً متاحاً يدعم generateContent."""
+def rank_models(available: list) -> list:
+    """يرتّب الموديلات الصالحة: المفضّلة أولاً ثم البقية حسب الأنسب."""
     usable = [
         m["name"].split("/")[-1] for m in available
         if "generateContent" in (m.get("supportedGenerationMethods") or [])
@@ -108,24 +120,45 @@ def pick_model(available: list) -> str:
     if not usable:
         raise RuntimeError("لا يوجد أي موديل يدعم generateContent في هذا الحساب")
 
-    for cand in MODEL_CANDIDATES:
-        if cand and cand in usable:
-            return cand
+    ordered = [c for c in MODEL_CANDIDATES if c and c in usable]
+    rest = sorted((m for m in usable if m not in ordered),
+                  key=lambda n: (_score(n), len(n)))
+    ordered += [m for m in rest if _score(m) < 100]
 
-    usable.sort(key=lambda n: (_score(n), len(n)))
-    if _score(usable[0]) >= 100:
+    if not ordered:
         raise RuntimeError(f"لا يوجد موديل نصي مناسب. المتاح: {usable[:15]}")
-    return usable[0]
+    return ordered[:5]
 
 
-def resolve_model() -> str:
-    global _RESOLVED
-    if _RESOLVED:
-        return _RESOLVED
-    data = _get(f"{BASE}/models?key={config.GEMINI_API_KEY}&pageSize=200")
-    _RESOLVED = pick_model(data.get("models", []))
-    print(f"  الموديل المستعمل: {_RESOLVED}")
-    return _RESOLVED
+def models() -> list:
+    global _MODELS
+    if _MODELS is None:
+        data = _get(f"{BASE}/models?key={config.GEMINI_API_KEY}&pageSize=200")
+        _MODELS = rank_models(data.get("models", []))
+        print(f"  الموديلات المتاحة بالترتيب: {_MODELS}")
+    return _MODELS
+
+
+def ask(payload: dict) -> dict:
+    """يجرّب كل موديل مع إعادة محاولة عند ازدحام الخادم."""
+    last = None
+    for model in models():
+        url = f"{BASE}/models/{model}:generateContent?key={config.GEMINI_API_KEY}"
+        for attempt, wait in enumerate([0] + BACKOFF):
+            if wait:
+                print(f"  الخادم مشغول — إعادة المحاولة بعد {wait}s ({model})")
+                time.sleep(wait)
+            try:
+                out = _post(url, payload)
+                print(f"  الموديل المستعمل: {model}")
+                return out
+            except Busy as e:
+                last = e
+            except RuntimeError as e:
+                last = e
+                break
+        print(f"  تعذّر {model} ({last}) — ننتقل للموديل التالي")
+    raise RuntimeError(f"فشل كل الموديلات. آخر خطأ: {last}")
 
 
 def clean(text: str) -> str:
@@ -155,9 +188,7 @@ def generate(topic: str, fmt: str = "shorts") -> dict:
         },
     }
 
-    model = resolve_model()
-    url = f"{BASE}/models/{model}:generateContent?key={config.GEMINI_API_KEY}"
-    raw = _post(url, payload)
+    raw = ask(payload)
     text = raw["candidates"][0]["content"]["parts"][0]["text"]
     data = json.loads(text)
 
