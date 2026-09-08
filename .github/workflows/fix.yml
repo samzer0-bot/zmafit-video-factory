@@ -1,0 +1,65 @@
+name: إصلاح بنية المجلدات
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: ترتيب الملفات في مجلداتها
+        run: |
+          set -e
+          mkdir -p scripts assets/fonts assets/music topics
+
+          for f in ai.py config.py main.py render.py stock.py subs.py voice.py _selftest.py; do
+            if [ -f "$f" ]; then git mv "$f" "scripts/$f"; echo "نقل $f"; fi
+          done
+
+          for f in Cairo-Bold.ttf Cairo-Regular.ttf; do
+            if [ -f "$f" ]; then git mv "$f" "assets/fonts/$f"; echo "نقل $f"; fi
+          done
+
+          for f in queue.txt done.txt; do
+            if [ -f "$f" ]; then git mv "$f" "topics/$f"; echo "نقل $f"; fi
+          done
+
+          if [ -f video.yml ]; then git rm -q video.yml; echo "حذف video.yml الزائد"; fi
+
+          printf 'ضع ملفات mp3 خالية من حقوق النشر هنا (اختياري).\n' > assets/music/README.md
+          printf 'خط Cairo برخصة SIL OFL.\n' > assets/fonts/README.md
+          printf '# مصنع الفيديو — ZMAFIT\n\nأتمتة مجانية لإنتاج فيديوهات لياقة عربية ورفعها على يوتيوب.\nالتشغيل: تبويب Actions ثم مصنع الفيديو ثم Run workflow.\n' > README.md
+
+          git config user.name "video-factory"
+          git config user.email "actions@github.com"
+          git add -A
+          git commit -m "إصلاح بنية المجلدات" || echo "لا تغييرات"
+          git push
+
+      - name: التحقق من النتيجة
+        run: |
+          echo "=== البنية بعد الإصلاح ==="
+          find . -path ./.git -prune -o -type f -print | sort
+          echo "=== فحص المسارات ==="
+          python3 - <<'PY'
+          import sys
+          sys.path.insert(0, "scripts")
+          import config
+          checks = {
+              "ROOT": config.ROOT,
+              "FONTS": config.FONTS,
+              "Cairo-Bold": config.FONTS / "Cairo-Bold.ttf",
+              "queue.txt": config.ROOT / "topics" / "queue.txt",
+          }
+          bad = 0
+          for k, v in checks.items():
+              ok = v.exists()
+              bad += 0 if ok else 1
+              print(("✓" if ok else "✗"), k, "=", v)
+          sys.exit(1 if bad else 0)
+          PY
