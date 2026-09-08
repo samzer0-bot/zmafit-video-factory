@@ -52,7 +52,8 @@ def pop_topic(topic: str):
 
 def slugify(text: str) -> str:
     text = unicodedata.normalize("NFKD", text)
-    text = re.sub(r"[^\w؀-ۿ]+", "-", text).strip("-")
+    text = text.encode("ascii", "ignore").decode("ascii")
+    text = re.sub(r"[^A-Za-z0-9]+", "-", text).strip("-")
     return (text[:40] or "video").lower()
 
 
