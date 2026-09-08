@@ -16,11 +16,38 @@ BROAD = [
     "running", "healthy lifestyle", "sport", "stretching", "yoga",
 ]
 
+UA = ("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
+      "(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36")
+
+_DIAG = {"shown": False}
+
+
+def _headers(auth: bool = True) -> dict:
+    h = {"User-Agent": UA, "Accept": "*/*", "Accept-Encoding": "identity"}
+    if auth:
+        h["Authorization"] = (config.PEXELS_API_KEY or "").strip()
+    return h
+
 
 def _get(url: str) -> dict:
-    req = urllib.request.Request(url, headers={"Authorization": config.PEXELS_API_KEY})
+    req = urllib.request.Request(url, headers=_headers())
     with urllib.request.urlopen(req, timeout=60) as r:
         return json.loads(r.read().decode("utf-8"))
+
+
+def _download(link: str, dest: Path):
+    req = urllib.request.Request(link, headers=_headers(auth=False))
+    with urllib.request.urlopen(req, timeout=180) as r, open(dest, "wb") as f:
+        shutil.copyfileobj(r, f)
+
+
+def key_report():
+    """يطبع تشخيصاً مرة واحدة عند أول فشل."""
+    k = (config.PEXELS_API_KEY or "").strip()
+    raw = config.PEXELS_API_KEY or ""
+    print(f"    [تشخيص] طول المفتاح: {len(k)}"
+          f" | مسافات زائدة: {'نعم' if raw != k else 'لا'}"
+          f" | يبدأ بـ: {k[:6]}…")
 
 
 def _best_file(v: dict, want_portrait: bool, min_side: int):
@@ -48,7 +75,15 @@ def _search(query: str, orientation, want_portrait: bool, used: set, min_side: i
     try:
         data = _get(url)
     except urllib.error.HTTPError as e:
-        print(f"    Pexels HTTP {e.code} على '{query}'")
+        body = ""
+        try:
+            body = e.read().decode("utf-8", "replace")[:220].replace("\n", " ")
+        except Exception:
+            pass
+        print(f"    Pexels HTTP {e.code} على '{query}' — {body}")
+        if not _DIAG["shown"]:
+            _DIAG["shown"] = True
+            key_report()
         return None
     except Exception as e:
         print(f"    Pexels خطأ على '{query}': {e}")
@@ -115,7 +150,7 @@ def fetch(scenes: list, orientation: str, workdir: Path) -> list:
         used.add(vid)
         dest = workdir / f"clip_{i:02d}.mp4"
         try:
-            urllib.request.urlretrieve(link, dest)
+            _download(link, dest)
         except Exception as e:
             print(f"  ! فشل تنزيل لقطة {i + 1}: {e}")
             if downloaded:
