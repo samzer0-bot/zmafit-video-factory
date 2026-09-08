@@ -1,13 +1,23 @@
 """توليد سكربت الفيديو بالعربية عبر Gemini (الباقة المجانية)."""
 import json
+import os
 import re
 import urllib.request
 import urllib.error
 
 import config
 
-MODEL = "gemini-2.0-flash"
-ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/{m}:generateContent?key={k}"
+BASE = "https://generativelanguage.googleapis.com/v1beta"
+
+MODEL_CANDIDATES = [
+    os.environ.get("GEMINI_MODEL", ""),
+    "gemini-flash-latest",
+    "gemini-2.5-flash",
+    "gemini-2.0-flash",
+    "gemini-1.5-flash",
+]
+
+_RESOLVED = None
 
 SCHEMA = {
     "type": "object",
@@ -57,8 +67,65 @@ PROMPT = """أنت كاتب محتوى لقناة يوتيوب عربية اسم
 def _post(url: str, payload: dict) -> dict:
     data = json.dumps(payload).encode("utf-8")
     req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
-    with urllib.request.urlopen(req, timeout=120) as r:
-        return json.loads(r.read().decode("utf-8"))
+    try:
+        with urllib.request.urlopen(req, timeout=120) as r:
+            return json.loads(r.read().decode("utf-8"))
+    except urllib.error.HTTPError as e:
+        body = e.read().decode("utf-8", "replace")[:600]
+        raise RuntimeError(f"Gemini HTTP {e.code}: {body}") from None
+
+
+def _get(url: str) -> dict:
+    try:
+        with urllib.request.urlopen(url, timeout=60) as r:
+            return json.loads(r.read().decode("utf-8"))
+    except urllib.error.HTTPError as e:
+        body = e.read().decode("utf-8", "replace")[:600]
+        raise RuntimeError(f"Gemini HTTP {e.code}: {body}") from None
+
+
+def _score(name: str) -> int:
+    """كلما صغر الرقم كان الموديل أنسب."""
+    bad = ("tts", "image", "vision", "embedding", "live", "native-audio",
+           "thinking", "learnlm", "gemma")
+    if any(b in name for b in bad):
+        return 100
+    if "flash-lite" in name:
+        return 3
+    if "flash" in name:
+        return 1
+    if "pro" in name:
+        return 2
+    return 50
+
+
+def pick_model(available: list) -> str:
+    """يختار موديلاً متاحاً يدعم generateContent."""
+    usable = [
+        m["name"].split("/")[-1] for m in available
+        if "generateContent" in (m.get("supportedGenerationMethods") or [])
+    ]
+    if not usable:
+        raise RuntimeError("لا يوجد أي موديل يدعم generateContent في هذا الحساب")
+
+    for cand in MODEL_CANDIDATES:
+        if cand and cand in usable:
+            return cand
+
+    usable.sort(key=lambda n: (_score(n), len(n)))
+    if _score(usable[0]) >= 100:
+        raise RuntimeError(f"لا يوجد موديل نصي مناسب. المتاح: {usable[:15]}")
+    return usable[0]
+
+
+def resolve_model() -> str:
+    global _RESOLVED
+    if _RESOLVED:
+        return _RESOLVED
+    data = _get(f"{BASE}/models?key={config.GEMINI_API_KEY}&pageSize=200")
+    _RESOLVED = pick_model(data.get("models", []))
+    print(f"  الموديل المستعمل: {_RESOLVED}")
+    return _RESOLVED
 
 
 def clean(text: str) -> str:
@@ -88,12 +155,12 @@ def generate(topic: str, fmt: str = "shorts") -> dict:
         },
     }
 
-    url = ENDPOINT.format(m=MODEL, k=config.GEMINI_API_KEY)
+    model = resolve_model()
+    url = f"{BASE}/models/{model}:generateContent?key={config.GEMINI_API_KEY}"
     raw = _post(url, payload)
     text = raw["candidates"][0]["content"]["parts"][0]["text"]
     data = json.loads(text)
 
-    # تنظيف
     data["title"] = clean(data["title"])[:95]
     data["description"] = clean(data["description"])
     data["thumbnail_text"] = clean(data["thumbnail_text"])
