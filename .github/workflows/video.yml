@@ -127,7 +127,7 @@ jobs:
         run: |
           git config user.name "video-factory"
           git config user.email "actions@github.com"
-          git add queue.txt done.txt topics/queue.txt topics/done.txt 2>/dev/null || true
+          git add -A topics/ || true
           git commit -m "تحديث قائمة المواضيع [skip ci]" || echo "لا تغييرات"
           git push || true
 
