@@ -71,6 +71,28 @@ PROMPT = """أنت كاتب محتوى لقناة يوتيوب عربية اسم
 - thumbnail_text: 3 إلى 5 كلمات عربية فقط للصورة المصغرة.
 """
 
+PROMPT_EN = """You are the scriptwriter for {brand}, a fitness brand posting short vertical videos on TikTok for an English-speaking audience (US, UK, Canada, Australia).
+
+Write a {kind} video script about:
+"{topic}"
+
+Strict rules:
+- Language: natural, punchy, conversational American English. Talk directly to the viewer ("you").
+- Scene 1 = a scroll-stopping hook in ONE short sentence (a bold claim, a common mistake, or a surprising question).
+- Exactly {n} scenes.
+- Each scene: one or two short sentences, max {wps} words, because a text-to-speech voice reads it.
+- The last scene = a short call to action: follow for more and check the link in bio ({site}).
+- Forbidden: emojis, brackets, asterisks, hashtags or any formatting inside the narration. Clean spoken text only.
+- No medical claims, no cure promises, no unrealistic results (like "lose 10 pounds in a week"). Safe, general advice only.
+- For each scene give "keywords": 2-4 English words describing the matching visual for a stock-footage search (e.g. "woman doing squats home").
+
+Also give:
+- title: a catchy TikTok caption hook under 90 characters.
+- description: 2 short lines expanding the hook + one line: "Full programs at {site}".
+- tags: 10 relevant TikTok hashtags WITHOUT the # sign (mix broad like fitness, fittok, homeworkout with niche ones).
+- thumbnail_text: 3 to 5 English words for the cover image.
+"""
+
 
 def _post(url: str, payload: dict) -> dict:
     data = json.dumps(payload).encode("utf-8")
@@ -171,10 +193,15 @@ def clean(text: str) -> str:
 
 def generate(topic: str, fmt: str = "shorts") -> dict:
     cfg = config.FORMATS[fmt]
-    kind = "قصير عمودي (Shorts) مدته حوالي 45 ثانية" if fmt == "shorts" else "أفقي مدته حوالي 4 دقائق"
+    if config.LANG == "en":
+        kind = "short vertical (about 40 seconds)" if fmt == "shorts" else "horizontal (about 4 minutes)"
+        template = PROMPT_EN
+    else:
+        kind = "قصير عمودي (Shorts) مدته حوالي 45 ثانية" if fmt == "shorts" else "أفقي مدته حوالي 4 دقائق"
+        template = PROMPT
     wps = 14 if fmt == "shorts" else 30
 
-    prompt = PROMPT.format(
+    prompt = template.format(
         brand=config.BRAND, kind=kind, topic=topic,
         n=cfg["scenes"], wps=wps, site=config.SITE,
     )
