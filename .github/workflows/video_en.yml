@@ -1,0 +1,128 @@
+name: English TikTok factory — ZMAFIT
+
+on:
+  schedule:
+    - cron: "0 14 * * *"      # every day 14:00 UTC (15:00 Algiers / 10:00 New York)
+  workflow_dispatch:
+    inputs:
+      topic:
+        description: "Specific topic (optional)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+concurrency:
+  group: video-factory
+  cancel-in-progress: false
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      VIDEO_LANG: en
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      MAKE_WEBHOOK_EN: ${{ secrets.MAKE_WEBHOOK_EN }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install ffmpeg
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install libraries
+        run: pip install --quiet edge-tts
+
+      - name: Render video
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+          TTS_VOICE: ${{ vars.TTS_VOICE_EN || 'en-US-AndrewNeural' }}
+          TTS_RATE: ${{ vars.TTS_RATE_EN || '+5%' }}
+          TOPIC: ${{ inputs.topic }}
+        run: |
+          if [ -n "$TOPIC" ]; then
+            python scripts/main.py --format shorts --topic "$TOPIC"
+          else
+            python scripts/main.py --format shorts
+          fi
+
+      - name: Read video data
+        id: meta
+        run: |
+          NAME=$(python -c "import json,glob,os;p=sorted(glob.glob('out/*.json'));p=[x for x in p if not x.endswith('latest.json')];print(os.path.basename(p[-1])[:-5])")
+          echo "name=$NAME" >> $GITHUB_OUTPUT
+          echo "tag=en-v$(date -u +%Y%m%d-%H%M%S)" >> $GITHUB_OUTPUT
+
+      - name: Publish release
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TITLE=$(python -c "import json;print(json.load(open('out/latest.json'))['title'].replace(chr(10),' ')[:120])")
+          gh release create "${{ steps.meta.outputs.tag }}" \
+            "out/${{ steps.meta.outputs.name }}.mp4" \
+            "out/${{ steps.meta.outputs.name }}.jpg" \
+            "out/${{ steps.meta.outputs.name }}.json" \
+            --title "EN: $TITLE" --notes "English TikTok short"
+          BASE="https://github.com/${{ github.repository }}/releases/download/${{ steps.meta.outputs.tag }}"
+          echo "video_url=$BASE/${{ steps.meta.outputs.name }}.mp4" >> $GITHUB_OUTPUT
+          echo "thumb_url=$BASE/${{ steps.meta.outputs.name }}.jpg" >> $GITHUB_OUTPUT
+
+      - name: Send to Telegram (ready to post on TikTok)
+        if: env.TELEGRAM_BOT_TOKEN != '' && env.TELEGRAM_CHAT_ID != ''
+        env:
+          VIDEO_FILE: out/${{ steps.meta.outputs.name }}.mp4
+        run: |
+          python - <<'PY'
+          import json, os, subprocess
+          m = json.load(open('out/latest.json', encoding='utf-8'))
+          tags = " ".join("#" + t.replace("#", "").replace(" ", "") for t in m.get("tags", []) if t.strip())
+          caption = f"{m['title']}\n\n{m['description']}\n\n{tags}"
+          caption = caption[:1000]
+          # الوصف كرسالة نصية منفصلة ليسهل نسخه
+          subprocess.run(["curl", "-s", "-F", f"chat_id={os.environ['TELEGRAM_CHAT_ID']}",
+                          "-F", f"video=@{os.environ['VIDEO_FILE']}",
+                          "-F", "caption=🎬 New TikTok video ready — caption below 👇",
+                          "-F", "supports_streaming=true",
+                          f"https://api.telegram.org/bot{os.environ['TELEGRAM_BOT_TOKEN']}/sendVideo"], check=True)
+          subprocess.run(["curl", "-s", "--data-urlencode", f"chat_id={os.environ['TELEGRAM_CHAT_ID']}",
+                          "--data-urlencode", f"text={caption}",
+                          f"https://api.telegram.org/bot{os.environ['TELEGRAM_BOT_TOKEN']}/sendMessage"], check=True)
+          print("sent to Telegram")
+          PY
+
+      - name: Notify Make (optional — Facebook Reel on Zmafit page)
+        if: env.MAKE_WEBHOOK_EN != ''
+        env:
+          VIDEO_URL: ${{ steps.release.outputs.video_url }}
+          THUMB_URL: ${{ steps.release.outputs.thumb_url }}
+        run: |
+          python - <<'PY'
+          import json, os, urllib.request
+          m = json.load(open('out/latest.json', encoding='utf-8'))
+          m["video_url"] = os.environ["VIDEO_URL"]
+          m["thumb_url"] = os.environ["THUMB_URL"]
+          m["tags_text"] = ",".join(m.get("tags", []))
+          req = urllib.request.Request(os.environ["MAKE_WEBHOOK_EN"], data=json.dumps(m, ensure_ascii=False).encode(),
+                                       headers={"Content-Type": "application/json"})
+          print(urllib.request.urlopen(req, timeout=120).read().decode()[:200])
+          PY
+
+      - name: Save topic list
+        run: |
+          git config user.name "video-factory"
+          git config user.email "actions@github.com"
+          git add -A topics/ || true
+          git commit -m "EN topics update [skip ci]" || echo "no changes"
+          git pull --rebase || true
+          git push || true
