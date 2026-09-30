@@ -1,5 +1,4 @@
 # English TikTok topics — one per line. The factory takes the first line each run.
-3 mistakes that stop you from losing belly fat
 The 10 minute no equipment workout you can do anywhere
 Why you are not seeing results from push ups
 How to do a perfect squat in 30 seconds
