@@ -116,7 +116,7 @@ def main():
 
     desc = data["description"].strip()
     if config.SITE not in desc:
-        desc += f"\n\nمزيد من البرامج والكتب: https://{config.SITE}"
+        desc += f"\n\nموقعنا الرسمي: https://{config.SITE}"
     if fmt == "shorts":
         data["title"] = (data["title"][:85] + " #shorts")
 

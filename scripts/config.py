@@ -10,8 +10,8 @@ FONTS = ASSETS / "fonts"
 MUSIC = ASSETS / "music"
 
 # ---------- الهوية ----------
-BRAND = "ZMAFIT"
-SITE = "zmafit.com"
+BRAND = "Muscle Arabia"
+SITE = "zermixmusclearabia.com"
 CHANNEL_LANG = "ar"
 
 # ---------- المفاتيح (من GitHub Secrets) ----------
