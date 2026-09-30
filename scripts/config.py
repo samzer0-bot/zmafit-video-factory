@@ -10,9 +10,14 @@ FONTS = ASSETS / "fonts"
 MUSIC = ASSETS / "music"
 
 # ---------- الهوية ----------
-BRAND = "Muscle Arabia"
-SITE = "zermixmusclearabia.com"
-CHANNEL_LANG = "ar"
+# اللغة: ar (افتراضي) أو en — تُضبط من متغير البيئة VIDEO_LANG
+CHANNEL_LANG = os.environ.get("VIDEO_LANG", "ar").strip().lower() or "ar"
+if CHANNEL_LANG == "en":
+    BRAND = "ZMAFIT"
+    SITE = "zmafit.com"
+else:
+    BRAND = "Muscle Arabia"
+    SITE = "zermixmusclearabia.com"
 
 # ---------- المفاتيح (من GitHub Secrets) ----------
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
@@ -24,8 +29,10 @@ PEXELS_API_KEY = os.environ.get("PEXELS_API_KEY", "")
 #   ar-SA-HamedNeural    (فصيح، رجالي، هادئ)
 #   ar-DZ-IsmaelNeural   (جزائري)
 #   ar-EG-SalmaNeural    (مصري، نسائي)
-VOICE = os.environ.get("TTS_VOICE", "ar-EG-ShakirNeural")
-VOICE_RATE = os.environ.get("TTS_RATE", "+8%")     # سرعة الإلقاء
+_DEFAULT_VOICE = "en-US-AndrewNeural" if CHANNEL_LANG == "en" else "ar-EG-ShakirNeural"
+_DEFAULT_RATE = "+5%" if CHANNEL_LANG == "en" else "+8%"
+VOICE = os.environ.get("TTS_VOICE") or _DEFAULT_VOICE
+VOICE_RATE = os.environ.get("TTS_RATE") or _DEFAULT_RATE     # سرعة الإلقاء
 VOICE_PITCH = os.environ.get("TTS_PITCH", "+0Hz")
 
 MUSIC_VOLUME_DB = -21          # مستوى الموسيقى الخلفية

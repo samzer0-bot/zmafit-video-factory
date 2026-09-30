@@ -71,6 +71,28 @@ PROMPT = """أنت كاتب محتوى لقناة يوتيوب عربية اسم
 - thumbnail_text: 3 إلى 5 كلمات عربية فقط للصورة المصغرة.
 """
 
+PROMPT_EN = """You are a scriptwriter for an English-language YouTube fitness channel called {brand}, focused on fat loss, home workouts and healthy habits.
+
+Write a {kind} video script about this topic:
+"{topic}"
+
+STRICT RULES:
+- Language: simple, energetic, conversational American English for a global audience.
+- Scene 1 = a strong one-sentence hook that stops the scroll immediately.
+- Exactly {n} scenes.
+- Each scene: one or two short sentences, about {wps} words, because it will be read by a text-to-speech voice.
+- The last scene = a call to subscribe and visit {site}.
+- Absolutely forbidden: emojis, parentheses, asterisks, any formatting symbols. Clean spoken text only.
+- No medical claims or cures. Safe general advice only.
+- For every scene give "keywords": 2-4 English words describing a matching stock-footage shot (example: "man doing push ups gym").
+
+Also provide:
+- title: a catchy English YouTube title under 70 characters.
+- description: 3 lines of English + one line with the link {site}.
+- tags: 12 relevant English tags.
+- thumbnail_text: 3 to 5 English words in capital letters for the thumbnail.
+"""
+
 
 def _post(url: str, payload: dict) -> dict:
     data = json.dumps(payload).encode("utf-8")
@@ -171,10 +193,16 @@ def clean(text: str) -> str:
 
 def generate(topic: str, fmt: str = "shorts") -> dict:
     cfg = config.FORMATS[fmt]
-    kind = "قصير عمودي (Shorts) مدته حوالي 45 ثانية" if fmt == "shorts" else "أفقي مدته حوالي 4 دقائق"
-    wps = 14 if fmt == "shorts" else 30
+    en = config.CHANNEL_LANG == "en"
+    if en:
+        kind = ("vertical short-form (YouTube Shorts) of about 45 seconds" if fmt == "shorts"
+                else "horizontal video of about 4 minutes")
+        wps = 15 if fmt == "shorts" else 32
+    else:
+        kind = "قصير عمودي (Shorts) مدته حوالي 45 ثانية" if fmt == "shorts" else "أفقي مدته حوالي 4 دقائق"
+        wps = 14 if fmt == "shorts" else 30
 
-    prompt = PROMPT.format(
+    prompt = (PROMPT_EN if en else PROMPT).format(
         brand=config.BRAND, kind=kind, topic=topic,
         n=cfg["scenes"], wps=wps, site=config.SITE,
     )

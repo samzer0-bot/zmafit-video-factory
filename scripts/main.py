@@ -22,8 +22,9 @@ import stock       # noqa: E402
 import subs        # noqa: E402
 import voice       # noqa: E402
 
-QUEUE = config.ROOT / "topics" / "queue.txt"
-DONE = config.ROOT / "topics" / "done.txt"
+EN = config.CHANNEL_LANG == "en"
+QUEUE = config.ROOT / "topics" / ("queue_en.txt" if EN else "queue.txt")
+DONE = config.ROOT / "topics" / ("done_en.txt" if EN else "done.txt")
 
 
 def next_topic() -> str:
@@ -32,7 +33,8 @@ def next_topic() -> str:
         lines = [l for l in lines if l and not l.startswith("#")]
         if lines:
             return lines[0]
-    return "نصيحة سريعة لحرق دهون البطن بدون معدات"
+    return ("A quick tip to burn belly fat without equipment" if EN
+            else "نصيحة سريعة لحرق دهون البطن بدون معدات")
 
 
 def pop_topic(topic: str):
@@ -116,7 +118,8 @@ def main():
 
     desc = data["description"].strip()
     if config.SITE not in desc:
-        desc += f"\n\nموقعنا الرسمي: https://{config.SITE}"
+        desc += (f"\n\nOfficial website: https://{config.SITE}" if EN
+                 else f"\n\nموقعنا الرسمي: https://{config.SITE}")
     if fmt == "shorts":
         data["title"] = (data["title"][:85] + " #shorts")
 
