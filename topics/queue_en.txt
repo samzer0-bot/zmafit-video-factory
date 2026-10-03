@@ -1,5 +1,4 @@
 # English TikTok topics — one per line. The factory takes the first line each run.
-How to do a perfect squat in 30 seconds
 5 moves to fix bad posture from sitting all day
 The easiest way to start working out as a total beginner
 Stop doing crunches, do this instead for abs
