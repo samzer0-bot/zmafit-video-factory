@@ -1,5 +1,4 @@
 # English TikTok topics — one per line. The factory takes the first line each run.
-How many push ups a day actually make a difference
 A 5 minute morning routine that wakes up your whole body
 The plank mistake almost everyone makes
 Walking vs running for fat loss, the honest answer
