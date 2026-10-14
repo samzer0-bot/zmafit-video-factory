@@ -231,9 +231,30 @@ def generate(topic: str, fmt: str = "shorts") -> dict:
         },
     }
 
-    raw = ask(payload)
-    text = raw["candidates"][0]["content"]["parts"][0]["text"]
-    data = json.loads(text)
+    # الفيديو الطويل: نتأكد أن عدد الكلمات يكفي (≈ 5 دقائق) ونعيد الطلب إن جاء قصيراً
+    need = int(cfg["scenes"] * wps * 0.9) if fmt == "long" else 0
+    best, best_words = None, -1
+    for attempt in range(3):
+        p = prompt
+        if attempt:
+            p += (f"\n\nIMPORTANT: your previous answer was too short ({best_words} words). "
+                  f"Write at least {need} words of narration in total across exactly "
+                  f"{cfg['scenes']} scenes, at least {wps - 4} words in EVERY scene. "
+                  f"Add concrete examples, numbers and practical tips."
+                  if en else
+                  f"\n\nمهم: إجابتك السابقة قصيرة جداً ({best_words} كلمة). اكتب ما لا يقل عن {need} كلمة "
+                  f"في مجموع السرد موزعة على {cfg['scenes']} مشهداً بالضبط، وكل مشهد لا يقل عن {wps - 4} كلمة. "
+                  f"أضف أمثلة وأرقاماً ونصائح عملية.")
+        payload["contents"] = [{"parts": [{"text": p}]}]
+        raw = ask(payload)
+        cand = json.loads(raw["candidates"][0]["content"]["parts"][0]["text"])
+        words = sum(len(x.get("narration", "").split()) for x in cand.get("scenes", []))
+        print(f"  عدد الكلمات: {words} (المطلوب ≥ {need})")
+        if words > best_words:
+            best, best_words = cand, words
+        if words >= need:
+            break
+    data = best
 
     data["title"] = clean(data["title"])[:95]
     data["description"] = clean(data["description"])
