@@ -2,8 +2,8 @@ name: مصنع الفيديو — Muscle Arabia
 
 on:
   schedule:
-    - cron: "0 9 * * 1,3,5"
-    - cron: "0 9 * * 0"
+    - cron: "0 9 * * *"
+    - cron: "0 11 * * 2,6"
   workflow_dispatch:
     inputs:
       format:
@@ -37,7 +37,7 @@ jobs:
         id: cfg
         run: |
           if [ "${{ github.event_name }}" = "schedule" ]; then
-            if [ "${{ github.event.schedule }}" = "0 9 * * 0" ]; then
+            if [ "${{ github.event.schedule }}" = "0 11 * * 2,6" ]; then
               echo "format=long" >> $GITHUB_OUTPUT
             else
               echo "format=shorts" >> $GITHUB_OUTPUT
@@ -58,7 +58,7 @@ jobs:
           python-version: "3.11"
 
       - name: تثبيت المكتبات
-        run: pip install --quiet edge-tts
+        run: pip install --quiet --upgrade edge-tts gTTS
 
       - name: إنتاج الفيديو
         env:
