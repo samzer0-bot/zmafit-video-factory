@@ -13,10 +13,11 @@ BASE = "https://generativelanguage.googleapis.com/v1beta"
 MODEL_CANDIDATES = [
     os.environ.get("GEMINI_MODEL", ""),
     "gemini-flash-latest",
-    "gemini-2.5-flash",
-    "gemini-2.0-flash",
-    "gemini-1.5-flash",
+    "gemini-flash-lite-latest",
+    "gemini-3.5-flash",
+    "gemini-3.6-flash",
 ]
+SKIP_MODELS = ("gemini-2.5", "gemini-2.0", "gemini-1.5")   # لم تعد متاحة للحسابات الجديدة
 
 _MODELS = None
 RETRY_CODES = (429, 500, 502, 503, 504)
@@ -138,6 +139,7 @@ def rank_models(available: list) -> list:
     usable = [
         m["name"].split("/")[-1] for m in available
         if "generateContent" in (m.get("supportedGenerationMethods") or [])
+        and not m["name"].split("/")[-1].startswith(SKIP_MODELS)
     ]
     if not usable:
         raise RuntimeError("لا يوجد أي موديل يدعم generateContent في هذا الحساب")
@@ -177,7 +179,7 @@ def ask(payload: dict) -> dict:
 
 def _ask_round(payload: dict) -> dict:
     last = None
-    for model in models()[:3]:
+    for model in models()[:4]:
         url = f"{BASE}/models/{model}:generateContent?key={config.GEMINI_API_KEY}"
         for attempt, wait in enumerate([0] + BACKOFF):
             if wait:
