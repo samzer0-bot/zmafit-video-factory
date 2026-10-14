@@ -1,5 +1,4 @@
 # English TikTok topics — one per line. The factory takes the first line each run.
-3 exercises to build strong legs at home
 What to eat before a workout for more energy
 How to stay consistent when motivation is gone
 The best stretch for tight hips
