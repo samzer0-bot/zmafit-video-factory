@@ -196,10 +196,10 @@ def generate(topic: str, fmt: str = "shorts") -> dict:
     en = config.CHANNEL_LANG == "en"
     if en:
         kind = ("vertical short-form (YouTube Shorts) of about 45 seconds" if fmt == "shorts"
-                else "horizontal video of about 4 minutes")
-        wps = 15 if fmt == "shorts" else 32
+                else "horizontal video of about 5.5 minutes (at least 5 minutes)")
+        wps = 15 if fmt == "shorts" else 30
     else:
-        kind = "قصير عمودي (Shorts) مدته حوالي 45 ثانية" if fmt == "shorts" else "أفقي مدته حوالي 4 دقائق"
+        kind = "قصير عمودي (Shorts) مدته حوالي 45 ثانية" if fmt == "shorts" else "أفقي مدته حوالي 5.5 دقيقة (لا تقل عن 5 دقائق)"
         wps = 14 if fmt == "shorts" else 30
 
     prompt = (PROMPT_EN if en else PROMPT).format(

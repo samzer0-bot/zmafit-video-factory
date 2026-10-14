@@ -27,6 +27,18 @@ async def _speak(text: str, out_mp3: Path):
     return words
 
 
+def _fallback(text: str, out_mp3: Path) -> list:
+    """صوت احتياطي عبر gTTS؛ بدون توقيت كلمات (الترجمة تُقسَّم تلقائياً)."""
+    try:
+        from gtts import gTTS
+        lang = "en" if config.CHANNEL_LANG == "en" else "ar"
+        print("  ! edge-tts مرفوض — نستعمل الصوت الاحتياطي gTTS")
+        gTTS(text=text, lang=lang).save(str(out_mp3))
+    except Exception as e:                               # noqa: BLE001
+        print(f"  ! فشل الصوت الاحتياطي أيضاً: {e}")
+    return []
+
+
 def duration(path: Path) -> float:
     out = subprocess.run(
         ["ffprobe", "-v", "error", "-show_entries", "format=duration",
@@ -51,7 +63,10 @@ def narrate(scenes: list, workdir: Path) -> list:
                 print(f"  ! محاولة {attempt + 1} فشلت للمشهد {i}: {e}")
                 words = []
         else:
-            raise RuntimeError(f"تعذّر توليد صوت المشهد {i}")
+            # بديل احتياطي: Google TTS (مجاني) إذا رفضت مايكروسوفت الاتصال
+            words = _fallback(sc["narration"], mp3)
+            if not (mp3.exists() and mp3.stat().st_size > 800):
+                raise RuntimeError(f"تعذّر توليد صوت المشهد {i}")
 
         d = duration(mp3)
         result.append({**sc, "audio": str(mp3), "duration": d, "words": words})

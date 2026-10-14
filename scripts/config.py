@@ -50,8 +50,8 @@ FORMATS = {
     },
     "long": {
         "w": 1920, "h": 1080, "fps": 30,
-        "target_seconds": 240,       # 4 دقائق
-        "scenes": 14,
+        "target_seconds": 330,       # 5.5 دقائق
+        "scenes": 28,
         "sub_fontsize": 52,
         "sub_margin_v": 90,
         "orientation": "landscape",
