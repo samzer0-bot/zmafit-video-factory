@@ -20,7 +20,7 @@ MODEL_CANDIDATES = [
 
 _MODELS = None
 RETRY_CODES = (429, 500, 502, 503, 504)
-BACKOFF = [8, 20, 45]
+BACKOFF = [8, 20]
 
 
 class Busy(Exception):
@@ -162,9 +162,22 @@ def models() -> list:
 
 
 def ask(payload: dict) -> dict:
-    """يجرّب كل موديل مع إعادة محاولة عند ازدحام الخادم."""
+    """يجرّب الموديلات؛ وإذا بقي الخادم مشغولاً يعيد الجولة بعد استراحة."""
     last = None
-    for model in models():
+    for rnd in range(3):
+        if rnd:
+            print(f"  كل الموديلات مشغولة — جولة جديدة بعد 120s ({rnd + 1}/3)")
+            time.sleep(120)
+        try:
+            return _ask_round(payload)
+        except RuntimeError as e:
+            last = e
+    raise RuntimeError(f"فشل كل الموديلات. آخر خطأ: {last}")
+
+
+def _ask_round(payload: dict) -> dict:
+    last = None
+    for model in models()[:3]:
         url = f"{BASE}/models/{model}:generateContent?key={config.GEMINI_API_KEY}"
         for attempt, wait in enumerate([0] + BACKOFF):
             if wait:
