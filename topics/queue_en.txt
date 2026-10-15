@@ -1,5 +1,4 @@
 # English TikTok topics — one per line. The factory takes the first line each run.
-How to stay consistent when motivation is gone
 The best stretch for tight hips
 A full body workout using only a chair
 How to breathe correctly during exercise
