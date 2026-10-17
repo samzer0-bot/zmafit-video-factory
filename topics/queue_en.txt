@@ -1,5 +1,4 @@
 # English TikTok topics — one per line. The factory takes the first line each run.
-A full body workout using only a chair
 How to breathe correctly during exercise
 Why sleep matters more than your workout for fat loss
 Burpees made easy, a beginner version that works
