@@ -1,5 +1,4 @@
 # English TikTok topics — one per line. The factory takes the first line each run.
-3 signs you are overtraining
 Why you are not losing weight even when eating less
 The best 5 exercises for a flat stomach at home
 How to build chest muscles with no equipment
