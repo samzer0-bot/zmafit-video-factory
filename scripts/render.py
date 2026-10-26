@@ -101,10 +101,13 @@ def build(scenes: list, fmt: str, ass_file: Path, voice_file: Path,
     args += [
         "-vf", vf,
         "-t", f"{total + 0.4:.3f}",
-        "-c:v", "libx264", "-preset", "medium", "-crf", "20",
+        *(["-c:v", "libx264", "-preset", "medium", "-crf", "20"] if fmt != "long" else
+          # الفيديو الطويل: سقف للحجم (< ~90MB) لأن Make يرفض تنزيل الملفات الأكبر من ~100MB
+          ["-c:v", "libx264", "-preset", "faster", "-crf", "23",
+           "-maxrate", "1600k", "-bufsize", "3200k"]),
         "-profile:v", "high", "-level", "4.1", "-pix_fmt", "yuv420p",
         "-r", str(fps), "-g", str(fps * 2),
-        "-c:a", "aac", "-b:a", "192k", "-ar", "44100", "-ac", "2",
+        "-c:a", "aac", "-b:a", "192k" if fmt != "long" else "128k", "-ar", "44100", "-ac", "2",
         "-movflags", "+faststart", str(out_file),
     ]
     print("• الترميز النهائي…")

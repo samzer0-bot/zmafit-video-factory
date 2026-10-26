@@ -27,7 +27,7 @@ concurrency:
 jobs:
   render:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 75
     env:
       MAKE_WEBHOOK: ${{ secrets.MAKE_WEBHOOK }}
 
