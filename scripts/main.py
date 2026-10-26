@@ -33,6 +33,17 @@ def next_topic() -> str:
         lines = [l for l in lines if l and not l.startswith("#")]
         if lines:
             return lines[0]
+    # القائمة فارغة: نطلب من Gemini موضوعاً جديداً لم يُستعمل من قبل
+    recent = []
+    if DONE.exists():
+        recent = [l.split("|", 1)[-1].strip() for l in DONE.read_text(encoding="utf-8").splitlines() if l.strip()][-60:]
+    try:
+        t = ai.new_topic(recent)
+        if t:
+            print(f"  القائمة فارغة — موضوع جديد من Gemini: {t}")
+            return t
+    except Exception as e:
+        print(f"  تعذّر توليد موضوع تلقائي: {e}")
     return ("A quick tip to burn belly fat without equipment" if EN
             else "نصيحة سريعة لحرق دهون البطن بدون معدات")
 

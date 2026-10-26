@@ -268,3 +268,23 @@ def generate(topic: str, fmt: str = "shorts") -> dict:
     data["scenes"] = scenes
     data["topic"] = topic
     return data
+
+
+def new_topic(recent: list) -> str:
+    """يقترح موضوعاً جديداً عندما تفرغ قائمة المواضيع، مع تجنّب المواضيع الأخيرة."""
+    en = config.CHANNEL_LANG == "en"
+    avoid = "\n".join(f"- {t}" for t in recent[-60:]) or "-"
+    if en:
+        prompt = (f"Suggest ONE new topic for a short fitness video on the YouTube channel {config.BRAND} "
+                  "(fat loss, home workouts, healthy habits). It must be clearly different from these "
+                  f"recent topics:\n{avoid}\n\nReply with the topic only, one line, under 70 characters, "
+                  "no quotes, no emojis.")
+    else:
+        prompt = (f"اقترح موضوعاً واحداً جديداً لفيديو لياقة قصير لقناة يوتيوب {config.BRAND} "
+                  "(خسارة الدهون، تمارين منزلية، عادات صحية). يجب أن يختلف بوضوح عن هذه المواضيع الأخيرة:\n"
+                  f"{avoid}\n\nأجب بالموضوع فقط في سطر واحد أقل من 70 حرفاً، بدون علامات تنصيص ولا رموز.")
+    raw = ask({"contents": [{"parts": [{"text": prompt}]}],
+               "generationConfig": {"temperature": 1.0}})
+    text = raw["candidates"][0]["content"]["parts"][0]["text"]
+    line = clean(text.strip().splitlines()[0]).strip(" \"'«»-.")
+    return line[:90]

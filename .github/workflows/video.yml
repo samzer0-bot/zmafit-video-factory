@@ -2,7 +2,8 @@ name: مصنع الفيديو — Muscle Arabia
 
 on:
   schedule:
-    - cron: "0 9 * * *"
+    - cron: "0 9 * * *"          # شورتس 1 يومياً
+    - cron: "0 18 * * *"         # شورتس 2 يومياً
     - cron: "0 11 * * 2,6"
   workflow_dispatch:
     inputs:
@@ -117,6 +118,7 @@ jobs:
           m["video_url"] = os.environ["VIDEO_URL"]
           m["thumb_url"] = os.environ["THUMB_URL"]
           m["tags_text"] = ",".join(m.get("tags", []))
+          m["lang"] = "ar"
           data = json.dumps(m, ensure_ascii=False).encode()
           req = urllib.request.Request(os.environ["MAKE_WEBHOOK"], data=data,
                                        headers={"Content-Type": "application/json"})

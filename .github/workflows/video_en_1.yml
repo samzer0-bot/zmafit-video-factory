@@ -2,7 +2,8 @@ name: English TikTok factory — ZMAFIT
 
 on:
   schedule:
-    - cron: "0 14 * * *"         # shorts every day 14:00 UTC
+    - cron: "0 14 * * *"         # short #1 every day 14:00 UTC
+    - cron: "0 21 * * *"         # short #2 every day 21:00 UTC
     - cron: "0 16 * * 3,0"        # 2 long videos/week: Wed, Sun 16:00 UTC
   workflow_dispatch:
     inputs:
@@ -117,7 +118,7 @@ jobs:
           print("sent to Telegram")
           PY
 
-      - name: Notify Make (optional — Facebook Reel on Zmafit page)
+      - name: Notify Make (YouTube + Facebook upload)
         if: env.MAKE_WEBHOOK_EN != ''
         env:
           VIDEO_URL: ${{ steps.release.outputs.video_url }}
@@ -129,6 +130,7 @@ jobs:
           m["video_url"] = os.environ["VIDEO_URL"]
           m["thumb_url"] = os.environ["THUMB_URL"]
           m["tags_text"] = ",".join(m.get("tags", []))
+          m["lang"] = "en"
           req = urllib.request.Request(os.environ["MAKE_WEBHOOK_EN"], data=json.dumps(m, ensure_ascii=False).encode(),
                                        headers={"Content-Type": "application/json"})
           print(urllib.request.urlopen(req, timeout=120).read().decode()[:200])
