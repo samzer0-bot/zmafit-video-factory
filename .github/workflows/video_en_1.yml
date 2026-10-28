@@ -2,9 +2,9 @@ name: English TikTok factory — ZMAFIT
 
 on:
   schedule:
-    - cron: "0 14 * * *"         # short #1 every day 14:00 UTC
-    - cron: "0 21 * * *"         # short #2 every day 21:00 UTC
-    - cron: "0 16 * * 3,0"        # 2 long videos/week: Wed, Sun 16:00 UTC
+    - cron: "19 14 * * *"         # short #1 every day 14:19 UTC
+    - cron: "27 21 * * *"         # short #2 every day 21:27 UTC
+    - cron: "11 16 * * 3,0"        # 2 long videos/week: Wed, Sun 16:11 UTC
   workflow_dispatch:
     inputs:
       format:
@@ -41,7 +41,7 @@ jobs:
         id: cfg
         run: |
           if [ "${{ github.event_name }}" = "schedule" ]; then
-            if [ "${{ github.event.schedule }}" = "0 16 * * 3,0" ]; then echo "format=long" >> $GITHUB_OUTPUT
+            if [ "${{ github.event.schedule }}" = "11 16 * * 3,0" ]; then echo "format=long" >> $GITHUB_OUTPUT
             else echo "format=shorts" >> $GITHUB_OUTPUT; fi
           else
             echo "format=${{ inputs.format }}" >> $GITHUB_OUTPUT

@@ -2,9 +2,9 @@ name: مصنع الفيديو — Muscle Arabia
 
 on:
   schedule:
-    - cron: "0 9 * * *"          # شورتس 1 يومياً
-    - cron: "0 18 * * *"         # شورتس 2 يومياً
-    - cron: "0 11 * * 2,6"
+    - cron: "17 9 * * *"          # شورتس 1 يومياً
+    - cron: "23 18 * * *"         # شورتس 2 يومياً
+    - cron: "13 11 * * 2,6"
   workflow_dispatch:
     inputs:
       format:
@@ -38,7 +38,7 @@ jobs:
         id: cfg
         run: |
           if [ "${{ github.event_name }}" = "schedule" ]; then
-            if [ "${{ github.event.schedule }}" = "0 11 * * 2,6" ]; then
+            if [ "${{ github.event.schedule }}" = "13 11 * * 2,6" ]; then
               echo "format=long" >> $GITHUB_OUTPUT
             else
               echo "format=shorts" >> $GITHUB_OUTPUT
