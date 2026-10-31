@@ -5,7 +5,7 @@ import {COLORS, SCENES} from '../config';
 import {Headline, SceneShell, SlamLine} from '../components/Layout';
 import {useCopy, useFormat} from '../i18n';
 
-const TEAR_AT = 46;
+const TEAR_AT = 32;
 
 // zig-zag tear line down the middle of the paper (percent coords)
 const ZIG = [50, 46, 54, 47, 53, 45, 55, 48, 52, 46, 53, 50];
@@ -53,8 +53,10 @@ export const Hook: React.FC = () => {
   const f = useCurrentFrame();
   const c = useCopy();
   const {square} = useFormat();
-  const drop = pop(f, 6, 13, 160);
-  const shake = f > 30 && f < TEAR_AT ? Math.sin(f * 2.2) * (f - 30) * 0.35 : 0;
+  const drop = pop(f, -9, 13, 160); // already on screen at frame 0
+  const shake = f > 14 && f < TEAR_AT ? Math.sin(f * 2.4) * (f - 14) * 0.6 : 0;
+  const punch = 1 + 0.06 * lin(f, TEAR_AT, TEAR_AT + 10) - 0.02 * lin(f, TEAR_AT + 10, 80);
+  const centerY = square ? 0 : lin(f, TEAR_AT + 6, TEAR_AT + 22) * 520; // headline moves to centre after the tear
   const t = Math.max(0, f - TEAR_AT);
   const tear = lin(f, TEAR_AT, TEAR_AT + 30, 0, 1, (x) => x * x);
   const paperScale = square ? 0.72 : 1;
@@ -83,13 +85,13 @@ export const Hook: React.FC = () => {
             ...(square ? {insetInlineStart: 70, width: 470, top: 0, bottom: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center'} : {left: 50, right: 50, top: 190}),
           }}
         >
-          <Headline size={square ? (c.dir === 'rtl' ? 64 : 76) : 104}>
+          <Headline size={square ? (c.dir === 'rtl' ? 64 : 76) : 96} style={{transform: `translateY(${centerY}px) scale(${punch})`, transformOrigin: square ? 'center left' : 'center top'}}>
             {c.hook.lines.map((l, i) => (
-              <SlamLine key={i} delay={i * 5} color={i === c.hook.highlight ? COLORS.secondary : undefined}>
+              <SlamLine key={i} delay={-9 + i * 2} color={i === c.hook.highlight ? COLORS.secondary : undefined}>
                 {i === c.hook.highlight ? (
                   <span style={{position: 'relative', display: 'inline-block'}}>
                     {l}
-                    <span style={{position: 'absolute', left: 0, right: 0, bottom: '12%', height: 8, background: COLORS.secondary, transformOrigin: c.dir === 'rtl' ? 'right' : 'left', transform: `scaleX(${lin(f, 14, 26)})`, borderRadius: 4}} />
+                    <span style={{position: 'absolute', left: 0, right: 0, bottom: '12%', height: 8, background: COLORS.secondary, transformOrigin: c.dir === 'rtl' ? 'right' : 'left', transform: `scaleX(${lin(f, 0, 12)})`, borderRadius: 4}} />
                   </span>
                 ) : (
                   l
