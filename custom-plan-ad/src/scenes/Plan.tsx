@@ -1,14 +1,14 @@
 import React from 'react';
 import {AbsoluteFill, interpolate, useCurrentFrame} from 'remotion';
 import {clamp, fmt, lin, pop} from '../anim';
-import {COLORS, SAMPLE, SCENES} from '../config';
+import {BEATS, COLORS, SAMPLE, SCENES} from '../config';
 import {Cart, Check, Dumbbell, Flame, ListCheck, Meal, Swap, Triangle} from '../components/Icons';
 import {Headline, PhoneLayout, SceneShell, SlamLine} from '../components/Layout';
 import {PhoneFrame} from '../components/PhoneFrame';
 import {useCopy, useFormat} from '../i18n';
 
-const GAP = 34;
-const FIRST = 12;
+const GAP = BEATS.planGap;
+const FIRST = BEATS.planFirst;
 const at = (i: number) => FIRST + i * GAP;
 
 const CardRow: React.FC<{i: number; icon: React.ReactNode; accent: string; title: string; children?: React.ReactNode}> = ({i, icon, accent, title, children}) => {
@@ -138,10 +138,10 @@ export const Plan: React.FC = () => {
   const f = useCurrentFrame();
   const c = useCopy();
   const {square} = useFormat();
-  const flash = interpolate(f, [0, 14], [0.5, 0], clamp);
   return (
-    <SceneShell duration={SCENES.plan.duration} enter="none">
+    <SceneShell duration={SCENES.plan.duration}>
       <PhoneLayout
+        phoneEnter={pop(f, 0, 14, 150)}
         headline={
           <Headline size={square ? 62 : 96}>
             <SlamLine delay={2}>{c.plan.headline}</SlamLine>
@@ -153,7 +153,6 @@ export const Plan: React.FC = () => {
           </PhoneFrame>
         }
       />
-      <AbsoluteFill style={{background: COLORS.primary, opacity: flash, mixBlendMode: 'screen', pointerEvents: 'none'}} />
     </SceneShell>
   );
 };

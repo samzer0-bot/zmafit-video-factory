@@ -3,6 +3,8 @@
 //  Every text, color, price and timing lives in this one file.
 // =====================================================================
 
+import TIMELINE from './timeline.json';
+
 export const COLORS = {
   bg: '#0B0F14',
   bg2: '#111821',
@@ -25,19 +27,13 @@ export const PRODUCT = {
   questions: 12,
 };
 
-export const FPS = 30;
-
-// Scene timeline in frames (30 fps). Total = 750 frames = 25 s.
-export const SCENES = {
-  hook: {from: 0, duration: 90}, //       0–3 s
-  questions: {from: 90, duration: 120}, // 3–7 s
-  building: {from: 210, duration: 60}, //  7–9 s
-  plan: {from: 270, duration: 210}, //     9–16 s
-  pdf: {from: 480, duration: 90}, //      16–19 s
-  price: {from: 570, duration: 90}, //    19–22 s
-  cta: {from: 660, duration: 90}, //      22–25 s
-};
-export const TOTAL_FRAMES = 750;
+export const FPS = TIMELINE.fps;
+// Scene timeline + beat timings live in timeline.json (shared with make_audio.py).
+export type SceneKey = keyof typeof TIMELINE.scenes;
+export const SCENES = TIMELINE.scenes;
+export const BEATS = TIMELINE.beats;
+export const VO_OFFSET = TIMELINE.vo as Partial<Record<SceneKey, number>>;
+export const TOTAL_FRAMES = TIMELINE.total;
 
 // Sample numbers shown inside the mock plan UI (clearly labelled "Sample").
 export const SAMPLE = {
@@ -53,10 +49,22 @@ export type Copy = {
   dir: 'ltr' | 'rtl';
   font: string;
   uppercase: boolean;
-  hook: {lines: string[]; highlight: number};
+  /** Hook variants for A/B tests. Index 0 is the main hook. */
+  hooks: {lines: string[]; highlight: number}[];
   paper: {title: string; sub: string; rows: string[]; stamp: string};
   questions: {pre: string; post: string; progress: (n: number) => string; items: Question[]; numbers: number[]};
   building: {title: string; done: string};
+  twoPlans: {
+    headline: string[];
+    personA: string;
+    personB: string;
+    answersA: string[];
+    answersB: string[];
+    planA: string[];
+    planB: string[];
+    yourPlan: string;
+    footer: string;
+  };
   plan: {
     headline: string;
     phoneTitle: string;
@@ -78,7 +86,12 @@ export const COPY: Record<Lang, Copy> = {
     dir: 'ltr',
     font: 'Montserrat',
     uppercase: true,
-    hook: {lines: ['Tired of', 'generic', 'fat-loss plans?'], highlight: 1},
+    hooks: [
+      {lines: ['Tired of', 'generic', 'fat-loss plans?'], highlight: 1},
+      {lines: ['Same plan as', 'everyone', 'else?'], highlight: 1},
+      {lines: ['Your plan should', 'fit your', 'life'], highlight: 1},
+      {lines: ['Home or gym?', 'Your plan', 'adapts'], highlight: 2},
+    ],
     paper: {
       title: 'GENERIC PLAN',
       sub: 'One size fits all',
@@ -99,6 +112,17 @@ export const COPY: Record<Lang, Copy> = {
       ],
     },
     building: {title: 'Building your plan…', done: 'Plan ready!'},
+    twoPlans: {
+      headline: ['Different answers.', 'Different plan.'],
+      personA: 'Person A',
+      personB: 'Person B',
+      answersA: ['Beginner', 'Bodyweight', '20 min', 'Halal'],
+      answersB: ['Intermediate', 'Gym', '45 min', 'Low-carb'],
+      planA: ['Home workouts', 'Easier variations', '20-min sessions', 'Halal meals'],
+      planB: ['Full-gym workouts', 'Harder variations', '45-min sessions', 'Low-carb meals'],
+      yourPlan: 'Their plan',
+      footer: 'Never a template',
+    },
     plan: {
       headline: 'Your plan includes',
       phoneTitle: 'Your 4-Week Plan',
@@ -128,7 +152,9 @@ export const COPY: Record<Lang, Copy> = {
     dir: 'rtl',
     font: 'Cairo',
     uppercase: false,
-    hook: {lines: ['سئمت من خطط', 'خسارة الدهون', 'العامة؟'], highlight: 2},
+    hooks: [
+      {lines: ['سئمت من خطط', 'خسارة الدهون', 'العامة؟'], highlight: 2},
+    ],
     paper: {
       title: 'خطة عامة',
       sub: 'مقاس واحد للجميع',
@@ -149,6 +175,17 @@ export const COPY: Record<Lang, Copy> = {
       ],
     },
     building: {title: 'جارٍ بناء خطتك…', done: 'خطتك جاهزة!'},
+    twoPlans: {
+      headline: ['إجابات مختلفة', 'خطة مختلفة'],
+      personA: 'الشخص أ',
+      personB: 'الشخص ب',
+      answersA: ['مبتدئ', 'وزن الجسم', '20 دقيقة', 'حلال'],
+      answersB: ['متوسط', 'جيم', '45 دقيقة', 'قليل الكربوهيدرات'],
+      planA: ['تمارين في البيت', 'نسخ أسهل', 'جلسات 20 دقيقة', 'وجبات حلال'],
+      planB: ['تمارين الجيم', 'نسخ أصعب', 'جلسات 45 دقيقة', 'وجبات قليلة الكربوهيدرات'],
+      yourPlan: 'خطته',
+      footer: 'ليست قالباً عاماً أبداً',
+    },
     plan: {
       headline: 'خطتك تتضمن',
       phoneTitle: 'خطة الـ4 أسابيع',

@@ -24,46 +24,54 @@ const chromiumOptions = {gl: 'swangle'};
 
 const serveUrl = await bundle({entryPoint: path.join(root, 'src/index.ts')});
 
-const comp = async (id, lang) =>
-  selectComposition({serveUrl, id, inputProps: {lang, hasAudio}, browserExecutable, chromiumOptions});
+const comp = async (id, props) => selectComposition({serveUrl, id, inputProps: props, browserExecutable, chromiumOptions});
 
 const stillsMode = process.argv.includes('--stills');
 const only = process.argv.find((a) => a.startsWith('--only='))?.slice(7);
+const voice = !process.argv.includes('--no-voice');
 
+// hook: index into COPY[lang].hooks (A/B variants exist for English)
 const jobs = [
-  {id: 'custom-plan-vertical-en', lang: 'en', file: 'custom-plan-vertical-en.mp4'},
-  {id: 'custom-plan-square-en', lang: 'en', file: 'custom-plan-square-en.mp4'},
-  {id: 'custom-plan-vertical-ar', lang: 'ar', file: 'custom-plan-vertical-ar.mp4'},
-  {id: 'custom-plan-square-ar', lang: 'ar', file: 'custom-plan-square-ar.mp4'},
-].filter((j) => !only || j.id.includes(only));
+  {id: 'custom-plan-vertical-en', lang: 'en', hook: 0, file: 'custom-plan-vertical-en.mp4'},
+  {id: 'custom-plan-vertical-en', lang: 'en', hook: 1, file: 'custom-plan-vertical-en-hook2.mp4'},
+  {id: 'custom-plan-vertical-en', lang: 'en', hook: 2, file: 'custom-plan-vertical-en-hook3.mp4'},
+  {id: 'custom-plan-vertical-en', lang: 'en', hook: 3, file: 'custom-plan-vertical-en-hook4.mp4'},
+  {id: 'custom-plan-portrait-en', lang: 'en', hook: 0, file: 'custom-plan-portrait-en.mp4'},
+  {id: 'custom-plan-square-en', lang: 'en', hook: 0, file: 'custom-plan-square-en.mp4'},
+  {id: 'custom-plan-vertical-ar', lang: 'ar', hook: 0, file: 'custom-plan-vertical-ar.mp4'},
+  {id: 'custom-plan-portrait-ar', lang: 'ar', hook: 0, file: 'custom-plan-portrait-ar.mp4'},
+  {id: 'custom-plan-square-ar', lang: 'ar', hook: 0, file: 'custom-plan-square-ar.mp4'},
+].filter((j) => !only || j.file.includes(only));
+
+const propsOf = (j) => ({lang: j.lang, hook: j.hook, hasAudio, voice});
 
 if (stillsMode) {
   // two frames per scene + last frame
-  const frames = [20, 70, 105, 175, 225, 252, 300, 460, 505, 560, 590, 650, 690, 749];
+  const frames = [5, 60, 110, 160, 200, 230, 290, 330, 462, 500, 545, 600, 650, 700, 749];
   const dir = path.join(out, 'review');
   fs.mkdirSync(dir, {recursive: true});
   for (const j of jobs) {
-    const composition = await comp(j.id, j.lang);
-    for (const frame of frames) {
-      await renderStill({composition, serveUrl, frame, output: path.join(dir, `${j.id}-${String(frame).padStart(3, '0')}.png`), inputProps: {lang: j.lang, hasAudio}, browserExecutable, chromiumOptions});
+    const composition = await comp(j.id, propsOf(j));
+    const fr = j.hook > 0 ? [5, 40, 70] : frames;
+    for (const frame of fr) {
+      await renderStill({composition, serveUrl, frame, output: path.join(dir, `${j.file.replace('.mp4', '')}-${String(frame).padStart(3, '0')}.png`), inputProps: propsOf(j), browserExecutable, chromiumOptions});
     }
-    console.log('stills done', j.id);
+    console.log('stills done', j.file);
   }
 } else {
   for (const j of jobs) {
-    const composition = await comp(j.id, j.lang);
+    const composition = await comp(j.id, propsOf(j));
     await renderMedia({
-      composition, serveUrl, codec: 'h264', crf: 18, pixelFormat: 'yuv420p',
-      outputLocation: path.join(out, j.file), inputProps: {lang: j.lang, hasAudio}, browserExecutable, chromiumOptions,
+      composition, serveUrl, codec: 'h264', crf: 18, pixelFormat: 'yuv420p', audioBitrate: '192k',
+      outputLocation: path.join(out, j.file), inputProps: propsOf(j), browserExecutable, chromiumOptions,
       onProgress: ({progress}) => process.stdout.write(`\r${j.file} ${(progress * 100).toFixed(0)}%   `),
     });
     console.log('\n✔', j.file);
   }
-  // Thumbnail: plan scene with every card visible + headline (strongest frame)
-  for (const [id, lang] of [['custom-plan-vertical-en', 'en'], ['custom-plan-square-en', 'en'], ['custom-plan-vertical-ar', 'ar']]) {
-    if (only && !id.includes(only)) continue;
-    const composition = await comp(id, lang);
-    await renderStill({composition, serveUrl, frame: 462, output: path.join(out, `thumbnail-${id.replace('custom-plan-', '')}.png`), inputProps: {lang, hasAudio}, browserExecutable, chromiumOptions});
+  // Thumbnails: plan scene with every card visible + headline (strongest frame)
+  for (const j of jobs.filter((x) => x.hook === 0)) {
+    const composition = await comp(j.id, propsOf(j));
+    await renderStill({composition, serveUrl, frame: 462, output: path.join(out, `thumbnail-${j.file.replace('custom-plan-', '').replace('.mp4', '.png')}`), inputProps: propsOf(j), browserExecutable, chromiumOptions});
   }
   console.log('✔ thumbnails');
 }

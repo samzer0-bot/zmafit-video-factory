@@ -1,17 +1,17 @@
 import React from 'react';
 import {AbsoluteFill, interpolate, useCurrentFrame} from 'remotion';
 import {clamp, lin} from '../anim';
-import {COLORS, SCENES} from '../config';
+import {BEATS, COLORS, SCENES} from '../config';
 import {Headline, PhoneLayout, SceneShell, SlamLine} from '../components/Layout';
 import {PhoneFrame} from '../components/PhoneFrame';
 import {useCopy, useFormat} from '../i18n';
 
-const BURST = 40;
+const BURST = BEATS.burstAt;
 
 export const Building: React.FC = () => {
   const f = useCurrentFrame();
   const c = useCopy();
-  const {square} = useFormat();
+  const {square, bleed} = useFormat();
   const ar = c.dir === 'rtl';
   const p = lin(f, 0, BURST - 2, 0, 1, (x) => 1 - Math.pow(1 - x, 2));
   const done = f >= BURST - 2;
@@ -50,7 +50,7 @@ export const Building: React.FC = () => {
         }
       />
       {/* green light burst */}
-      <AbsoluteFill style={{pointerEvents: 'none', overflow: 'hidden'}}>
+      <AbsoluteFill style={{pointerEvents: 'none', overflow: 'hidden', top: -bleed, bottom: -bleed, height: 'auto'}}>
         <div
           style={{
             position: 'absolute', left: '50%', top: '55%', width: 400, height: 400, marginLeft: -200, marginTop: -200, borderRadius: '50%',

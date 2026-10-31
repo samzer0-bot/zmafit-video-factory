@@ -1,14 +1,14 @@
 import React from 'react';
 import {interpolate, useCurrentFrame} from 'remotion';
 import {clamp, lin, pop} from '../anim';
-import {COLORS, PRODUCT, SCENES} from '../config';
+import {BEATS, COLORS, PRODUCT, SCENES} from '../config';
 import {Check} from '../components/Icons';
 import {Headline, PhoneLayout, SceneShell, SlamLine} from '../components/Layout';
 import {PhoneFrame} from '../components/PhoneFrame';
 import {useCopy, useFormat} from '../i18n';
 
-const PER_Q = 22;
-const START = 8;
+const PER_Q = BEATS.perQ;
+const START = BEATS.qStart;
 
 const QuestionCard: React.FC<{index: number; local: number}> = ({index, local}) => {
   const c = useCopy();
@@ -18,7 +18,7 @@ const QuestionCard: React.FC<{index: number; local: number}> = ({index, local}) 
   const enter = lin(local, 0, 6);
   const isLast = index === c.questions.items.length - 1;
   const exit = isLast ? 0 : lin(local, PER_Q - 4, PER_Q, 0, 1, (x) => x);
-  const tapAt = 10;
+  const tapAt = BEATS.tapAt;
   const picked = local >= tapAt;
   const tap = interpolate(local, [tapAt, tapAt + 8], [0, 1], clamp);
   return (

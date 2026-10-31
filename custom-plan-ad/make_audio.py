@@ -146,12 +146,23 @@ def thud():
 ROOTS = [55.0, 43.65, 65.41, 49.0]  # A1 F1 C2 G1  (Am - F - C - G)
 CHORDS = [(220, 261.6, 329.6), (174.6, 220, 261.6), (261.6, 329.6, 392), (196, 246.9, 293.7)]
 
+import json  # noqa: E402
+
+TL = json.loads((Path(__file__).parent / 'src/timeline.json').read_text())
+SC, BT = TL['scenes'], TL['beats']
+
+
+def at(scene, frame=0):  # seconds of a frame inside a scene
+    return f2s(SC[scene]['from'] + frame)
+
+
+build_a, build_b = at('building'), at('twoPlans')
 beats = int(DUR / BEAT)
 for b in range(beats):
     t = b * BEAT
     bar = b // 4
-    build = 14 <= b < 18  # 7–9 s : building scene -> drop drums, riser
-    hook = b < 6  # 0–3 s : sparse, heavy
+    build = build_a - 0.01 <= t < build_b  # building scene -> drop drums, riser
+    hook = t < at('questions')  # hook : sparse, heavy
     if not build:
         add(kick(), t, 0.95)
     if not hook and not build and b % 2 == 1:
@@ -165,34 +176,40 @@ for b in range(beats):
             add(bass(root, BEAT / 2), t + e * BEAT, 0.9)
         add(stab(CHORDS[bar % 4]), t + 0.5 * BEAT, 1.0, pan=-0.2)
 
-# hook: impact on frame 0, tension, paper tear at frame 46
+# hook: impact on frame 0, tension, paper tear
 add(impact(), 0.0, 0.9)
-add(riser(1.5, 200, 3000), f2s(0), 0.35)
-add(tear(), f2s(30), 1.0)
-add(impact(), f2s(32), 0.6)
-add(whoosh(0.4), f2s(86), 0.7)
+add(riser(1.0, 200, 3000), 0.0, 0.35)
+add(tear(), at('hook', BT['tearAt'] - 2), 1.0)
+add(impact(), at('hook', BT['tearAt']), 0.6)
+add(whoosh(0.4), at('questions') - 0.15, 0.7)
 
-# questions: answer taps (START 8 + i*22 + 10)
+# questions: answer taps
 for i in range(5):
-    add(tap(), f2s(90 + 8 + i * 22 + 10), 0.9)
-    add(whoosh(0.18), f2s(90 + 8 + i * 22), 0.25)
+    add(tap(), at('questions', BT['qStart'] + i * BT['perQ'] + BT['tapAt']), 0.9)
+    add(whoosh(0.18), at('questions', BT['qStart'] + i * BT['perQ']), 0.25)
 
-# building: riser into the green burst (frame 210+40)
-add(riser(f2s(40), 300, 9000), f2s(210), 0.8)
-add(impact(), f2s(250), 1.0)
+# building: riser into the green burst
+add(riser(f2s(BT['burstAt']), 300, 9000), at('building'), 0.8)
+add(impact(), at('building', BT['burstAt']), 1.0)
 
-# plan cards pop (270 + 12 + i*34) + habit checks
+# two plans: whoosh per column + ticks
+add(whoosh(0.3), at('twoPlans', BT['twoPlansA']), 0.5)
+add(whoosh(0.3), at('twoPlans', BT['twoPlansB']), 0.5)
+add(impact(), at('twoPlans', 24), 0.35)
+
+# plan cards pop + habit checks
+add(whoosh(0.35), at('plan'), 0.5)
 for i in range(5):
-    add(blip(700 + i * 90, 1100 + i * 120), f2s(270 + 12 + i * 34), 0.9)
+    add(blip(700 + i * 90, 1100 + i * 120), at('plan', BT['planFirst'] + i * BT['planGap']), 0.9)
 for k in range(3):
-    add(blip(1500, 2000, 0.07), f2s(270 + 12 + 4 * 34 + 8 + k * 6), 0.6)
+    add(blip(1500, 2000, 0.07), at('plan', BT['planFirst'] + 4 * BT['planGap'] + 8 + k * 6), 0.6)
 
 # pdf drop, price ding, CTA impact
-add(whoosh(0.35), f2s(480), 0.6)
-add(thud(), f2s(480 + 18), 1.0)
-add(ding(), f2s(570 + 16), 0.9)
-add(blip(900, 1300), f2s(570 + 20), 0.6)
-add(impact(), f2s(660), 0.8)
+add(whoosh(0.35), at('pdf'), 0.6)
+add(thud(), at('pdf', BT['pdfDrop']), 1.0)
+add(ding(), at('price', BT['priceDing']), 0.9)
+add(blip(900, 1300), at('price', BT['priceDing'] + 4), 0.6)
+add(impact(), at('cta'), 0.8)
 
 # master: normalise, soft-clip, fade out last 0.6 s
 mix = np.tanh(mix / np.max(np.abs(mix)) * 2.2) * 0.89
