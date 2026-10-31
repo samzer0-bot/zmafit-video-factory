@@ -15,7 +15,10 @@ const audio = audioCandidates.find((p) => fs.existsSync(p));
 const publicAudio = path.join(root, 'public', 'audio.mp3');
 if (audio) fs.copyFileSync(audio, publicAudio);
 else if (fs.existsSync(publicAudio)) fs.rmSync(publicAudio);
-const hasAudio = Boolean(audio);
+const guideMode = process.argv.includes('--guide');
+const guideAudio = path.join(root, 'audio-guide.mp3');
+if (fs.existsSync(guideAudio)) fs.copyFileSync(guideAudio, path.join(root, 'public', 'audio-guide.mp3'));
+const hasAudio = guideMode ? fs.existsSync(guideAudio) : Boolean(audio);
 console.log(hasAudio ? `Using audio: ${audio}` : 'No audio.mp3 found — rendering silent video.');
 
 const browserExecutable =
@@ -41,13 +44,22 @@ const jobs = [
   {id: 'custom-plan-vertical-ar', lang: 'ar', hook: 0, file: 'custom-plan-vertical-ar.mp4'},
   {id: 'custom-plan-portrait-ar', lang: 'ar', hook: 0, file: 'custom-plan-portrait-ar.mp4'},
   {id: 'custom-plan-square-ar', lang: 'ar', hook: 0, file: 'custom-plan-square-ar.mp4'},
-].filter((j) => !only || j.file.includes(only));
+];
+// Free-guide (lead magnet) ad:  node render.mjs --guide
+const guideJobs = [
+  {id: 'free-guide-vertical-en', hook: 0, file: 'free-guide-vertical-en.mp4'},
+  {id: 'free-guide-vertical-en', hook: 1, file: 'free-guide-vertical-en-hook2.mp4'},
+  {id: 'free-guide-portrait-en', hook: 0, file: 'free-guide-portrait-en.mp4'},
+];
+const selected = (guideMode ? guideJobs : jobs).filter((j) => !only || j.file.includes(only));
+jobs.length = 0;
+jobs.push(...selected);
 
-const propsOf = (j) => ({lang: j.lang, hook: j.hook, hasAudio, voice});
+const propsOf = (j) => (guideMode ? {hook: j.hook, hasAudio, voice} : {lang: j.lang, hook: j.hook, hasAudio, voice});
 
 if (stillsMode) {
   // two frames per scene + last frame
-  const frames = [5, 60, 110, 160, 200, 230, 290, 330, 462, 500, 545, 600, 650, 700, 749];
+  const frames = guideMode ? [5, 45, 100, 150, 200, 260, 320, 360, 420, 479] : [5, 60, 110, 160, 200, 230, 290, 330, 462, 500, 545, 600, 650, 700, 749];
   const dir = path.join(out, 'review');
   fs.mkdirSync(dir, {recursive: true});
   for (const j of jobs) {
@@ -69,7 +81,7 @@ if (stillsMode) {
     console.log('\n✔', j.file);
   }
   // Thumbnails: plan scene with every card visible + headline (strongest frame)
-  for (const j of jobs.filter((x) => x.hook === 0)) {
+  for (const j of jobs.filter((x) => x.hook === 0 && !guideMode)) {
     const composition = await comp(j.id, propsOf(j));
     await renderStill({composition, serveUrl, frame: 462, output: path.join(out, `thumbnail-${j.file.replace('custom-plan-', '').replace('.mp4', '.png')}`), inputProps: propsOf(j), browserExecutable, chromiumOptions});
   }

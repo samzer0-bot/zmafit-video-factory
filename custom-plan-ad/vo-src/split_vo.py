@@ -33,15 +33,19 @@ SEGMENTS = {
 extra = ROOT / 'vo-src/segments_ar.json'
 if extra.exists():
     SEGMENTS['ar'] = json.loads(extra.read_text())
+guide = ROOT / 'vo-src/segments_guide.json'
+if guide.exists():  # free-guide ad -> public/vo/guide/, uses its own timeline
+    SEGMENTS['guide'] = json.loads(guide.read_text())
 
 
-def scene_end_sec(key):
+def scene_end_sec(key, TL=TL):
     scene = 'hook' if key.startswith('hook') else key
     s = TL['scenes'][scene]
     return (s['from'] + s['duration']) / FPS, (s['from'] + TL['vo'][scene]) / FPS
 
 
 for lang, cfg in SEGMENTS.items():
+    tl = json.loads((ROOT / cfg['timeline']).read_text()) if 'timeline' in cfg else TL
     out = ROOT / 'public/vo' / lang
     out.mkdir(parents=True, exist_ok=True)
     for key, seg in cfg['clips'].items():
@@ -59,10 +63,11 @@ for lang, cfg in SEGMENTS.items():
             check=True,
         )
         dur = float(subprocess.run(['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', str(dst)], capture_output=True, text=True).stdout)
-        end, start = scene_end_sec(key)
+        end, start = scene_end_sec(key, tl)
         if key.startswith('hook'):  # hook may overflow until the questions voice line starts
-            q = TL['scenes']['questions']
-            end = (q['from'] + TL['vo']['questions']) / FPS - 0.05
+            nxt = list(tl['scenes'])[1]  # the voice line of the next scene
+            q = tl['scenes'][nxt]
+            end = (q['from'] + tl['vo'][nxt]) / FPS - 0.05
         limit = end - start
         flag = 'OK ' if dur <= limit else 'TOO LONG'
         print(f'{flag} {lang}/{key}: {dur:.2f}s (slot {limit:.2f}s)')

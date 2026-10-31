@@ -2,6 +2,7 @@ import React from 'react';
 import {Composition} from 'remotion';
 import {Ad, AdProps} from './Ad';
 import {FPS, TOTAL_FRAMES} from './config';
+import {GUIDE_TOTAL, GuideAd, GuideProps} from './guide/GuideAd';
 
 export const FORMATS = [
   {id: 'vertical', width: 1080, height: 1920}, // TikTok / Reels / Shorts
@@ -25,5 +26,18 @@ export const RemotionRoot: React.FC = () => (
         />
       )),
     )}
+    {/* Free-guide (lead magnet) ad — English only */}
+    {FORMATS.map((fm) => (
+      <Composition<any, GuideProps>
+        key={`guide-${fm.id}`}
+        id={`free-guide-${fm.id}-en`}
+        component={GuideAd}
+        durationInFrames={GUIDE_TOTAL}
+        fps={FPS}
+        width={fm.width}
+        height={fm.height}
+        defaultProps={{hook: 0, hasAudio: false, voice: false}}
+      />
+    ))}
   </>
 );

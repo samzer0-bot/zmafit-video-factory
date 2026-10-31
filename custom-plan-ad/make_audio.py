@@ -2,7 +2,8 @@
 
 Everything is synthesised from scratch with numpy (no samples, no third-party music).
 Timings match src/config.ts (30 fps; 1 beat = 15 frames).
-Usage: python3 make_audio.py
+Usage: python3 make_audio.py          -> audio.mp3        (custom-plan ad)
+       python3 make_audio.py guide    -> audio-guide.mp3  (free-guide ad)
 """
 import subprocess
 import wave
@@ -11,7 +12,13 @@ from pathlib import Path
 import numpy as np
 
 SR = 44100
-DUR = 25.0
+import json
+import sys
+
+MODE = sys.argv[1] if len(sys.argv) > 1 else 'plan'
+TL_FILE = {'plan': 'src/timeline.json', 'guide': 'src/guide/timeline.json'}[MODE]
+TL = json.loads((Path(__file__).parent / TL_FILE).read_text())
+DUR = TL['total'] / TL['fps']
 BPM = 120
 BEAT = 60 / BPM
 N = int(SR * DUR)
@@ -146,9 +153,6 @@ def thud():
 ROOTS = [55.0, 43.65, 65.41, 49.0]  # A1 F1 C2 G1  (Am - F - C - G)
 CHORDS = [(220, 261.6, 329.6), (174.6, 220, 261.6), (261.6, 329.6, 392), (196, 246.9, 293.7)]
 
-import json  # noqa: E402
-
-TL = json.loads((Path(__file__).parent / 'src/timeline.json').read_text())
 SC, BT = TL['scenes'], TL['beats']
 
 
@@ -156,60 +160,98 @@ def at(scene, frame=0):  # seconds of a frame inside a scene
     return f2s(SC[scene]['from'] + frame)
 
 
-build_a, build_b = at('building'), at('twoPlans')
-beats = int(DUR / BEAT)
-for b in range(beats):
-    t = b * BEAT
-    bar = b // 4
-    build = build_a - 0.01 <= t < build_b  # building scene -> drop drums, riser
-    hook = t < at('questions')  # hook : sparse, heavy
-    if not build:
-        add(kick(), t, 0.95)
-    if not hook and not build and b % 2 == 1:
-        add(clap(), t, 0.8)
-    if not build:
-        for h in (0.5,) if hook else (0, 0.25, 0.5, 0.75):
-            add(HAT, t + h * BEAT, 0.22 if h % 0.5 else 0.32, pan=0.3)
-    if not hook and not build:
-        root = ROOTS[bar % 4]
-        for e in (0, 0.5):
-            add(bass(root, BEAT / 2), t + e * BEAT, 0.9)
-        add(stab(CHORDS[bar % 4]), t + 0.5 * BEAT, 1.0, pan=-0.2)
+def beat_bed(sparse_until, drop=(None, None)):
+    for b in range(int(DUR / BEAT)):
+        t = b * BEAT
+        bar = b // 4
+        build = drop[0] is not None and drop[0] - 0.01 <= t < drop[1]
+        hook = t < sparse_until
+        if not build:
+            add(kick(), t, 0.95)
+        if not hook and not build and b % 2 == 1:
+            add(clap(), t, 0.8)
+        if not build:
+            for h in (0.5,) if hook else (0, 0.25, 0.5, 0.75):
+                add(HAT, t + h * BEAT, 0.22 if h % 0.5 else 0.32, pan=0.3)
+        if not hook and not build:
+            root = ROOTS[bar % 4]
+            for e in (0, 0.5):
+                add(bass(root, BEAT / 2), t + e * BEAT, 0.9)
+            add(stab(CHORDS[bar % 4]), t + 0.5 * BEAT, 1.0, pan=-0.2)
 
-# hook: impact on frame 0, tension, paper tear
-add(impact(), 0.0, 0.9)
-add(riser(1.0, 200, 3000), 0.0, 0.35)
-add(tear(), at('hook', BT['tearAt'] - 2), 1.0)
-add(impact(), at('hook', BT['tearAt']), 0.6)
-add(whoosh(0.4), at('questions') - 0.15, 0.7)
 
-# questions: answer taps
-for i in range(5):
-    add(tap(), at('questions', BT['qStart'] + i * BT['perQ'] + BT['tapAt']), 0.9)
-    add(whoosh(0.18), at('questions', BT['qStart'] + i * BT['perQ']), 0.25)
+if MODE == 'guide':
+    beat_bed(at('reveal'))
+    add(impact(), 0.0, 0.9)
+    add(riser(1.2, 200, 3000), 0.0, 0.3)
+    for i in range(6):  # noise chips pop in
+        add(blip(500 + i * 60, 700 + i * 80, 0.08), at('hook', max(0, -6 + i * 3)), 0.5)
+    add(tear(), at('hook', BT['strikeAt']), 0.9)
+    add(whoosh(0.4), at('reveal') - 0.15, 0.7)
+    add(thud(), at('reveal', BT['bookLand']), 1.0)
+    add(ding(), at('reveal', BT['bookLand'] + 2), 0.8)
+    for i in range(4):
+        add(whoosh(0.25), at('inside', BT['pageFirst'] + i * BT['pageGap']), 0.45)
+        add(blip(700 + i * 90, 1100 + i * 120), at('inside', BT['pageFirst'] + i * BT['pageGap'] + 4), 0.8)
+    add(impact(), at('cta'), 0.7)
+    for k in range(len('you@email.com')):  # typing ticks
+        add(tap(), at('cta', BT['typeStart']) + k * 1.6 / 30, 0.25)
+    add(ding(), at('cta', BT['typeStart'] + 18), 0.8)
+else:
+    build_a, build_b = at('building'), at('twoPlans')
+    beats = int(DUR / BEAT)
+    for b in range(beats):
+        t = b * BEAT
+        bar = b // 4
+        build = build_a - 0.01 <= t < build_b  # building scene -> drop drums, riser
+        hook = t < at('questions')  # hook : sparse, heavy
+        if not build:
+            add(kick(), t, 0.95)
+        if not hook and not build and b % 2 == 1:
+            add(clap(), t, 0.8)
+        if not build:
+            for h in (0.5,) if hook else (0, 0.25, 0.5, 0.75):
+                add(HAT, t + h * BEAT, 0.22 if h % 0.5 else 0.32, pan=0.3)
+        if not hook and not build:
+            root = ROOTS[bar % 4]
+            for e in (0, 0.5):
+                add(bass(root, BEAT / 2), t + e * BEAT, 0.9)
+            add(stab(CHORDS[bar % 4]), t + 0.5 * BEAT, 1.0, pan=-0.2)
 
-# building: riser into the green burst
-add(riser(f2s(BT['burstAt']), 300, 9000), at('building'), 0.8)
-add(impact(), at('building', BT['burstAt']), 1.0)
+    # hook: impact on frame 0, tension, paper tear
+    add(impact(), 0.0, 0.9)
+    add(riser(1.0, 200, 3000), 0.0, 0.35)
+    add(tear(), at('hook', BT['tearAt'] - 2), 1.0)
+    add(impact(), at('hook', BT['tearAt']), 0.6)
+    add(whoosh(0.4), at('questions') - 0.15, 0.7)
 
-# two plans: whoosh per column + ticks
-add(whoosh(0.3), at('twoPlans', BT['twoPlansA']), 0.5)
-add(whoosh(0.3), at('twoPlans', BT['twoPlansB']), 0.5)
-add(impact(), at('twoPlans', 24), 0.35)
+    # questions: answer taps
+    for i in range(5):
+        add(tap(), at('questions', BT['qStart'] + i * BT['perQ'] + BT['tapAt']), 0.9)
+        add(whoosh(0.18), at('questions', BT['qStart'] + i * BT['perQ']), 0.25)
 
-# plan cards pop + habit checks
-add(whoosh(0.35), at('plan'), 0.5)
-for i in range(5):
-    add(blip(700 + i * 90, 1100 + i * 120), at('plan', BT['planFirst'] + i * BT['planGap']), 0.9)
-for k in range(3):
-    add(blip(1500, 2000, 0.07), at('plan', BT['planFirst'] + 4 * BT['planGap'] + 8 + k * 6), 0.6)
+    # building: riser into the green burst
+    add(riser(f2s(BT['burstAt']), 300, 9000), at('building'), 0.8)
+    add(impact(), at('building', BT['burstAt']), 1.0)
 
-# pdf drop, price ding, CTA impact
-add(whoosh(0.35), at('pdf'), 0.6)
-add(thud(), at('pdf', BT['pdfDrop']), 1.0)
-add(ding(), at('price', BT['priceDing']), 0.9)
-add(blip(900, 1300), at('price', BT['priceDing'] + 4), 0.6)
-add(impact(), at('cta'), 0.8)
+    # two plans: whoosh per column + ticks
+    add(whoosh(0.3), at('twoPlans', BT['twoPlansA']), 0.5)
+    add(whoosh(0.3), at('twoPlans', BT['twoPlansB']), 0.5)
+    add(impact(), at('twoPlans', 24), 0.35)
+
+    # plan cards pop + habit checks
+    add(whoosh(0.35), at('plan'), 0.5)
+    for i in range(5):
+        add(blip(700 + i * 90, 1100 + i * 120), at('plan', BT['planFirst'] + i * BT['planGap']), 0.9)
+    for k in range(3):
+        add(blip(1500, 2000, 0.07), at('plan', BT['planFirst'] + 4 * BT['planGap'] + 8 + k * 6), 0.6)
+
+    # pdf drop, price ding, CTA impact
+    add(whoosh(0.35), at('pdf'), 0.6)
+    add(thud(), at('pdf', BT['pdfDrop']), 1.0)
+    add(ding(), at('price', BT['priceDing']), 0.9)
+    add(blip(900, 1300), at('price', BT['priceDing'] + 4), 0.6)
+    add(impact(), at('cta'), 0.8)
 
 # master: normalise, soft-clip, fade out last 0.6 s
 mix = np.tanh(mix / np.max(np.abs(mix)) * 2.2) * 0.89
@@ -218,12 +260,13 @@ fade[-int(0.6 * SR) :] = np.linspace(1, 0, int(0.6 * SR))
 mix *= fade[:, None]
 
 root = Path(__file__).parent
+OUT = root / ('audio.mp3' if MODE == 'plan' else 'audio-guide.mp3')
 wav = root / 'audio.wav'
 with wave.open(str(wav), 'wb') as w:
     w.setnchannels(2)
     w.setsampwidth(2)
     w.setframerate(SR)
     w.writeframes((mix * 32767).astype('<i2').tobytes())
-subprocess.run(['ffmpeg', '-loglevel', 'error', '-y', '-i', str(wav), '-b:a', '192k', str(root / 'audio.mp3')], check=True)
+subprocess.run(['ffmpeg', '-loglevel', 'error', '-y', '-i', str(wav), '-b:a', '192k', str(OUT)], check=True)
 wav.unlink()
-print('wrote', root / 'audio.mp3')
+print('wrote', OUT)
