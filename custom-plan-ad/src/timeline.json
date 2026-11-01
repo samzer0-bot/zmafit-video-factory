@@ -1,0 +1,60 @@
+{
+  "fps": 30,
+  "total": 750,
+  "scenes": {
+    "hook": {
+      "from": 0,
+      "duration": 75
+    },
+    "questions": {
+      "from": 75,
+      "duration": 95
+    },
+    "building": {
+      "from": 170,
+      "duration": 40
+    },
+    "twoPlans": {
+      "from": 210,
+      "duration": 100
+    },
+    "plan": {
+      "from": 310,
+      "duration": 165
+    },
+    "pdf": {
+      "from": 475,
+      "duration": 75
+    },
+    "price": {
+      "from": 550,
+      "duration": 105
+    },
+    "cta": {
+      "from": 655,
+      "duration": 95
+    }
+  },
+  "beats": {
+    "tearAt": 32,
+    "qStart": 6,
+    "perQ": 17,
+    "tapAt": 8,
+    "burstAt": 26,
+    "planFirst": 8,
+    "planGap": 28,
+    "twoPlansA": 4,
+    "twoPlansB": 10,
+    "pdfDrop": 18,
+    "priceDing": 16
+  },
+  "vo": {
+    "hook": 2,
+    "questions": 27,
+    "twoPlans": 4,
+    "plan": 5,
+    "pdf": 3,
+    "price": 3,
+    "cta": 2
+  }
+}

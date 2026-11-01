@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>The 7-Day Fat-Loss Kickstart — ZmaFit</title>
+<style>
+  @font-face { font-family: 'Montserrat'; font-weight: 400; src: url('fonts/montserrat-latin-400-normal.woff2') format('woff2'); }
+  @font-face { font-family: 'Montserrat'; font-weight: 500; src: url('fonts/montserrat-latin-500-normal.woff2') format('woff2'); }
+  @font-face { font-family: 'Montserrat'; font-weight: 600; src: url('fonts/montserrat-latin-600-normal.woff2') format('woff2'); }
+  @font-face { font-family: 'Montserrat'; font-weight: 700; src: url('fonts/montserrat-latin-700-normal.woff2') format('woff2'); }
+  @font-face { font-family: 'Montserrat'; font-weight: 800; src: url('fonts/montserrat-latin-800-normal.woff2') format('woff2'); }
+  @font-face { font-family: 'Montserrat'; font-weight: 900; src: url('fonts/montserrat-latin-900-normal.woff2') format('woff2'); }
+
+  :root { --bg: #0B0F14; --card: #151D27; --green: #22E584; --green-d: #0E9F59; --orange: #FF7A1A; --ink: #18202A; --muted: #5F6B7A; --line: #E3E8EE; --soft: #F4F7F9; }
+  @page { size: A4; margin: 0; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { font-family: 'Montserrat', sans-serif; color: var(--ink); font-size: 10.6pt; line-height: 1.55; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .page { width: 210mm; height: 297mm; position: relative; overflow: hidden; page-break-after: always; padding: 20mm 18mm 22mm; background: #fff; }
+  .page:last-child { page-break-after: auto; }
+  .dark { background: var(--bg); color: #fff; }
+
+  /* header / footer */
+  .top { display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 8.5pt; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 10mm; }
+  .foot { position: absolute; left: 18mm; right: 18mm; bottom: 10mm; display: flex; justify-content: space-between; font-size: 8pt; color: var(--muted); border-top: 1px solid var(--line); padding-top: 3mm; }
+  .logo { display: inline-flex; align-items: center; gap: 7px; font-weight: 900; font-size: 13pt; color: var(--ink); letter-spacing: -.02em; text-transform: none; }
+  .logo b { width: 22px; height: 22px; border-radius: 6px; background: var(--green); color: var(--bg); display: inline-flex; align-items: center; justify-content: center; font-size: 13pt; transform: skewX(-8deg); }
+  .logo em { font-style: normal; }
+  .logo span { color: var(--green-d); }
+  .dark .logo { color: #fff; } .dark .logo span { color: var(--green); }
+
+  h1 { font-weight: 900; font-size: 30pt; line-height: 1.05; letter-spacing: -.02em; margin: 0 0 5mm; text-transform: uppercase; }
+  h2 { font-weight: 800; font-size: 14pt; margin: 7mm 0 3mm; }
+  h3 { font-weight: 800; font-size: 11.5pt; margin: 0 0 2mm; }
+  p { margin: 0 0 3.2mm; }
+  .step { display: inline-block; font-weight: 800; font-size: 9pt; letter-spacing: .12em; text-transform: uppercase; color: var(--bg); background: var(--green); padding: 1.4mm 3.5mm; border-radius: 20px; margin-bottom: 4mm; }
+  .step.o { background: var(--orange); }
+  .lead { font-size: 12pt; font-weight: 500; color: #33404F; }
+  .hl { color: var(--green-d); } .ho { color: var(--orange); }
+  .box { background: var(--soft); border-radius: 4mm; padding: 5mm 6mm; margin: 4mm 0; }
+  .box.g { background: #E8FBF2; border: 1.5px solid #9DEBC3; }
+  .box.o { background: #FFF2E8; border: 1.5px solid #FFC59B; }
+  .box.dark { background: var(--card); color: #fff; }
+  .big { font-weight: 900; font-size: 22pt; letter-spacing: -.02em; line-height: 1.1; }
+  ul.check { list-style: none; padding: 0; margin: 0 0 3mm; }
+  ul.check li { position: relative; padding-left: 8mm; margin-bottom: 2.4mm; }
+  ul.check li::before { content: ''; position: absolute; left: 0; top: 1.2mm; width: 4.6mm; height: 4.6mm; border-radius: 1.4mm; background: var(--green) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5' stroke='%230B0F14' stroke-width='3.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/80% no-repeat; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4mm; }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 9.6pt; margin: 3mm 0; }
+  th { text-align: left; font-weight: 800; font-size: 8.6pt; letter-spacing: .06em; text-transform: uppercase; color: #fff; background: var(--bg); padding: 2.6mm 3mm; }
+  th:first-child { border-top-left-radius: 3mm; } th:last-child { border-top-right-radius: 3mm; }
+  td { padding: 2.6mm 3mm; border-bottom: 1px solid var(--line); vertical-align: top; }
+  tr:nth-child(even) td { background: #FAFBFC; }
+  .tag { display: inline-block; font-size: 8pt; font-weight: 700; padding: .5mm 2.2mm; border-radius: 10px; margin-right: 1mm; }
+  .tag.e { background: #E8FBF2; color: var(--green-d); } .tag.h { background: #FFF2E8; color: #C2560B; }
+  .tick { display: inline-block; width: 5mm; height: 5mm; border: 1.6px solid #B9C3CE; border-radius: 1.4mm; }
+  .note { font-size: 8.6pt; color: var(--muted); }
+
+  /* cover */
+  .cover { padding: 0; }
+  .cover .bg { position: absolute; inset: 0; background:
+      radial-gradient(circle at 12% 8%, rgba(34,229,132,.32), transparent 45%),
+      radial-gradient(circle at 92% 92%, rgba(255,122,26,.28), transparent 45%),
+      repeating-linear-gradient(-55deg, transparent 0 46px, rgba(34,229,132,.05) 46px 50px),
+      var(--bg); }
+  .cover .grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px); background-size: 12mm 12mm; }
+  .cover .inner { position: absolute; inset: 22mm 18mm; display: flex; flex-direction: column; }
+  .cover .badge { align-self: flex-start; background: var(--orange); color: #fff; font-weight: 900; font-size: 11pt; letter-spacing: .14em; padding: 2mm 5mm; border-radius: 30px; margin-top: 26mm; }
+  .cover .title { font-weight: 900; font-size: 52pt; line-height: .98; letter-spacing: -.03em; text-transform: uppercase; margin: 8mm 0 6mm; }
+  .cover .title em { font-style: normal; color: var(--green); display: block; }
+  .cover .sub { font-size: 14.5pt; font-weight: 600; color: #C9D3DE; max-width: 150mm; }
+  .cover .pills { display: flex; flex-wrap: wrap; gap: 3mm; margin-top: 12mm; }
+  .cover .pills span { border: 1.5px solid rgba(255,255,255,.22); color: #fff; font-weight: 700; font-size: 10pt; padding: 2.4mm 4.5mm; border-radius: 30px; background: rgba(255,255,255,.04); }
+  .cover .bottom { margin-top: auto; display: flex; justify-content: space-between; align-items: flex-end; }
+  .cover .days { display: flex; gap: 2mm; }
+  .cover .days i { font-style: normal; width: 11mm; height: 11mm; border-radius: 3mm; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 11pt; background: rgba(34,229,132,.14); color: var(--green); border: 1.5px solid rgba(34,229,132,.5); }
+
+  /* CTA */
+  .cta .inner { position: absolute; inset: 20mm 18mm 26mm; display: flex; flex-direction: column; }
+  .price { font-weight: 900; font-size: 64pt; line-height: 1; letter-spacing: -.03em; text-shadow: 0 0 30px rgba(255,122,26,.55); }
+  .btn { display: inline-flex; align-items: center; gap: 4mm; background: var(--green); color: var(--bg); font-weight: 900; font-size: 15pt; text-transform: uppercase; padding: 5mm 10mm; border-radius: 40px; text-decoration: none; box-shadow: 0 0 30px rgba(34,229,132,.45); }
+  .url { font-weight: 800; font-size: 15pt; color: #fff; text-decoration: none; }
+  .url span { color: var(--green); }
+  .dark .note { color: #93A1B2; }
+  .dark ul.check li { color: #E6ECF2; }
+</style>
+</head>
+<body>
+
+<!-- 1. COVER -->
+<section class="page dark cover">
+  <div class="bg"></div><div class="grid"></div>
+  <div class="inner">
+    <div class="logo"><b>Z</b><em>Zma<span>Fit</span></em></div>
+    <div class="badge">FREE GUIDE</div>
+    <div class="title">The 7-Day<em>Fat-Loss</em>Kickstart</div>
+    <div class="sub">Simple daily actions to start strong — whether you train at home, with dumbbells or in the gym.</div>
+    <div class="pills">
+      <span>Calories &amp; protein</span><span>Simple meals + swaps</span><span>Home or gym workouts</span><span>7-day checklist</span>
+    </div>
+    <div class="bottom">
+      <div class="days"><i>1</i><i>2</i><i>3</i><i>4</i><i>5</i><i>6</i><i>7</i></div>
+      <div class="note" style="color:#93A1B2">zmafit.com</div>
+    </div>
+  </div>
+</section>
+
+<!-- 2. WELCOME -->
+<section class="page">
+  <div class="top"><span class="logo"><b>Z</b><em>Zma<span>Fit</span></em></span><span>Start here</span></div>
+  <h1>Welcome. <span class="hl">Let’s keep it simple.</span></h1>
+  <p class="lead">Most fat-loss plans fail for one boring reason: they weren’t built for the person following them. Same calories, same workouts and same meals for everyone — no matter their schedule, equipment or food choices.</p>
+  <p>This guide gives you a clean, realistic first week. No extreme diets, no two-hour workouts. Just four steps you can start today:</p>
+  <div class="grid2" style="margin-top:5mm">
+    <div class="box g"><h3><span class="hl">01</span> Your numbers</h3><p class="note" style="margin:0">Find a sensible starting point for calories and protein.</p></div>
+    <div class="box g"><h3><span class="hl">02</span> Your meals</h3><p class="note" style="margin:0">Build plates that keep you full — with swaps for halal, vegetarian and low-carb.</p></div>
+    <div class="box o"><h3><span class="ho">03</span> Your workouts</h3><p class="note" style="margin:0">Three short full-body sessions, with an easier and harder version of every move.</p></div>
+    <div class="box o"><h3><span class="ho">04</span> Your habits</h3><p class="note" style="margin:0">Sleep, steps and water — the quiet multipliers.</p></div>
+  </div>
+  <h2>How to use this guide</h2>
+  <ul class="check">
+    <li>Read it once (about 10 minutes).</li>
+    <li>Print or save the <b>7-day checklist</b> on page 7 and tick it off daily.</li>
+    <li>Don’t chase perfect. Aim for most boxes, most days.</li>
+    <li>At the end of the week, use page 8 to check progress and decide what to adjust.</li>
+  </ul>
+  <div class="box" style="margin-top:6mm">
+    <p class="note" style="margin:0"><b>Important:</b> This guide is general guidance, not medical advice, and is intended for healthy adults (18+). If you are pregnant, breastfeeding, have a medical condition, take medication or have a history of disordered eating, talk to a qualified health professional before changing your diet or training.</p>
+  </div>
+  <div class="foot"><span>The 7-Day Fat-Loss Kickstart</span><span>2</span></div>
+</section>
+
+<!-- 3. STEP 1 NUMBERS -->
+<section class="page">
+  <div class="top"><span class="logo"><b>Z</b><em>Zma<span>Fit</span></em></span><span>Step 1</span></div>
+  <span class="step">Step 1</span>
+  <h1>Your calorie &amp; protein <span class="hl">starting point</span></h1>
+  <p class="lead">Fat loss happens when you consistently take in a little less energy than you use. “A little” is the key word — big cuts are hard to keep up.</p>
+  <h2>1. Estimate your maintenance calories</h2>
+  <p>A quick, rough estimate for many adults:</p>
+  <div class="grid2">
+    <div class="box"><div class="note">Using kilograms</div><div class="big">kg × 31–35</div><p class="note" style="margin:2mm 0 0">Lower end if you sit most of the day, higher end if you’re on your feet a lot.</p></div>
+    <div class="box"><div class="note">Using pounds</div><div class="big">lb × 14–16</div><p class="note" style="margin:2mm 0 0">Same idea — it’s a starting estimate, not an exact number.</p></div>
+  </div>
+  <h2>2. Create a modest deficit</h2>
+  <p>Subtract roughly <b>300–500 calories</b> per day from your maintenance estimate. Very low intakes aren’t recommended without professional supervision.</p>
+  <h2>3. Set your protein</h2>
+  <p>Protein helps you stay full and protects muscle while you lose fat. A common target is <b>1.6–2.2 g per kg</b> of body weight per day (about <b>0.7–1 g per lb</b>). If you have a lot of weight to lose, base it on your goal weight instead.</p>
+  <div class="box g">
+    <h3>Worked example</h3>
+    <p style="margin:0">Body weight 80 kg, mostly sitting → maintenance ≈ 80 × 32 = <b>2,560 kcal</b>.<br/>Modest deficit → about <b>2,100–2,250 kcal</b> per day.<br/>Protein → 80 × 1.6–2.0 = <b>about 130–160 g</b> per day (roughly 35–40 g per meal across 4 meals).</p>
+  </div>
+  <p class="note">These are estimates — your real results over 1–2 weeks matter more (see page 8).</p>
+  <div class="foot"><span>The 7-Day Fat-Loss Kickstart</span><span>3</span></div>
+</section>
+
+<!-- 4. STEP 2 MEALS -->
+<section class="page">
+  <div class="top"><span class="logo"><b>Z</b><em>Zma<span>Fit</span></em></span><span>Step 2</span></div>
+  <span class="step">Step 2</span>
+  <h1>Build a plate that <span class="hl">keeps you full</span></h1>
+  <p class="lead">You don’t need to weigh everything in week one. Use this plate at most meals:</p>
+  <div class="grid2" style="align-items:center">
+    <svg viewBox="0 0 200 200" width="100%" style="max-width:58mm;justify-self:center">
+      <circle cx="100" cy="100" r="96" fill="#F4F7F9" stroke="#E3E8EE" stroke-width="3"/>
+      <path d="M100 100 L100 8 A92 92 0 0 1 100 192 Z" fill="#22E584"/>
+      <path d="M100 100 L100 192 A92 92 0 0 1 8 100 Z" fill="#FF7A1A"/>
+      <path d="M100 100 L8 100 A92 92 0 0 1 100 8 Z" fill="#0B0F14"/>
+      <text x="146" y="104" font-family="Montserrat" font-weight="800" font-size="13" fill="#0B0F14" text-anchor="middle">VEG</text>
+      <text x="62" y="150" font-family="Montserrat" font-weight="800" font-size="11" fill="#fff" text-anchor="middle">CARBS</text>
+      <text x="58" y="66" font-family="Montserrat" font-weight="800" font-size="11" fill="#fff" text-anchor="middle">PROTEIN</text>
+    </svg>
+    <ul class="check">
+      <li><b>½ plate vegetables or salad</b> — volume and fibre for very few calories.</li>
+      <li><b>¼ plate protein</b> — about a palm or two.</li>
+      <li><b>¼ plate smart carbs</b> — rice, potatoes, oats, bread, fruit.</li>
+      <li><b>A thumb of fats</b> — olive oil, nuts, avocado.</li>
+      <li>Drink water with the meal.</li>
+    </ul>
+  </div>
+  <h2>Easy swaps for your eating style</h2>
+  <table>
+    <tr><th style="width:22%">Need</th><th>Halal</th><th>Vegetarian</th><th>Low-carb</th></tr>
+    <tr><td><b>Protein</b></td><td>Halal-certified chicken, beef or lamb, fish, eggs</td><td>Eggs, Greek yogurt, lentils, chickpeas, tofu, tempeh</td><td>Chicken, fish, eggs, Greek yogurt, tofu</td></tr>
+    <tr><td><b>Carbs</b></td><td>Rice, bread, potatoes, oats, fruit</td><td>Rice, oats, wholegrain bread, beans, fruit</td><td>Extra veg, berries, small portion of beans</td></tr>
+    <tr><td><b>Fats</b></td><td>Olive oil, nuts, olives</td><td>Nuts, seeds, avocado, olive oil</td><td>Avocado, olive oil, nuts, cheese</td></tr>
+    <tr><td><b>Snack</b></td><td>Yogurt + fruit, dates (2–3)</td><td>Hummus + veg sticks</td><td>Boiled eggs, cheese + cucumber</td></tr>
+  </table>
+  <div class="box o"><p style="margin:0"><b>Sample day:</b> Greek yogurt + oats + berries · Chicken or chickpea rice bowl with salad · Apple + a handful of nuts · Fish or tofu with potatoes and vegetables.</p></div>
+  <div class="foot"><span>The 7-Day Fat-Loss Kickstart</span><span>4</span></div>
+</section>
+
+<!-- 5. STEP 3 WORKOUTS -->
+<section class="page">
+  <div class="top"><span class="logo"><b>Z</b><em>Zma<span>Fit</span></em></span><span>Step 3</span></div>
+  <span class="step o">Step 3</span>
+  <h1>Three short <span class="ho">full-body sessions</span></h1>
+  <p class="lead">Train on 3 non-consecutive days (for example Mon / Wed / Fri). About 30 minutes each. Pick the version that fits your equipment and level.</p>
+  <table>
+    <tr><th style="width:20%">Move</th><th>Home / bodyweight</th><th>Dumbbells / gym</th><th style="width:30%">Make it easier / harder</th></tr>
+    <tr><td><b>Squat</b></td><td>Bodyweight squat</td><td>Goblet squat / leg press</td><td><span class="tag e">Easier</span>Sit-to-stand from a chair<br/><span class="tag h">Harder</span>Pause at the bottom</td></tr>
+    <tr><td><b>Push</b></td><td>Push-up</td><td>Dumbbell / machine press</td><td><span class="tag e">Easier</span>Hands on a bench or wall<br/><span class="tag h">Harder</span>Feet raised, slow lowering</td></tr>
+    <tr><td><b>Hinge</b></td><td>Glute bridge</td><td>Romanian deadlift</td><td><span class="tag e">Easier</span>Smaller range<br/><span class="tag h">Harder</span>Single-leg bridge</td></tr>
+    <tr><td><b>Pull</b></td><td>Backpack row / towel row</td><td>Dumbbell row / cable row</td><td><span class="tag e">Easier</span>Lighter load<br/><span class="tag h">Harder</span>2-second squeeze at the top</td></tr>
+    <tr><td><b>Core</b></td><td>Plank</td><td>Plank / dead bug</td><td><span class="tag e">Easier</span>Knees down<br/><span class="tag h">Harder</span>Longer hold</td></tr>
+  </table>
+  <div class="grid3" style="margin-top:4mm">
+    <div class="box"><h3>Sets &amp; reps</h3><p class="note" style="margin:0">2–3 rounds of 8–12 reps (planks: 20–40 s). Rest about 60 s.</p></div>
+    <div class="box"><h3>Effort</h3><p class="note" style="margin:0">Finish each set feeling you could do 2–3 more reps with good form.</p></div>
+    <div class="box"><h3>Progress</h3><p class="note" style="margin:0">Each week, add a rep, a set or a little weight — one thing at a time.</p></div>
+  </div>
+  <p class="note">Warm up for 5 minutes (brisk walk, arm circles, bodyweight squats). Stop if anything causes sharp pain.</p>
+  <div class="foot"><span>The 7-Day Fat-Loss Kickstart</span><span>5</span></div>
+</section>
+
+<!-- 6. STEP 4 HABITS -->
+<section class="page">
+  <div class="top"><span class="logo"><b>Z</b><em>Zma<span>Fit</span></em></span><span>Step 4</span></div>
+  <span class="step">Step 4</span>
+  <h1>The daily habits that <span class="hl">multiply results</span></h1>
+  <div class="grid3" style="margin-top:6mm">
+    <div class="box dark"><div class="big" style="color:var(--green)">Sleep</div><p style="margin:3mm 0 0;color:#C9D3DE">Most adults need <b style="color:#fff">7–9 hours</b>. Poor sleep makes hunger and cravings harder to manage.</p></div>
+    <div class="box dark"><div class="big" style="color:var(--orange)">Steps</div><p style="margin:3mm 0 0;color:#C9D3DE">Check your current daily average, then add <b style="color:#fff">1,000–2,000 steps</b>. Small and steady wins.</p></div>
+    <div class="box dark"><div class="big" style="color:#7CC8FF">Water</div><p style="margin:3mm 0 0;color:#C9D3DE">Keep a bottle nearby and drink with every meal. Needs vary with heat and activity.</p></div>
+  </div>
+  <h2>Make habits automatic</h2>
+  <ul class="check">
+    <li><b>Stack it:</b> “After I pour my morning coffee, I fill my water bottle.”</li>
+    <li><b>Walk after meals:</b> 10 minutes after lunch or dinner adds up fast.</li>
+    <li><b>Wind down:</b> screens off 30 minutes before bed, same bedtime most nights.</li>
+    <li><b>Prep the easy option:</b> washed fruit and a protein snack you can grab.</li>
+    <li><b>Never miss twice:</b> a missed day is normal — just get back to it tomorrow.</li>
+  </ul>
+  <div class="box g" style="margin-top:6mm"><p style="margin:0"><b>Why this matters:</b> calories and training set the direction, but sleep, movement and hydration decide how easy it feels to stay consistent. Consistency is what drives results.</p></div>
+  <div class="foot"><span>The 7-Day Fat-Loss Kickstart</span><span>6</span></div>
+</section>
+
+<!-- 7. CHECKLIST -->
+<section class="page">
+  <div class="top"><span class="logo"><b>Z</b><em>Zma<span>Fit</span></em></span><span>Your week</span></div>
+  <h1>Your <span class="hl">7-day</span> checklist</h1>
+  <p class="lead">Tick what you complete. Aim for most boxes, most days.</p>
+  <table style="font-size:9.4pt">
+    <tr><th style="width:24%">Daily action</th><th>D1</th><th>D2</th><th>D3</th><th>D4</th><th>D5</th><th>D6</th><th>D7</th></tr>
+    <tr><td><b>Protein at every meal</b></td><td><i class="tick"></i></td><td><i class="tick"></i></td><td><i class="tick"></i></td><td><i class="tick"></i></td><td><i class="tick"></i></td><td><i class="tick"></i></td><td><i class="tick"></i></td></tr>
+    <tr><td><b>Half-plate veg</b> (2 meals)</td><td><i class="tick"></i></td><td><i class="tick"></i></td><td><i class="tick"></i></td><td><i class="tick"></i></td><td><i class="tick"></i></td><td><i class="tick"></i></td><td><i class="tick"></i></td></tr>
+    <tr><td><b>Calorie target</b> (roughly)</td><td><i class="tick"></i></td><td><i class="tick"></i></td><td><i class="tick"></i></td><td><i class="tick"></i></td><td><i class="tick"></i></td><td><i class="tick"></i></td><td><i class="tick"></i></td></tr>
+    <tr><td><b>Workout</b></td><td><span class="tag h">Train</span></td><td class="note">rest</td><td><span class="tag h">Train</span></td><td class="note">rest</td><td><span class="tag h">Train</span></td><td class="note">walk</td><td class="note">rest</td></tr>
+    <tr><td><b>Step goal</b></td><td><i class="tick"></i></td><td><i class="tick"></i></td><td><i class="tick"></i></td><td><i class="tick"></i></td><td><i class="tick"></i></td><td><i class="tick"></i></td><td><i class="tick"></i></td></tr>
+    <tr><td><b>Water with every meal</b></td><td><i class="tick"></i></td><td><i class="tick"></i></td><td><i class="tick"></i></td><td><i class="tick"></i></td><td><i class="tick"></i></td><td><i class="tick"></i></td><td><i class="tick"></i></td></tr>
+    <tr><td><b>7+ hours sleep</b></td><td><i class="tick"></i></td><td><i class="tick"></i></td><td><i class="tick"></i></td><td><i class="tick"></i></td><td><i class="tick"></i></td><td><i class="tick"></i></td><td><i class="tick"></i></td></tr>
+    <tr><td><b>Morning weigh-in</b> (optional)</td><td>____</td><td>____</td><td>____</td><td>____</td><td>____</td><td>____</td><td>____</td></tr>
+  </table>
+  <div class="grid2" style="margin-top:5mm">
+    <div class="box"><h3>Day 1 to-do</h3><ul class="check" style="margin:0"><li>Work out your numbers (page 3)</li><li>Buy the basics (page 9)</li><li>Measure your waist</li></ul></div>
+    <div class="box"><h3>Day 7 to-do</h3><ul class="check" style="margin:0"><li>Count your ticks</li><li>Measure your waist again</li><li>Use page 8 to adjust</li></ul></div>
+  </div>
+  <div class="foot"><span>The 7-Day Fat-Loss Kickstart</span><span>7</span></div>
+</section>
+
+<!-- 8. TRACK & ADJUST -->
+<section class="page">
+  <div class="top"><span class="logo"><b>Z</b><em>Zma<span>Fit</span></em></span><span>Track &amp; adjust</span></div>
+  <h1>Check in. <span class="hl">Adjust calmly.</span></h1>
+  <p class="lead">Body weight goes up and down every day because of water, salt and food volume. Look at trends, not single days.</p>
+  <h2>What to track</h2>
+  <ul class="check">
+    <li><b>Weekly average weight:</b> weigh 3+ mornings a week (after the bathroom, before eating) and compare weekly averages.</li>
+    <li><b>Waist:</b> measure once a week at belly-button height.</li>
+    <li><b>Your checklist score:</b> how many boxes did you tick?</li>
+    <li><b>Energy, sleep and hunger:</b> a quick 1–5 rating is enough.</li>
+  </ul>
+  <h2>If progress slows after 2 weeks</h2>
+  <p>First, be honest about consistency — if the checklist score was low, focus on that before changing anything. If you were consistent and the weekly averages haven’t moved, change <b>one thing</b>:</p>
+  <div class="grid2">
+    <div class="box g"><h3>Option A</h3><p style="margin:0">Reduce daily intake by about <b>100–200 calories</b>.</p></div>
+    <div class="box o"><h3>Option B</h3><p style="margin:0">Add about <b>2,000 steps</b> per day.</p></div>
+  </div>
+  <p>Then give it another 1–2 weeks before adjusting again. Small, patient changes beat big swings.</p>
+  <div class="box dark" style="margin-top:6mm">
+    <p style="margin:0;color:#C9D3DE"><b style="color:#fff">Want this done for you?</b> The ZmaFit Custom 4-Week Plan builds your numbers, workouts and meals from your answers — and tells you exactly what to change after week 2 if progress slows.</p>
+  </div>
+  <div class="foot"><span>The 7-Day Fat-Loss Kickstart</span><span>8</span></div>
+</section>
+
+<!-- 9. GROCERY LIST -->
+<section class="page">
+  <div class="top"><span class="logo"><b>Z</b><em>Zma<span>Fit</span></em></span><span>Shopping</span></div>
+  <h1>Starter <span class="hl">grocery list</span></h1>
+  <p class="lead">Pick what fits your eating style and budget. You don’t need everything.</p>
+  <div class="grid2">
+    <div class="box"><h3 class="hl">Protein</h3><ul class="check" style="margin:0"><li>Eggs</li><li>Greek yogurt / skyr</li><li>Chicken or turkey (halal-certified if needed)</li><li>Fish or canned tuna</li><li>Lentils, chickpeas, beans</li><li>Tofu or tempeh</li></ul></div>
+    <div class="box"><h3 class="ho">Carbs</h3><ul class="check" style="margin:0"><li>Oats</li><li>Rice (white or brown)</li><li>Potatoes / sweet potatoes</li><li>Wholegrain bread or wraps</li><li>Fruit: bananas, apples, berries</li></ul></div>
+    <div class="box"><h3 class="hl">Vegetables</h3><ul class="check" style="margin:0"><li>Salad leaves, cucumber, tomatoes</li><li>Frozen mixed vegetables</li><li>Broccoli, peppers, onions</li><li>Carrots for snacking</li></ul></div>
+    <div class="box"><h3 class="ho">Fats &amp; extras</h3><ul class="check" style="margin:0"><li>Olive oil</li><li>Nuts or seeds</li><li>Avocado</li><li>Spices, herbs, lemon, hot sauce</li><li>Hummus</li></ul></div>
+  </div>
+  <div class="box g" style="margin-top:5mm"><p style="margin:0"><b>Tip:</b> cook a big batch of one protein and one carb twice a week. Mix with different vegetables and sauces so meals don’t get boring.</p></div>
+  <div class="foot"><span>The 7-Day Fat-Loss Kickstart</span><span>9</span></div>
+</section>
+
+<!-- 10. CTA -->
+<section class="page dark cta">
+  <div class="bg" style="position:absolute;inset:0;background:radial-gradient(circle at 85% 10%, rgba(34,229,132,.28), transparent 45%),radial-gradient(circle at 10% 95%, rgba(255,122,26,.25), transparent 45%),var(--bg)"></div>
+  <div class="inner">
+    <div class="logo"><b>Z</b><em>Zma<span>Fit</span></em></div>
+    <div style="margin-top:12mm;align-self:flex-start" class="step o">Ready for week 2?</div>
+    <h1 style="font-size:34pt">Get a plan built <span style="color:var(--green)">for you</span> — not a template.</h1>
+    <p class="lead" style="color:#C9D3DE">Answer 12 questions. Your Custom 4-Week Fat-Loss Plan is built from your answers — your time, your equipment, your food.</p>
+    <ul class="check" style="margin-top:4mm">
+      <li>Daily calorie and protein targets</li>
+      <li>4 weeks of workouts for your time and equipment</li>
+      <li>A sample eating day with swaps + a grocery list</li>
+      <li>Every exercise explained, with an easier and harder version</li>
+      <li>Daily habits checklist (sleep, steps, water)</li>
+      <li>What to change after week 2 if progress slows</li>
+    </ul>
+    <p class="note" style="margin-top:2mm">All levels · bodyweight to full gym · halal, vegetarian, low-carb and more</p>
+    <div style="display:flex;align-items:center;gap:8mm;margin-top:8mm">
+      <div><div class="price">$19</div><div style="font-weight:800;color:var(--orange);font-size:12pt;text-transform:uppercase">One-time · no subscription</div></div>
+      <div class="note" style="max-width:70mm">Pay with PayPal or card. Your plan appears on screen in 1–3 minutes — save it as a PDF.</div>
+    </div>
+    <div style="margin-top:auto;display:flex;flex-direction:column;gap:5mm;align-items:flex-start">
+      <a class="btn" href="https://zmafit.com/custom-plan">Build your plan →</a>
+      <a class="url" href="https://zmafit.com/custom-plan">zmafit.com<span>/custom-plan</span></a>
+      <p class="note" style="margin:2mm 0 0">General guidance, not medical advice. 18+. Results vary with consistency and individual factors.</p>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>
