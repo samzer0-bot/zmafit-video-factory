@@ -85,7 +85,7 @@ SCENES = [
       q=["crowd silhouette", "broken glass", "shadows people walking"], tag="Hate & Division"),
     S("clip", "Poverty and injustice feed them too. When people feel they have nothing "
       "left to lose, violence starts to look like an answer.",
-      q=["poverty slum", "poor neighborhood", "homeless"], tag="Poverty & Injustice"),
+      q=["empty plate", "abandoned house interior", "old worn shoes"], tag="Poverty & Injustice"),
     S("clip", "History shows how small the spark can be. In nineteen fourteen, one "
       "assassination in Sarajevo pulled the great powers of Europe into the First World War.",
       q=["old steam train", "vintage pocket watch", "old city street black and white"], mood="archive",
@@ -126,7 +126,7 @@ SCENES = [
       q=["sunrise over city", "sunrise", "sun rays clouds"], mood="turn", pre=0.8, post=1.4),
     S("clip", "After the Second World War, France and Germany, enemies for centuries, "
       "chose to work together. That choice helped build the peace Europe still lives in today.",
-      q=["handshake", "business handshake", "two people shaking hands"], mood="peace",
+      q=["signing document pen", "pen signing paper", "signing contract"], mood="peace",
       loc="PARIS  —  18 APRIL 1951"),
     S("clip", "In South Africa, Nelson Mandela walked out of prison after twenty-seven years, "
       "and chose reconciliation instead of revenge.",
