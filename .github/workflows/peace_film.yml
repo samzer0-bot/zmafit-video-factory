@@ -1,0 +1,58 @@
+name: Peace Film — The Morning After
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ccr-3918ece2-nkrqlu]
+    paths:
+      - scripts/peace_film.py
+      - .github/workflows/peace_film.yml
+
+permissions:
+  contents: write
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install ffmpeg + fonts
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg fonts-dejavu-core
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install TTS
+        run: pip install --quiet --upgrade edge-tts gTTS
+
+      - name: Render film
+        env:
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+          VIDEO_LANG: en
+        run: python scripts/peace_film.py
+
+      - name: Publish as release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="peace-film-$(date -u +%Y%m%d-%H%M%S)"
+          gh release create "$TAG" \
+            out/the_morning_after.mp4 out/the_morning_after.jpg out/the_morning_after.json \
+            --target "${{ github.sha }}" --prerelease \
+            --title "The Morning After — A Short Film About Peace" \
+            --notes "English short film about war and peace. Real Pexels footage + voice-over."
+          echo "### Download: https://github.com/${{ github.repository }}/releases/tag/$TAG" >> $GITHUB_STEP_SUMMARY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: the-morning-after
+          path: |
+            out/the_morning_after.mp4
+            out/the_morning_after.jpg
+            out/the_morning_after.json
+          retention-days: 14
