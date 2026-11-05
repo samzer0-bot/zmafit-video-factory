@@ -79,16 +79,16 @@ SCENES = [
       q=["oil field pump", "desert land aerial", "dry cracked earth"], tag="Land & Resources"),
     S("clip", "Some begin over power: a leader who wants more, or a government that "
       "refuses to share it.",
-      q=["political rally crowd", "crowd flags", "parliament building"], tag="Power"),
+      q=["parliament building", "government building columns", "chess pieces"], tag="Power"),
     S("clip", "Others grow from old wounds. Differences of religion, ethnicity or language "
       "are turned into weapons by people who profit from hate.",
-      q=["angry crowd protest", "protest street", "riot police"], tag="Hate & Division"),
+      q=["crowd silhouette", "broken glass", "shadows people walking"], tag="Hate & Division"),
     S("clip", "Poverty and injustice feed them too. When people feel they have nothing "
       "left to lose, violence starts to look like an answer.",
       q=["poverty slum", "poor neighborhood", "homeless"], tag="Poverty & Injustice"),
     S("clip", "History shows how small the spark can be. In nineteen fourteen, one "
       "assassination in Sarajevo pulled the great powers of Europe into the First World War.",
-      q=["world war soldiers", "soldiers marching", "old film vintage"], mood="archive",
+      q=["old steam train", "vintage pocket watch", "old city street black and white"], mood="archive",
       loc="SARAJEVO, BOSNIA  —  28 JUNE 1914"),
     S("img", "In nineteen thirty-nine, the invasion of Poland began the Second World War. "
       "By the time it ended, more than seventy million people were dead.",
@@ -130,7 +130,7 @@ SCENES = [
       loc="PARIS  —  18 APRIL 1951"),
     S("clip", "In South Africa, Nelson Mandela walked out of prison after twenty-seven years, "
       "and chose reconciliation instead of revenge.",
-      q=["people celebrating together", "crowd celebrating", "people dancing joy"], mood="peace",
+      q=["hands raised sky", "people walking sunset", "sunrise field silhouette"], mood="peace",
       loc="CAPE TOWN, SOUTH AFRICA  —  11 FEBRUARY 1990"),
     S("clip", "Again and again, ordinary people have shown that the cycle of violence can "
       "be broken.", q=["construction worker bricks", "building construction hands", "rebuilding"],
@@ -155,10 +155,10 @@ SCENES = [
       mood="peace", tag="4 · Fighting Poverty"),
     S("clip", "And fifth, through cooperation between nations: keeping promises, respecting "
       "borders, and solving conflicts together.",
-      q=["world flags", "flags waving", "globe earth"], mood="peace", tag="5 · Cooperation"),
+      q=["earth from space", "globe earth", "planet earth"], mood="peace", tag="5 · Cooperation"),
     S("clip", "But peace is not only the work of presidents. It begins with us: in how we "
       "speak to people who are different from us, and how we treat those we disagree with.",
-      q=["friends different cultures", "diverse friends laughing", "people hugging"],
+      q=["friends walking together", "group of friends sunset", "people hugging"],
       mood="peace"),
     S("clip", "Peace is not weakness. It takes more courage to forgive than to fight.",
       q=["children playing football street", "kids playing outside", "children running field"],
