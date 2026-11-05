@@ -36,7 +36,6 @@ jobs:
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
           VIDEO_LANG: en
         run: python scripts/make_peace.py
-      - assets/make_peace/**
 
       - name: Publish as release
         env:
