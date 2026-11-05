@@ -1,7 +1,6 @@
 # English TikTok topics — one per line. The factory takes the first line each run.
 # 3-month plan (Nov 2026 – Feb 2027) for a US / English-speaking audience,
 # with Thanksgiving, holiday and New Year topics placed near their dates.
-How to lose fat when you work from home
 3 glute exercises you can do in your living room
 Why you gain weight in the fall and how to stop it
 The right way to do lunges without knee pain
