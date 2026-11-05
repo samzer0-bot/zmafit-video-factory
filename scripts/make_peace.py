@@ -441,7 +441,7 @@ def captions(work: Path, total: float) -> Path:
             add(2, t0 + 0.6, end - 0.2, "CardNum", sc["num"], "{\\fad(600,500)}")
             add(2, t0 + 0.9, end - 0.2, "Card", sc["title"], "{\\fad(700,500)}")
             continue
-        if sc["vo"]:
+        if sc["vo"] and os.environ.get("MP_SUBS") == "1":   # subtitles off by default
             start = t0 + sc["pre"]
             chunks = [c.strip() for c in re.split(r"(?<=[.?!:])\s+", sc["text"]) if c.strip()]
             n = sum(len(c) for c in chunks)
