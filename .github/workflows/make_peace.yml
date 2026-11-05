@@ -1,0 +1,60 @@
+name: Make Peace — 5 min film
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ccr-3918ece2-nkrqlu]
+    paths:
+      - scripts/make_peace.py
+      - assets/make_peace/**
+      - .github/workflows/make_peace.yml
+
+permissions:
+  contents: write
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install ffmpeg + fonts
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg fonts-dejavu-core fonts-ebgaramond
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install TTS
+        run: pip install --quiet --upgrade edge-tts gTTS
+
+      - name: Render film
+        env:
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+          VIDEO_LANG: en
+        run: python scripts/make_peace.py
+      - assets/make_peace/**
+
+      - name: Publish as release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="make-peace-$(date -u +%Y%m%d-%H%M%S)"
+          gh release create "$TAG" \
+            out/make_peace.mp4 out/make_peace.json \
+            --target "${{ github.sha }}" --prerelease \
+            --title "Make Peace — Why Wars Begin and How Peace Is Built" \
+            --notes "5-minute English film: causes of war, wars today, hope, solutions for peace."
+          echo "### Download: https://github.com/${{ github.repository }}/releases/tag/$TAG" >> $GITHUB_STEP_SUMMARY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: make-peace
+          path: |
+            out/make_peace.mp4
+           
+            out/make_peace.json
+          retention-days: 14
