@@ -37,7 +37,7 @@ BAR = round(H * 0.128)          # letterbox bars -> ~2.39:1 picture
 INNER = H - 2 * BAR
 XF = 0.9                        # crossfade (s)
 VOICES = ["en-US-AndrewMultilingualNeural", "en-US-AndrewNeural", "en-GB-RyanNeural"]
-RATE, PITCH = "-6%", "-2Hz"
+RATE, PITCH = "-10%", "-4Hz"
 IMG = config.ASSETS / "make_peace"
 SERIF = "EB Garamond"
 
@@ -45,6 +45,10 @@ GRADE = {
     "war": "eq=contrast=1.14:saturation=0.55:brightness=-0.03:gamma=0.96,"
            "colorbalance=bs=0.06:bm=0.03:rh=-0.02",
     "img": "eq=contrast=1.05:saturation=0.95",
+    # archival newsreel look: B&W, warm tint, flicker, heavy grain
+    "archive": "hue=s=0,eq=contrast=1.28:brightness='-0.03+0.025*sin(t*31)':eval=frame,"
+               "colorchannelmixer=.393:.769:.189:0:.349:.686:.168:0:.272:.534:.131,"
+               "eq=saturation=0.35,noise=alls=24:allf=t",
     "turn": "eq=contrast=1.08:saturation=0.8:brightness=-0.01,colorbalance=rh=0.03:bh=-0.02",
     "peace": "eq=contrast=1.05:saturation=0.95:gamma=1.02,"
              "colorbalance=rs=0.04:rm=0.03:bh=-0.04",
@@ -84,11 +88,11 @@ SCENES = [
       q=["poverty slum", "poor neighborhood", "homeless"], tag="Poverty & Injustice"),
     S("clip", "History shows how small the spark can be. In nineteen fourteen, one "
       "assassination in Sarajevo pulled the great powers of Europe into the First World War.",
-      q=["old film vintage", "vintage film footage", "old black and white city"],
-      big=("1914", "The First World War")),
+      q=["world war soldiers", "soldiers marching", "old film vintage"], mood="archive",
+      loc="SARAJEVO, BOSNIA  —  28 JUNE 1914"),
     S("img", "In nineteen thirty-nine, the invasion of Poland began the Second World War. "
       "By the time it ended, more than seventy million people were dead.",
-      img="02_battle_planes.jpg", big=("1939", "The Second World War"), post=1.2),
+      img="02_battle_planes.jpg", mood="archive", loc="POLAND  —  1 SEPTEMBER 1939", post=1.2),
     S("img", "Behind every number, there is a person. Someone's son. Someone's daughter.",
       img="01_soldier_child.jpg", post=2.0),
 
@@ -107,7 +111,7 @@ SCENES = [
       "people have been forced to flee their homes. That is more than the population of "
       "most countries on Earth.",
       q=["refugees walking", "people walking with luggage", "migrants walking road"],
-      big=("120,000,000+", "people forced from their homes")),
+      big=("120,000,000+", "people forced from their homes"), src="SOURCE: UNHCR"),
     S("img", "And war does not only kill soldiers. Most of its victims are ordinary people "
       "who never chose to fight.", img="04_fallen.jpg", post=1.6),
     S("clip", "Children grow up knowing the sound of sirens better than the sound of a "
@@ -122,10 +126,12 @@ SCENES = [
       q=["sunrise over city", "sunrise", "sun rays clouds"], mood="turn", pre=0.8, post=1.4),
     S("clip", "After the Second World War, France and Germany, enemies for centuries, "
       "chose to work together. That choice helped build the peace Europe still lives in today.",
-      q=["handshake", "business handshake", "two people shaking hands"], mood="peace"),
+      q=["handshake", "business handshake", "two people shaking hands"], mood="peace",
+      loc="PARIS  —  18 APRIL 1951"),
     S("clip", "In South Africa, Nelson Mandela walked out of prison after twenty-seven years, "
       "and chose reconciliation instead of revenge.",
-      q=["people celebrating together", "crowd celebrating", "people dancing joy"], mood="peace"),
+      q=["people celebrating together", "crowd celebrating", "people dancing joy"], mood="peace",
+      loc="CAPE TOWN, SOUTH AFRICA  —  11 FEBRUARY 1990"),
     S("clip", "Again and again, ordinary people have shown that the cycle of violence can "
       "be broken.", q=["construction worker bricks", "building construction hands", "rebuilding"],
       mood="peace", post=1.4),
@@ -318,7 +324,8 @@ def segment(i, sc, work: Path) -> Path:
             motion = (f"[0:v]scale=-2:{fg_h}[fg];[bg][fg]overlay=(W-w)/2:(H-h)/2,"
                       f"{_still_motion(i, d)}")
         g = (bg + motion + ","
-             + _finish("img" if k == "img" else "none", bars=(k == "img"),
+             + _finish((sc["mood"] if sc["mood"] == "archive" else "img") if k == "img" else "none",
+                       bars=(k == "img"),
                        grain=6 if k == "img" else 3) + "[v]")
         run(["ffmpeg", "-y", "-v", "error", "-loop", "1", "-i", src,
              "-filter_complex", g, "-map", "[v]", *enc], f"image {i}")
@@ -435,6 +442,16 @@ def captions(work: Path, total: float) -> Path:
     def add(layer, a, b, style, text, fx="{\\fad(250,250)}"):
         ev.append(f"Dialogue: {layer},{tc(a)},{tc(b)},{style},,0,0,0,,{fx}{text}")
 
+    def f(v):
+        return max(1, round(v * sc_))
+
+    def typewriter(a, b, text, cps=22):
+        """documentary location line, typed out letter by letter."""
+        for n in range(1, len(text) + 1):
+            s0 = a + (n - 1) / cps
+            s1 = a + n / cps if n < len(text) else b
+            add(1, s0, s1, "Loc", text[:n] + ("_" if n < len(text) else ""), "")
+
     for sc in SCENES:
         t0, end = sc["t0"], sc["t0"] + sc["dur"] - XF
         if sc["kind"] == "card":
@@ -450,8 +467,15 @@ def captions(work: Path, total: float) -> Path:
                 d = sc["vo_dur"] * len(c) / n
                 add(0, t, t + d + 0.25, "Sub", c, "{\\fad(150,150)}")
                 t += d
+        if sc.get("loc"):
+            typewriter(t0 + 0.9, end - 0.4, sc["loc"])
+        if sc.get("src"):
+            add(1, t0 + 1.4, end - 0.4, "Src", sc["src"], "{\\fad(500,400)}")
         if sc.get("tag"):
-            add(1, t0 + 0.8, end - 0.3, "Tag", sc["tag"], "{\\fad(500,400)}")
+            bar_y = H - BAR - f(118)
+            add(1, t0 + 0.8, end - 0.3, "Line",
+                f"{{\\pos({f(90)},{bar_y})\\fad(500,400)\\p1}}m 0 0 l {f(5)} 0 {f(5)} {f(64)} 0 {f(64)}{{\\p0}}", "")
+            add(1, t0 + 0.8, end - 0.3, "Tag", sc["tag"].upper(), "{\\fad(500,400)}")
         if sc.get("big"):
             num, cap = sc["big"]
             add(1, t0 + 0.7, end - 0.4, "Big", num, "{\\fad(700,500)}")
@@ -466,7 +490,6 @@ def captions(work: Path, total: float) -> Path:
             pass
     # names credit over the very last seconds of the closing title card
     ass = work / "film.ass"
-    f = lambda v: max(1, round(v * sc_))  # noqa: E731
     ass.write_text(f"""[Script Info]
 ScriptType: v4.00+
 PlayResX: {W}
@@ -479,7 +502,10 @@ Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour,
 Style: Sub,{SERIF},{f(42)},&H00EAEAEA,&H00EAEAEA,&H00000000,&H00000000,0,0,0,0,100,100,0.5,0,1,1.2,0,2,{f(160)},{f(160)},{f(40)},1
 Style: Card,{SERIF},{f(96)},&H00F0F0F0,&H00F0F0F0,&H00000000,&H00000000,0,0,0,0,100,100,2,0,1,0,0,5,0,0,0,1
 Style: CardNum,{SERIF},{f(34)},&H0088C8E8,&H0088C8E8,&H00000000,&H00000000,0,0,0,0,100,100,{f(12)},0,1,0,0,8,0,0,{f(400)},1
-Style: Tag,{SERIF},{f(54)},&H00F2F2F2,&H00F2F2F2,&H00000000,&H96000000,0,1,0,0,100,100,1,0,1,0,{f(3)},7,{f(90)},0,{BAR + f(50)},1
+Style: Tag,{SERIF},{f(46)},&H00F2F2F2,&H00F2F2F2,&H00000000,&H96000000,0,0,0,0,100,100,{f(4)},0,1,0,{f(2)},1,{f(115)},0,{BAR + f(60)},1
+Style: Loc,DejaVu Sans Mono,{f(30)},&H00E8E8E8,&H00E8E8E8,&H00000000,&H96000000,0,0,0,0,100,100,{f(3)},0,1,0,{f(2)},1,{f(90)},0,{BAR + f(40)},1
+Style: Src,DejaVu Sans,{f(24)},&H00B0B0B0,&H00B0B0B0,&H00000000,&H96000000,0,0,0,0,100,100,{f(3)},0,1,0,{f(2)},3,0,{f(90)},{BAR + f(30)},1
+Style: Line,DejaVu Sans,{f(20)},&H0088C8E8,&H0088C8E8,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,0,0,7,0,0,0,1
 Style: Big,{SERIF},{f(150)},&H00F5F5F5,&H00F5F5F5,&H00000000,&H96000000,1,0,0,0,100,100,2,0,1,0,{f(4)},5,0,0,0,1
 Style: BigCap,{SERIF},{f(44)},&H0088C8E8,&H0088C8E8,&H00000000,&H96000000,0,1,0,0,100,100,2,0,1,0,{f(3)},2,0,0,{BAR + f(150)},1
 Style: Country,{SERIF},{f(50)},&H00F2F2F2,&H00F2F2F2,&H00000000,&H96000000,0,0,0,0,100,100,1,0,1,0,{f(3)},7,0,0,0,1
