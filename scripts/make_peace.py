@@ -173,6 +173,10 @@ SCENES = [
 ]
 
 
+# clips approved after review (scene number -> Pexels video id); others are searched
+PINNED = {3: 30449778, 4: 36619093, 5: 14994490, 6: 27360213, 8: 38384939, 12: 6660909, 15: 36493468, 17: 6565084, 18: 4707600, 20: 38913800, 22: 37639455, 23: 30836674, 25: 5939449, 26: 8061671, 27: 8196812, 28: 33536453, 29: 854223, 30: 6136969, 31: 8813013, 32: 856018}
+
+
 # ---------------------------------------------------------------- helpers
 def run(args, desc=""):
     p = subprocess.run(args, capture_output=True, text=True)
@@ -196,7 +200,7 @@ def fetch_footage(work: Path, dry: bool):
         import stock
         if not (config.PEXELS_API_KEY or "").strip():
             raise SystemExit("PEXELS_API_KEY is missing")
-    used = set()
+    used = set(PINNED.values())
     for i, sc in enumerate(SCENES):
         if sc["kind"] != "clip":
             continue
@@ -208,7 +212,16 @@ def fetch_footage(work: Path, dry: bool):
             sc["clip"], sc["clip_dur"] = str(dest), 14.0
             continue
         chosen, hit = None, None
-        for q in sc["q"]:
+        pin = PINNED.get(i + 1)
+        if pin:
+            try:
+                v = stock._get(f"https://api.pexels.com/videos/videos/{pin}")
+                got = stock._best_file(v, False, 1280)
+                if got:
+                    chosen, hit = (got[0], got[1], pin, v.get("duration", 10)), f"pinned #{pin}"
+            except Exception as e:  # noqa: BLE001
+                print(f"  ! pinned clip {pin} unavailable: {e}")
+        for q in ([] if chosen else sc["q"]):
             for orient, min_side in (("landscape", 1920), ("landscape", 1280), (None, 1280)):
                 chosen = stock._search(q, orient, False, used, min_side)
                 if chosen:
