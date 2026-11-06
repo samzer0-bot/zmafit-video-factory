@@ -27,7 +27,6 @@ jobs:
       TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
       TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
       MAKE_WEBHOOK_EN: ${{ secrets.MAKE_WEBHOOK_EN }}
-      METRICOOL_TOKEN: ${{ secrets.METRICOOL_TOKEN }}
 
     steps:
       - uses: actions/checkout@v4
@@ -121,21 +120,6 @@ jobs:
                                        headers={"Content-Type": "application/json"})
           print(urllib.request.urlopen(req, timeout=120).read().decode()[:200])
           PY
-
-      - name: Cross-post to Instagram Reels + TikTok (Metricool)
-        # اختياري: لا يعمل إلا إذا أضفت METRICOOL_TOKEN، ولا يوقف المصنع أبداً إذا فشل
-        if: steps.cfg.outputs.format == 'shorts' && env.METRICOOL_TOKEN != ''
-        continue-on-error: true
-        env:
-          METRICOOL_TOKEN: ${{ secrets.METRICOOL_TOKEN }}
-          METRICOOL_USER_ID: ${{ vars.METRICOOL_USER_ID || '5932094' }}
-          METRICOOL_BLOG_ID: ${{ vars.METRICOOL_BLOG_ID || '7607720' }}
-          METRICOOL_NETWORKS: ${{ vars.METRICOOL_NETWORKS || 'instagram,tiktok' }}
-          METRICOOL_PIN_BOARD: ${{ vars.METRICOOL_PIN_BOARD }}
-          LEAD_MAGNET_URL_EN: ${{ vars.LEAD_MAGNET_URL_EN }}
-          VIDEO_URL: ${{ steps.release.outputs.video_url }}
-          THUMB_URL: ${{ steps.release.outputs.thumb_url }}
-        run: python scripts/crosspost.py
 
       - name: Save topic list
         run: |
