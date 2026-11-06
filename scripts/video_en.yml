@@ -46,6 +46,8 @@ jobs:
       - name: Render video
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          LEAD_MAGNET_URL_AR: ${{ vars.LEAD_MAGNET_URL_AR }}
+          LEAD_MAGNET_URL_EN: ${{ vars.LEAD_MAGNET_URL_EN }}
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
           TTS_VOICE: ${{ vars.TTS_VOICE_EN || 'en-US-AndrewNeural' }}
           TTS_RATE: ${{ vars.TTS_RATE_EN || '+5%' }}
