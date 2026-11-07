@@ -67,7 +67,7 @@ SCENES = [
     # ------------------------------------------------------------ opening
     S("title", "This is a story about war... and about the people who refuse "
       "to let war have the last word.", mood="title", pre=4.0, post=2.2,
-      img="00_title.jpg"),
+      img="00_title_cover_c.png"),
 
     # ------------------------------------------------------------ part one
     card("PART ONE", "How Wars Begin", "war"),
@@ -169,12 +169,12 @@ SCENES = [
       mood="peace", post=3.0),
 
     # ------------------------------------------------------------ ending
-    S("title", "", mood="title", pre=0, post=0, img="00_title.jpg", hold=8.0, ending=True),
+    S("title", "", mood="title", pre=0, post=0, img="00_title_cover_c.png", hold=8.0, ending=True),
 ]
 
 
 # clips approved after review (scene number -> Pexels video id); others are searched
-PINNED = {3: 30449778, 4: 36619093, 5: 14994490, 6: 27360213, 8: 38384939, 12: 6660909, 15: 36493468, 17: 6565084, 18: 4707600, 20: 38913800, 22: 37639455, 23: 30836674, 25: 5939449, 26: 8061671, 27: 8196812, 28: 33536453, 29: 854223, 30: 6136969, 31: 8813013, 32: 856018}
+PINNED = {7: 5899333, 21: 7490379, 3: 30449778, 4: 36619093, 5: 14994490, 6: 27360213, 8: 38384939, 12: 6660909, 15: 36493468, 17: 6565084, 18: 4707600, 20: 38913800, 22: 37639455, 23: 30836674, 25: 5939449, 26: 8061671, 27: 8196812, 28: 33536453, 29: 854223, 30: 6136969, 31: 8813013, 32: 856018}
 
 
 # ---------------------------------------------------------------- helpers
@@ -285,22 +285,22 @@ def narrate(work: Path, dry: bool):
 
 
 # ---------------------------------------------------------------- picture
-def _finish(mood, bars=True, grain=8):
+def _finish(mood, bars=True, grain=8, vig=True):
     f = f"{GRADE[mood]}," if mood in GRADE else ""
-    f += f"noise=alls={grain}:allf=t,vignette=PI/4.6,"
+    f += f"noise=alls={grain}:allf=t," + ("vignette=PI/4.6," if vig else "")
     if bars:
         f += (f"drawbox=x=0:y=0:w=iw:h={BAR}:color=black:t=fill,"
               f"drawbox=x=0:y=ih-{BAR}:w=iw:h={BAR}:color=black:t=fill,")
     return f + "format=yuv420p"
 
 
-def _still_motion(i, d):
+def _still_motion(i, d, amount=0.10):
     """slow push-in or pull-out on a still (upscaled first so it doesn't judder)."""
     n = int(d * FPS) + 2
     if i % 2:
-        z = f"1.10-0.10*on/{n}"
+        z = f"{1 + amount:.3f}-{amount:.3f}*on/{n}"
     else:
-        z = f"1.0+0.10*on/{n}"
+        z = f"1.0+{amount:.3f}*on/{n}"
     return (f"scale={W * 2}:{H * 2},zoompan=z='{z}':x='iw/2-(iw/zoom/2)':"
             f"y='ih/2-(ih/zoom/2)':d=1:s={W}x{H}:fps={FPS}")
 
@@ -335,11 +335,11 @@ def segment(i, sc, work: Path) -> Path:
         else:
             fg_h = H if k == "title" else INNER
             motion = (f"[0:v]scale=-2:{fg_h}[fg];[bg][fg]overlay=(W-w)/2:(H-h)/2,"
-                      f"{_still_motion(i, d)}")
+                      f"{_still_motion(i, d, 0.035 if k == 'title' else 0.10)}")
         g = (bg + motion + ","
              + _finish((sc["mood"] if sc["mood"] == "archive" else "img") if k == "img" else "none",
                        bars=(k == "img"),
-                       grain=6 if k == "img" else 3) + "[v]")
+                       grain=6 if k == "img" else 3, vig=(k == "img")) + "[v]")
         run(["ffmpeg", "-y", "-v", "error", "-loop", "1", "-i", src,
              "-filter_complex", g, "-map", "[v]", *enc], f"image {i}")
     else:
@@ -471,9 +471,21 @@ def captions(work: Path, total: float) -> Path:
             add(2, t0 + 0.6, end - 0.2, "CardNum", sc["num"], "{\\fad(600,500)}")
             add(2, t0 + 0.9, end - 0.2, "Card", sc["title"], "{\\fad(700,500)}")
             continue
-        if sc["vo"] and os.environ.get("MP_SUBS") == "1":   # subtitles off by default
+        if sc["vo"] and os.environ.get("MP_SUBS", "1") == "1":   # narration captions on
             start = t0 + sc["pre"]
-            chunks = [c.strip() for c in re.split(r"(?<=[.?!:])\s+", sc["text"]) if c.strip()]
+            chunks = []
+            for c in (c.strip() for c in re.split(r"(?<=[.?!:])\s+", sc["text"])):
+                if not c:
+                    continue
+                parts = -(-len(c) // 60)          # pieces of at most ~60 chars
+                words, cur = c.split(), []
+                target = len(c) / parts
+                for w_ in words:
+                    if cur and len(" ".join(cur + [w_])) > target + 6 and len(chunks) < 99:
+                        chunks.append(" ".join(cur))
+                        cur = []
+                    cur.append(w_)
+                chunks.append(" ".join(cur))
             n = sum(len(c) for c in chunks)
             t = start
             for c in chunks:
@@ -512,7 +524,7 @@ WrapStyle: 0
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Sub,{SERIF},{f(42)},&H00EAEAEA,&H00EAEAEA,&H00000000,&H00000000,0,0,0,0,100,100,0.5,0,1,1.2,0,2,{f(160)},{f(160)},{f(40)},1
+Style: Sub,{SERIF},{f(38)},&H00EAEAEA,&H00EAEAEA,&H00000000,&H00000000,0,0,0,0,100,100,0.5,0,1,1.2,0,2,{f(80)},{f(80)},{f(46)},1
 Style: Card,{SERIF},{f(96)},&H00F0F0F0,&H00F0F0F0,&H00000000,&H00000000,0,0,0,0,100,100,2,0,1,0,0,5,0,0,0,1
 Style: CardNum,{SERIF},{f(34)},&H0088C8E8,&H0088C8E8,&H00000000,&H00000000,0,0,0,0,100,100,{f(12)},0,1,0,0,8,0,0,{f(400)},1
 Style: Tag,{SERIF},{f(46)},&H00F2F2F2,&H00F2F2F2,&H00000000,&H96000000,0,0,0,0,100,100,{f(4)},0,1,0,{f(2)},1,{f(115)},0,{BAR + f(60)},1
