@@ -1,7 +1,6 @@
 # English TikTok topics — one per line. The factory takes the first line each run.
 # 3-month plan (Nov 2026 – Feb 2027) for a US / English-speaking audience,
 # with Thanksgiving, holiday and New Year topics placed near their dates.
-What a 500 calorie fast food meal really looks like
 3 exercises to get rid of back fat
 How to stop the all or nothing diet mindset
 The wall sit challenge for stronger legs
