@@ -1,0 +1,35 @@
+{
+  "fps": 30,
+  "total": 480,
+  "scenes": {
+    "hook": {
+      "from": 0,
+      "duration": 75
+    },
+    "reveal": {
+      "from": 75,
+      "duration": 105
+    },
+    "inside": {
+      "from": 180,
+      "duration": 190
+    },
+    "cta": {
+      "from": 370,
+      "duration": 110
+    }
+  },
+  "beats": {
+    "strikeAt": 40,
+    "bookLand": 14,
+    "pageFirst": 6,
+    "pageGap": 44,
+    "typeStart": 20
+  },
+  "vo": {
+    "hook": 2,
+    "reveal": 4,
+    "inside": 4,
+    "cta": 4
+  }
+}
