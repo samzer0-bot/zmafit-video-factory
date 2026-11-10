@@ -1,7 +1,6 @@
 # English TikTok topics — one per line. The factory takes the first line each run.
 # 3-month plan (Nov 2026 – Feb 2027) for a US / English-speaking audience,
 # with Thanksgiving, holiday and New Year topics placed near their dates.
-Fat loss vs weight loss, what really matters
 How to lose weight while eating Mexican food
 3 signs you are eating too little to lose fat
 Flutter kicks for core endurance
