@@ -1,7 +1,6 @@
 # English TikTok topics — one per line. The factory takes the first line each run.
 # 3-month plan (Nov 2026 – Feb 2027) for a US / English-speaking audience,
 # with Thanksgiving, holiday and New Year topics placed near their dates.
-Intermittent fasting explained in 60 seconds
 How to work out when it is cold and dark outside
 Is your pumpkin spice latte ruining your diet?
 Knee push ups done right for beginners
