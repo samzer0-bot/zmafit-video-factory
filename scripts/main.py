@@ -79,6 +79,9 @@ def trim_to_target(scenes: list, fmt: str) -> list:
             break
         keep.append(sc)
         total += sc["duration"]
+    # لا نقصّ مشهد الدعوة الأخير أبداً: نضعه مكان آخر مشهد محفوظ
+    if EN and config.OFFER_SPOKEN and 1 < len(keep) < len(scenes):
+        keep[-1] = scenes[-1]
     return keep
 
 
@@ -128,7 +131,14 @@ def main():
     render.thumbnail(video, data["thumbnail_text"], fmt, config.WORK, thumb)
 
     desc = data["description"].strip()
-    if config.SITE not in desc:
+    if EN and config.OFFER_URL:
+        # رابط العرض في أول سطر حتى يظهر قبل "المزيد" في يوتيوب وفيسبوك وتيك توك
+        # نحذف أي سطر فيه رابط أو اسم الموقع حتى لا يتكرر الرابط أو يبقى سطر مبتور
+        desc = "\n".join(l for l in desc.splitlines()
+                          if not re.search(r"https?://|zmafit\.com", l, re.I)).strip()
+        desc = (f"Get your personal 4-week plan (answer a few quick questions): {config.OFFER_URL}"
+                f"\n\n{desc}")
+    elif config.SITE not in desc:
         desc += (f"\n\nOfficial website: https://{config.SITE}" if EN
                  else f"\n\nموقعنا الرسمي: https://{config.SITE}")
     if fmt == "shorts":

@@ -82,14 +82,16 @@ STRICT RULES:
 - Scene 1 = a strong one-sentence hook that stops the scroll immediately.
 - Exactly {n} scenes.
 - Each scene: one or two short sentences, about {wps} words, because it will be read by a text-to-speech voice.
-- The last scene = a call to subscribe and visit {site}.
+- The last scene = ONE clear call to action, said naturally, close to this:
+  "{offer}"
+  Do not ask people to subscribe in the last scene; the plan is the only call to action.
 - Absolutely forbidden: emojis, parentheses, asterisks, any formatting symbols. Clean spoken text only.
 - No medical claims or cures. Safe general advice only.
 - For every scene give "keywords": 2-4 English words describing a matching stock-footage shot (example: "man doing push ups gym").
 
 Also provide:
 - title: a catchy English YouTube title under 70 characters.
-- description: 3 lines of English + one line with the link {site}.
+- description: 3 lines of English that make the viewer want a personal plan. Do not put any link, the link is added automatically.
 - tags: 12 relevant English tags.
 - thumbnail_text: 3 to 5 English words in capital letters for the thumbnail.
 """
@@ -219,7 +221,7 @@ def generate(topic: str, fmt: str = "shorts") -> dict:
 
     prompt = (PROMPT_EN if en else PROMPT).format(
         brand=config.BRAND, kind=kind, topic=topic,
-        n=cfg["scenes"], wps=wps, site=config.SITE,
+        n=cfg["scenes"], wps=wps, site=config.SITE, offer=config.OFFER_SPOKEN,
     )
 
     payload = {
@@ -265,9 +267,24 @@ def generate(topic: str, fmt: str = "shorts") -> dict:
         n = clean(s["narration"])
         if n:
             scenes.append({"narration": n, "keywords": clean(s.get("keywords", "")) or "fitness"})
-    data["scenes"] = scenes
+    data["scenes"] = ensure_offer(scenes)
     data["topic"] = topic
     return data
+
+
+def ensure_offer(scenes: list) -> list:
+    """يضمن أن آخر مشهد يدعو إلى العرض (للقناة الإنجليزية فقط)."""
+    offer = config.OFFER_SPOKEN
+    if not offer or not scenes:
+        return scenes
+    last = scenes[-1]["narration"].lower()
+    if "zmafit" in last and "plan" in last:
+        return scenes
+    if "subscribe" in last or "zmafit" in last:
+        scenes[-1] = {"narration": offer, "keywords": "person using phone fitness plan"}
+    else:
+        scenes.append({"narration": offer, "keywords": "person using phone fitness plan"})
+    return scenes
 
 
 def new_topic(recent: list) -> str:

@@ -15,9 +15,18 @@ CHANNEL_LANG = os.environ.get("VIDEO_LANG", "ar").strip().lower() or "ar"
 if CHANNEL_LANG == "en":
     BRAND = "ZMAFIT"
     SITE = "zmafit.com"
+    # العرض الذي نبيعه: خطة شخصية 4 أسابيع (صفحة الاختبار في الموقع)
+    OFFER_URL = os.environ.get("OFFER_URL_EN") or (
+        "https://zmafit.com/custom-plan/"
+        "?utm_source=video&utm_medium=social&utm_campaign=en_factory")
+    # الجملة المنطوقة في آخر مشهد (الصوت الآلي يقرأ النقطة "dot")
+    OFFER_SPOKEN = ("Want a plan built for your body? Answer a few quick questions "
+                    "at zmafit dot com and get your personal 4 week plan.")
 else:
     BRAND = "Muscle Arabia"
     SITE = "zermixmusclearabia.com"
+    OFFER_URL = ""
+    OFFER_SPOKEN = ""
 
 # ---------- المفاتيح (من GitHub Secrets) ----------
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
@@ -66,7 +75,7 @@ SUB_FONT = "Cairo"
 
 # ---------- يوتيوب ----------
 # ابدأ بـ private حتى تتأكد من جودة أول فيديو، ثم غيّرها إلى public
-YT_PRIVACY = os.environ.get("YT_PRIVACY", "private")
+YT_PRIVACY = os.environ.get("YT_PRIVACY") or "private"
 YT_CATEGORY = "17"          # 17 = رياضة | 26 = صحة وأسلوب حياة
 
 # ---------- كلمات البحث الاحتياطية في Pexels ----------
