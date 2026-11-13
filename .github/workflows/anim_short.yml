@@ -1,0 +1,48 @@
+name: شورتس متحرك 3D — تمرين الساعد
+
+on:
+  workflow_dispatch:
+    inputs:
+      voice:
+        description: "إضافة التعليق الصوتي (edge-tts)"
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: تثبيت ffmpeg و raqm
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg libraqm0 libfribidi0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: تثبيت المكتبات
+        run: pip install --quiet --upgrade numpy pillow edge-tts
+
+      - name: رسم الفيديو
+        env:
+          TTS_VOICE: ${{ vars.TTS_VOICE || 'ar-EG-ShakirNeural' }}
+          TTS_RATE: ${{ vars.TTS_RATE || '+8%' }}
+        run: |
+          ARGS="--workers 4"
+          [ "${{ inputs.voice }}" = "false" ] && ARGS="$ARGS --no-voice"
+          python scripts/anim_short.py $ARGS
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: anim-forearm-short
+          path: |
+            out/anim-forearm-short.mp4
+            out/anim-forearm-short.json
+          retention-days: 14
