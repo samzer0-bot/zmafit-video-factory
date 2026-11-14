@@ -1,7 +1,6 @@
 # English TikTok topics — one per line. The factory takes the first line each run.
 # 3-month plan (Nov 2026 – Feb 2027) for a US / English-speaking audience,
 # with Thanksgiving, holiday and New Year topics placed near their dates.
-3 moves to strengthen your grip at home
 How to build a high protein breakfast in 5 minutes
 How to do your first pull up
 5 grocery swaps that cut 500 calories a week
