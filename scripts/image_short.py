@@ -40,7 +40,7 @@ EXERCISE = {
     "cam": {
         "full": (616, 650, 1300),
         "muscle_a": (366, 634, 430),          # البايسبس الأيسر (الذراع الممدودة)
-        "muscle_b": (860, 640, 640),          # الذراع المثنية مع الدمبل
+        "muscle_b": (850, 690, 860),          # الذراع المثنية مع الدمبل (تتسع للنزول)
         "arm_a": (300, 820, 980),
         "arm_b": (880, 640, 980),
     },
@@ -69,8 +69,9 @@ def source():
     im = Image.open(config.ROOT / EXERCISE["image"]).convert("RGB")
     a = np.asarray(im).astype(np.int16)
     r, g, b = a[..., 0], a[..., 1], a[..., 2]
-    m = ((r > 140) & (r - g > 70) & (r - b > 70)).astype(np.uint8) * 255
-    mask = Image.fromarray(m).filter(ImageFilter.MaxFilter(3)).filter(ImageFilter.GaussianBlur(1.2))
+    m = ((r > 150) & (r - g > 32) & (r - b > 36)).astype(np.uint8) * 255   # يشمل لمعة العضلة
+    mask = (Image.fromarray(m).filter(ImageFilter.MaxFilter(9)).filter(ImageFilter.MinFilter(7))
+            .filter(ImageFilter.GaussianBlur(1.2)))           # إغلاق الثقوب داخل العضلة
     big = Image.new("RGB", (im.width + 2 * PAD, im.height + 2 * PAD), (255, 255, 255))
     big.paste(im, (PAD, PAD))
     bm = Image.new("L", big.size, 0)
@@ -78,13 +79,97 @@ def source():
     return big, bm
 
 
+# ------------------------------------------------------------------ تحريك الذراع
+# الساعد مع الدمبل يدور حول المرفق، والبايسبس ينتفخ عند الانقباض.
+ARM = {
+    "pivot": (836, 776),                       # مركز مفصل المرفق
+    "joint_r": 50,                             # قرص المفصل (يدور على نفسه بلا فراغات)
+    "forearm": [(838, 676), (866, 640), (862, 440), (1220, 420), (1220, 712), (1005, 712),
+                (905, 800), (862, 845), (836, 826), (824, 742), (832, 712)],
+    "muscle_anchor": (772, 640),               # نقطة ثبات البايسبس عند التضخيم
+    "max_angle": 80.0,                         # زاوية النزول القصوى
+    "rep": 2.6,                                # ثوانٍ لكل تكرار
+}
+
+
+def rep_pose(t: float):
+    """(الزاوية، الانتفاخ): نزول بطيء ثم صعود سريع مع عصر في الأعلى."""
+    ph = (t % ARM["rep"]) / ARM["rep"]
+    if ph < 0.12:
+        k = 0.0                                # ثبات وعصر في الأعلى
+    elif ph < 0.62:
+        k = ease((ph - 0.12) / 0.5)            # نزول بطيء
+    else:
+        k = 1 - ease((ph - 0.62) / 0.38)       # صعود
+    return ARM["max_angle"] * k, 1.0 + 0.09 * (1 - k)
+
+
+@lru_cache(maxsize=1)
+def _arm_parts():
+    big, bm = source()
+    px, py = ARM["pivot"][0] + PAD, ARM["pivot"][1] + PAD
+    poly = Image.new("L", big.size, 0)
+    ImageDraw.Draw(poly).polygon([(x + PAD, y + PAD) for x, y in ARM["forearm"]], fill=255)
+    jr = ARM["joint_r"]
+    disc = Image.new("L", big.size, 0)
+    ImageDraw.Draw(disc).ellipse([px - jr, py - jr, px + jr, py + jr], fill=255)
+    erase_m = Image.fromarray(np.minimum(np.asarray(poly), 255 - np.asarray(disc)))
+    poly = Image.fromarray(np.maximum(np.asarray(poly), np.asarray(disc)))
+    # لون البايسبس يبقى مكانه (لا يُسحب مع الساعد)
+    red = 255 - np.asarray(bm.point(lambda v: 255 if v > 20 else 0).filter(ImageFilter.MaxFilter(5)))
+    poly = Image.fromarray(np.minimum(np.asarray(poly), red))
+    erase_m = Image.fromarray(np.minimum(np.asarray(erase_m), red))
+    poly = poly.filter(ImageFilter.GaussianBlur(1.5))
+    erase_m = erase_m.filter(ImageFilter.GaussianBlur(1.5))
+    R = 560
+    box = (px - R, py - R, px + R, py + R)
+    piece = big.crop(box).convert("RGBA")
+    piece.putalpha(poly.crop(box))
+    erased = big.copy()
+    erased.paste((255, 255, 255), mask=erase_m)
+    # البايسبس: قصاصة بحواف ناعمة حول المنطقة الحمراء
+    mb = bm.point(lambda v: 255 if v > 20 else 0)
+    ax = ARM["muscle_anchor"][0] + PAD
+    mb_r = Image.new("L", big.size, 0)
+    mb_r.paste(mb.crop((ax - 40, 0, big.width, big.height)), (ax - 40, 0))
+    mb_r = mb_r.filter(ImageFilter.MaxFilter(9)).filter(ImageFilter.GaussianBlur(3))
+    bb = mb_r.getbbox()
+    mus = big.crop(bb).convert("RGBA")
+    mus.putalpha(mb_r.crop(bb))
+    mus_m = bm.crop(bb)
+    return erased, bm, piece, box, mus, mus_m, bb
+
+
+def animated_source(t: float):
+    ang, bulge = rep_pose(t)
+    erased, bm, piece, box, mus, mus_m, bb = _arm_parts()
+    img = erased.copy()
+    m = bm.copy()
+    if bulge > 1.001:
+        ax, ay = ARM["muscle_anchor"][0] + PAD, ARM["muscle_anchor"][1] + PAD
+        w, h = mus.size
+        nw, nh = int(w * bulge), int(h * (1 + (bulge - 1) * 0.5))
+        sm = mus.resize((nw, nh), Image.BICUBIC)
+        smm = mus_m.resize((nw, nh), Image.BILINEAR)
+        nx = int(ax - (ax - bb[0]) * bulge)
+        ny = int(ay - (ay - bb[1]) * (1 + (bulge - 1) * 0.5))
+        img.paste(sm, (nx, ny), sm)
+        m.paste(smm, (nx, ny), sm.getchannel("A"))
+    rp = piece.rotate(-ang, resample=Image.BICUBIC, center=(piece.width / 2, piece.height / 2))
+    img.paste(rp, (box[0], box[1]), rp)
+    # الساعد يغطي ما تحته من القناع
+    m.paste(0, (box[0], box[1]), rp.getchannel("A"))
+    return img, m
+
+
 def lerp(a, b, k):
     return tuple(x + (y - x) * k for x, y in zip(a, b))
 
 
-def cam_view(cam, w, h, rot=0.0):
-    """يقص منطقة من الرسمة (مركز وارتفاع) ويعيدها بمقاس اللوحة مع قناع العضلة."""
-    big, bm = source()
+def cam_view(cam, w, h, rot=0.0, t=None):
+    """يقص منطقة من الرسمة (مركز وارتفاع) ويعيدها بمقاس اللوحة مع قناع العضلة.
+    t: إن أُعطي، تتحرك الذراع المثنية (تكرار كيرل)."""
+    big, bm = source() if t is None else animated_source(t)
     cx, cy, ch = cam
     cw = ch * w / h
     x0, y0 = cx - cw / 2 + PAD, cy - ch / 2 + PAD
@@ -149,7 +234,7 @@ def render_frame(job):
             cam = lerp(cams["full"], cams["muscle_b"], ease((lt - 0.3) / 1.8))
         else:
             cam = (cams["full"][0], cams["full"][1], cams["full"][2] * (1 - 0.08 * lt / dur))
-        img, msk = cam_view(cam, w, h)
+        img, msk = cam_view(cam, w, h, t=None if kind == "hook" else gi / FPS)
         arr = pulse_muscle(img, msk, lt)
         yy = y + int((1 - intro) * 60)
         A.paste_panel(frame, arr, x, yy, glow_col=(255, 150, 70) if kind == "cta" else (200, 200, 205),
@@ -207,7 +292,7 @@ def render_frame(job):
             if k <= 0:
                 continue
             if ok:
-                img, msk = cam_view(cams["arm_b"], pw, ph)
+                img, msk = cam_view(cams["arm_b"], pw, ph, t=gi / FPS)
             else:
                 rot = 7 * math.sin(lt * 4.2)            # تأرجح خاطئ
                 img, msk = cam_view(cams["arm_a"], pw, ph, rot=rot)
