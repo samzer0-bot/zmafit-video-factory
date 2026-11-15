@@ -1,8 +1,13 @@
-name: شورتس متحرك 3D — تمرين الساعد
+name: شورتس متحرك — تمارين بالمجسّم
 
 on:
   workflow_dispatch:
     inputs:
+      video:
+        description: "الفيديو"
+        type: choice
+        options: [biceps-curl, forearm-3d]
+        default: biceps-curl
       voice:
         description: "إضافة التعليق الصوتي (edge-tts)"
         type: boolean
@@ -37,12 +42,16 @@ jobs:
         run: |
           ARGS="--workers 4"
           [ "${{ inputs.voice }}" = "false" ] && ARGS="$ARGS --no-voice"
-          python scripts/anim_short.py $ARGS
+          if [ "${{ inputs.video }}" = "forearm-3d" ]; then
+            python scripts/anim_short.py $ARGS
+          else
+            python scripts/image_short.py $ARGS
+          fi
 
       - uses: actions/upload-artifact@v4
         with:
-          name: anim-forearm-short
+          name: ${{ inputs.video }}-short
           path: |
-            out/anim-forearm-short.mp4
-            out/anim-forearm-short.json
+            out/*.mp4
+            out/*.json
           retention-days: 14
