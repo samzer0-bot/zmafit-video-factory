@@ -163,3 +163,27 @@ def fetch(scenes: list, orientation: str, workdir: Path) -> list:
         print(f"  ✓ لقطة {i + 1}: pexels#{vid} ({dest.stat().st_size // 1024}KB)")
 
     return scenes
+
+
+def fetch_photo(query: str, workdir: Path):
+    """صورة ستوك أفقية مضيئة للصورة المصغرة (Pexels Photos). ترجع None عند الفشل."""
+    queries = [q for q in [query, "muscular man workout", "fitness athlete training"] if q]
+    for q in queries:
+        try:
+            params = {"query": q, "orientation": "landscape", "per_page": 15, "size": "large"}
+            data = _get("https://api.pexels.com/v1/search?" + urllib.parse.urlencode(params))
+            photos = data.get("photos") or []
+            if not photos:
+                continue
+            p = random.choice(photos[:6])
+            link = (p.get("src") or {}).get("large2x") or (p.get("src") or {}).get("original")
+            if not link:
+                continue
+            dest = workdir / "thumb_photo.jpg"
+            _download(link, dest)
+            if dest.exists() and dest.stat().st_size > 20_000:
+                print(f"  صورة الغلاف: Pexels «{q}»")
+                return dest
+        except Exception as e:                       # noqa: BLE001
+            print(f"  ! تعذر جلب صورة الغلاف ({q}): {e}")
+    return None

@@ -183,7 +183,13 @@ def main():
     thumb = config.OUT / f"{name}.jpg"
 
     render.build(scenes, fmt, ass, voice_file, total, config.WORK, video)
-    render.thumbnail(video, data["thumbnail_text"], fmt, config.WORK, thumb)
+    photo = None
+    try:
+        photo = stock.fetch_photo(data.get("thumb_query") or "", config.WORK)
+    except Exception as e:                               # noqa: BLE001
+        print(f"  ! صورة الغلاف: {e}")
+    render.thumbnail(video, data["thumbnail_text"], fmt, config.WORK, thumb,
+                     parts=data, photo=photo)
 
     desc = data["description"].strip()
     if config.SITE not in desc:

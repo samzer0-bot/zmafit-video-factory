@@ -35,6 +35,10 @@ SCHEMA = {
         "description": {"type": "string"},
         "tags": {"type": "array", "items": {"type": "string"}},
         "thumbnail_text": {"type": "string"},
+        "thumb_hook": {"type": "string"},
+        "thumb_main": {"type": "string"},
+        "thumb_tag": {"type": "string"},
+        "thumb_query": {"type": "string"},
         "scenes": {
             "type": "array",
             "items": {
@@ -70,6 +74,11 @@ PROMPT = """أنت كاتب محتوى لقناة يوتيوب عربية اسم
 - description: وصف من 3 أسطر بالعربية + سطر فيه رابط {site}.
 - tags: 12 وسماً مختلطة عربي وإنجليزي.
 - thumbnail_text: 3 إلى 5 كلمات عربية فقط للصورة المصغرة.
+- الصورة المصغرة مقسّمة إلى 3 أجزاء (أسلوب: «أقوى / 4 تمارين لبطن مشدود / في البيت»):
+  - thumb_hook: كلمة أو كلمتان قويتان جداً بخط ضخم (مثال: «أقوى»، «الطريقة الوحيدة»، «توقف!»، «أهم 30 تمرين»).
+  - thumb_main: 2 إلى 4 كلمات تكمل الفكرة (مثال: «لتضخيم عضلات السمانة»، «تمارين لبطن مشدود»).
+  - thumb_tag: كلمتان كحد أقصى داخل شريط أبيض (مثال: «في البيت»، «بدون معدات»، «للمبتدئين»).
+  - thumb_query: 3-5 كلمات إنجليزية لصورة ستوك مضيئة وواضحة لشخص رياضي يؤدي التمرين أو يُظهر العضلة المعنية (مثال: "muscular man doing pull ups").
 """
 
 PROMPT_EN = """You are a scriptwriter for an English-language YouTube fitness channel called {brand}, focused on fat loss, home workouts and healthy habits.
@@ -92,6 +101,11 @@ Also provide:
 - description: 3 lines of English + one line with the link {site}.
 - tags: 12 relevant English tags.
 - thumbnail_text: 3 to 5 English words in capital letters for the thumbnail.
+- The thumbnail is split into 3 parts (style: "TOP 4 / EXERCISES FOR FLAT ABS / AT HOME"):
+  - thumb_hook: 1-2 very punchy words shown huge (e.g. "TOP 4", "STOP!", "THE ONLY WAY").
+  - thumb_main: 2-4 words completing the idea (e.g. "FOR BIGGER CALVES").
+  - thumb_tag: max 2 words in a white label (e.g. "AT HOME", "NO EQUIPMENT", "BEGINNERS").
+  - thumb_query: 3-5 English words for a bright, clear stock photo of an athletic person doing the exercise or showing the target muscle.
 """
 
 
@@ -202,6 +216,7 @@ def clean(text: str) -> str:
     """يزيل الرموز التي تُفسد النطق الآلي."""
     text = re.sub(r"[*_#`~<>\[\]{}|]", " ", text)
     text = re.sub(r"[\U0001F000-\U0001FAFF☀-➿]", "", text)
+    text = re.sub(r"[\u200b-\u200f\u202a-\u202e\u2066-\u2069\ufeff\u0640]", "", text)
     text = re.sub(r"\s+", " ", text).strip()
     return text
 
@@ -271,6 +286,8 @@ def generate(topic: str, fmt: str = "shorts") -> dict:
     data["title"] = clean(data["title"])[:95]
     data["description"] = clean(data["description"])
     data["thumbnail_text"] = clean(data["thumbnail_text"])
+    for k in ("thumb_hook", "thumb_main", "thumb_tag", "thumb_query"):
+        data[k] = clean(data.get(k) or "")
     data["tags"] = [clean(t)[:30] for t in data["tags"]][:15]
     scenes = []
     for s in data["scenes"][: cfg["scenes"]]:
