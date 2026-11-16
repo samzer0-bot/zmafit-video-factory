@@ -60,7 +60,7 @@ PROMPT = """أنت كاتب محتوى لقناة يوتيوب عربية اسم
 - المشهد الأول = خطّاف (hook) قوي في جملة واحدة قصيرة توقف المتفرج فوراً.
 - {n} مشاهد بالضبط.
 - كل مشهد: جملة أو جملتين فقط، بحدود {wps} كلمة، لأنها ستُقرأ بصوت آلي.
-- المشهد الأخير = دعوة للاشتراك في القناة وزيارة {site}.
+- المشهد الأخير = {cta}
 - ممنوع نهائياً: الرموز التعبيرية، الأقواس، علامات النجمة، أي رموز تنسيق. نص منطوق نظيف فقط.
 - ممنوع الوعود الطبية أو ادعاءات علاجية. نصائح عامة آمنة فقط.
 - لكل مشهد ضع "keywords": 2-4 كلمات بالإنجليزية تصف اللقطة المرئية المناسبة للبحث في مكتبة فيديوهات (مثال: "man doing push ups gym").
@@ -82,7 +82,7 @@ STRICT RULES:
 - Scene 1 = a strong one-sentence hook that stops the scroll immediately.
 - Exactly {n} scenes.
 - Each scene: one or two short sentences, about {wps} words, because it will be read by a text-to-speech voice.
-- The last scene = a call to subscribe and visit {site}.
+- The last scene = {cta}
 - Absolutely forbidden: emojis, parentheses, asterisks, any formatting symbols. Clean spoken text only.
 - No medical claims or cures. Safe general advice only.
 - For every scene give "keywords": 2-4 English words describing a matching stock-footage shot (example: "man doing push ups gym").
@@ -206,6 +206,18 @@ def clean(text: str) -> str:
     return text
 
 
+def _cta(en: bool) -> str:
+    """دعوة المشهد الأخير: إذا وُجدت هدية مجانية نوجّه المشاهد لرابطها في الوصف."""
+    if config.LEAD_MAGNET_URL:
+        return ("tell viewers to grab the FREE 30-day home workout plan from the first link in the "
+                "description, then subscribe for daily tips. Say it naturally in one or two short sentences."
+                if en else
+                "اطلب من المشاهد تحميل جدول تمارين 30 يوماً المجاني من أول رابط في الوصف، ثم الاشتراك في القناة. "
+                "قلها بشكل طبيعي في جملة أو جملتين قصيرتين.")
+    return (f"a call to subscribe and visit {config.SITE}." if en
+            else f"دعوة للاشتراك في القناة وزيارة {config.SITE}.")
+
+
 def generate(topic: str, fmt: str = "shorts") -> dict:
     cfg = config.FORMATS[fmt]
     en = config.CHANNEL_LANG == "en"
@@ -219,7 +231,7 @@ def generate(topic: str, fmt: str = "shorts") -> dict:
 
     prompt = (PROMPT_EN if en else PROMPT).format(
         brand=config.BRAND, kind=kind, topic=topic,
-        n=cfg["scenes"], wps=wps, site=config.SITE,
+        n=cfg["scenes"], wps=wps, site=config.SITE, cta=_cta(en),
     )
 
     payload = {

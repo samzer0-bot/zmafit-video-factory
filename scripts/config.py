@@ -19,6 +19,11 @@ else:
     BRAND = "Muscle Arabia"
     SITE = "zermixmusclearabia.com"
 
+# رابط الهدية المجانية (صفحة جمع الإيميلات). يُضاف أول سطر في الوصف إذا ضُبط.
+# يُضبط من GitHub Variables: LEAD_MAGNET_URL_AR / LEAD_MAGNET_URL_EN
+LEAD_MAGNET_URL = (os.environ.get("LEAD_MAGNET_URL_EN" if CHANNEL_LANG == "en" else "LEAD_MAGNET_URL_AR", "")
+                   or os.environ.get("LEAD_MAGNET_URL", "")).strip()
+
 # ---------- المفاتيح (من GitHub Secrets) ----------
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 PEXELS_API_KEY = os.environ.get("PEXELS_API_KEY", "")

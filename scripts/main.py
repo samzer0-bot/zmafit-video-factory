@@ -27,29 +27,85 @@ QUEUE = config.ROOT / "topics" / ("queue_en.txt" if EN else "queue.txt")
 DONE = config.ROOT / "topics" / ("done_en.txt" if EN else "done.txt")
 
 
+# مواضيع احتياطية دائمة: تُستعمل فقط إذا فرغت القائمة وفشل Gemini،
+# ويُختار أول موضوع لم يُنشر من قبل حتى لا يتكرر نفس الفيديو.
+EVERGREEN_AR = [
+    "ثلاثة تمارين منزلية لشد عضلات البطن",
+    "أخطاء في الأكل تمنعك من خسارة الدهون",
+    "تمرين خمس دقائق لتنشيط الجسم في الصباح",
+    "كيف تبدأ التمرين في البيت بدون معدات",
+    "عادات يومية بسيطة تساعدك على خسارة الوزن",
+    "أفضل تمارين لتقوية الظهر للمبتدئين",
+    "كيف تقلل السكر بدون أن تشعر بالحرمان",
+    "تمارين تمدد سريعة بعد يوم طويل من الجلوس",
+    "كيف تتجنب الأكل العاطفي في الليل",
+    "تمرين كامل للجسم بدون قفز مناسب للجيران",
+    "كم خطوة تحتاج يومياً لحرق الدهون",
+    "وجبة فطور صحية تشبعك حتى الظهر",
+    "تمارين للذراعين بدون أوزان",
+    "كيف تحسب حاجتك من السعرات ببساطة",
+    "ثلاث خرافات شائعة عن خسارة الوزن",
+]
+EVERGREEN_EN = [
+    "3 home exercises to tighten your core",
+    "Eating mistakes that stop your fat loss",
+    "A 5 minute morning routine to wake up your body",
+    "How to start working out at home with zero equipment",
+    "Simple daily habits that help you lose weight",
+    "The best back exercises for beginners",
+    "How to cut sugar without feeling deprived",
+    "Quick stretches after a long day of sitting",
+    "How to stop emotional eating at night",
+    "A quiet no jump full body workout for apartments",
+    "How many steps a day you really need for fat loss",
+    "A healthy breakfast that keeps you full until lunch",
+    "Arm exercises with no weights",
+    "How to work out your calorie needs the simple way",
+    "3 common weight loss myths you should stop believing",
+]
+
+
+def _done_topics() -> list:
+    if not DONE.exists():
+        return []
+    return [l.split("|", 1)[-1].strip() for l in DONE.read_text(encoding="utf-8").splitlines()
+            if l.strip() and not l.startswith("#")]
+
+
 def next_topic() -> str:
+    done = _done_topics()
+    done_set = {t.lower() for t in done}
     if QUEUE.exists():
         lines = [l.strip() for l in QUEUE.read_text(encoding="utf-8").splitlines()]
         lines = [l for l in lines if l and not l.startswith("#")]
-        if lines:
-            return lines[0]
-    # القائمة فارغة: نطلب من Gemini موضوعاً جديداً لم يُستعمل من قبل
-    recent = []
-    if DONE.exists():
-        recent = [l.split("|", 1)[-1].strip() for l in DONE.read_text(encoding="utf-8").splitlines() if l.strip()][-60:]
-    try:
-        t = ai.new_topic(recent)
-        if t:
-            print(f"  القائمة فارغة — موضوع جديد من Gemini: {t}")
+        for l in lines:
+            if l.lower() not in done_set:
+                return l
+            print(f"  تخطّي موضوع منشور سابقاً: {l}")
+            pop_topic(l, log=False)
+    # القائمة فارغة: نطلب من Gemini موضوعاً جديداً لم يُستعمل من قبل (محاولتان)
+    for attempt in range(2):
+        try:
+            t = ai.new_topic(done[-60:])
+            if t and t.lower() not in done_set:
+                print(f"  القائمة فارغة — موضوع جديد من Gemini: {t}")
+                return t
+        except Exception as e:
+            print(f"  تعذّر توليد موضوع تلقائي (محاولة {attempt + 1}): {e}")
+    for t in (EVERGREEN_EN if EN else EVERGREEN_AR):
+        if t.lower() not in done_set:
+            print(f"  موضوع احتياطي: {t}")
             return t
-    except Exception as e:
-        print(f"  تعذّر توليد موضوع تلقائي: {e}")
-    return ("A quick tip to burn belly fat without equipment" if EN
-            else "نصيحة سريعة لحرق دهون البطن بدون معدات")
+    # كل الاحتياطي استُعمل: نضيف التاريخ حتى لا يتطابق العنوان حرفياً
+    base = EVERGREEN_EN[0] if EN else EVERGREEN_AR[0]
+    return f"{base} {datetime.now(timezone.utc):%Y-%m-%d}"
 
 
-def pop_topic(topic: str):
+def pop_topic(topic: str, log: bool = True):
     if not QUEUE.exists():
+        if log:
+            with open(DONE, "a", encoding="utf-8") as f:
+                f.write(f"{datetime.now(timezone.utc):%Y-%m-%d} | {topic}\n")
         return
     lines = QUEUE.read_text(encoding="utf-8").splitlines()
     kept, removed = [], False
@@ -59,6 +115,8 @@ def pop_topic(topic: str):
             continue
         kept.append(l)
     QUEUE.write_text("\n".join(kept).rstrip() + "\n", encoding="utf-8")
+    if not log:
+        return
     with open(DONE, "a", encoding="utf-8") as f:
         f.write(f"{datetime.now(timezone.utc):%Y-%m-%d} | {topic}\n")
 
@@ -131,6 +189,10 @@ def main():
     if config.SITE not in desc:
         desc += (f"\n\nOfficial website: https://{config.SITE}" if EN
                  else f"\n\nموقعنا الرسمي: https://{config.SITE}")
+    lead = config.LEAD_MAGNET_URL
+    if lead and lead not in desc:
+        desc = ((f"FREE 30-day home workout plan: {lead}\n\n" if EN
+                 else f"احصل مجاناً على جدول تمارين 30 يوم في البيت: {lead}\n\n") + desc)
     if fmt == "shorts":
         data["title"] = (data["title"][:85] + " #shorts")
 
@@ -146,6 +208,9 @@ def main():
         "created_at": datetime.now(timezone.utc).isoformat(),
         "categoryId": config.YT_CATEGORY,
         "privacyStatus": config.YT_PRIVACY,
+        "lead_magnet_url": lead,
+        "pinned_comment": ((f"Want a simple plan? Grab the FREE 30-day home workout plan here: {lead}" if EN
+                            else f"تبي خطة واضحة؟ حمّل جدول 30 يوم مجاناً من هنا: {lead}") if lead else ""),
     }
     (config.OUT / f"{name}.json").write_text(
         json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")

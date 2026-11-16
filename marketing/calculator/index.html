@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Free Fat-Loss Calculator + 7-Day Starter Plan | ZmaFit</title>
+<meta name="description" content="Find out how many calories and how much protein you need to lose fat, and get a free 7-day home workout plan that fits your schedule.">
+</head>
+<body>
+<!-- ===== ZmaFit Fat-Loss Calculator — paste everything from here to the END marker into a WordPress "Custom HTML" block ===== -->
+<div id="zmf-calc">
+<style>
+#zmf-calc{--ink:#1f1d1a;--paper:#fffdf8;--sand:#f3efe6;--line:#e3dccb;--accent:#b5442a;--accent-ink:#fff;--gold:#f2b84b;--muted:#6b665c;--ok:#2f7d4f;
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--ink);background:var(--paper);line-height:1.55;font-size:16px;max-width:760px;margin:0 auto;padding:16px;box-sizing:border-box}
+#zmf-calc *{box-sizing:border-box}
+#zmf-calc .hero{background:var(--ink);color:#fff;border-radius:14px;padding:28px 22px;margin-bottom:18px}
+#zmf-calc .kicker{color:var(--gold);font-weight:700;letter-spacing:.12em;font-size:12px;text-transform:uppercase;margin:0 0 8px}
+#zmf-calc h1{font-size:clamp(26px,5.4vw,38px);line-height:1.12;margin:0 0 10px;color:#fff}
+#zmf-calc .hero p{margin:0;color:#d9d4c7;font-size:17px}
+#zmf-calc .ticks{display:flex;flex-wrap:wrap;gap:8px 16px;margin:14px 0 0;padding:0;list-style:none;color:#fff;font-size:14px}
+#zmf-calc .ticks li::before{content:"✓ ";color:var(--gold);font-weight:700}
+#zmf-calc .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:16px}
+#zmf-calc .step{font-size:12px;font-weight:700;color:var(--accent);letter-spacing:.08em;text-transform:uppercase;margin:0 0 4px}
+#zmf-calc h2{font-size:21px;margin:0 0 14px;line-height:1.25}
+#zmf-calc h3{font-size:17px;margin:18px 0 8px}
+#zmf-calc .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+#zmf-calc .full{grid-column:1/-1}
+@media (max-width:560px){#zmf-calc .grid{grid-template-columns:1fr}}
+#zmf-calc label{display:block;font-weight:600;font-size:14px;margin-bottom:6px}
+#zmf-calc input[type=number],#zmf-calc input[type=email],#zmf-calc input[type=text],#zmf-calc select{width:100%;padding:12px;border:1.5px solid var(--line);border-radius:10px;font-size:16px;background:#fff;color:var(--ink)}
+#zmf-calc input:focus,#zmf-calc select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(181,68,42,.15)}
+#zmf-calc .seg{display:flex;flex-wrap:wrap;gap:8px}
+#zmf-calc .seg input{position:absolute;opacity:0;pointer-events:none}
+#zmf-calc .seg label{margin:0;padding:10px 14px;border:1.5px solid var(--line);border-radius:999px;cursor:pointer;font-weight:600;font-size:14px;background:#fff;user-select:none}
+#zmf-calc .seg input:checked+label{background:var(--ink);color:#fff;border-color:var(--ink)}
+#zmf-calc .seg input:focus-visible+label{box-shadow:0 0 0 3px rgba(181,68,42,.3)}
+#zmf-calc .row{display:flex;gap:8px}
+#zmf-calc .row>*{flex:1}
+#zmf-calc .hint{font-size:13px;color:var(--muted);margin-top:6px}
+#zmf-calc .btn{display:inline-block;width:100%;background:var(--accent);color:var(--accent-ink);border:0;border-radius:12px;padding:16px 18px;font-size:17px;font-weight:700;cursor:pointer;text-align:center;text-decoration:none}
+#zmf-calc .btn:hover{filter:brightness(1.07)}
+#zmf-calc .btn[disabled]{opacity:.6;cursor:wait}
+#zmf-calc .btn.dark{background:var(--ink)}
+#zmf-calc .err{color:var(--accent);font-size:14px;margin-top:8px;min-height:1em}
+#zmf-calc .lock{display:flex;gap:14px;align-items:center;background:var(--sand);border-radius:12px;padding:14px;margin-bottom:14px}
+#zmf-calc .lock b{font-size:30px;line-height:1;filter:blur(7px);user-select:none}
+#zmf-calc .small{font-size:12.5px;color:var(--muted)}
+#zmf-calc .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:6px 0 4px}
+@media (max-width:560px){#zmf-calc .stats{grid-template-columns:1fr 1fr}}
+#zmf-calc .stat{background:var(--sand);border-radius:12px;padding:14px}
+#zmf-calc .stat .v{font-size:26px;font-weight:800;line-height:1.1}
+#zmf-calc .stat .l{font-size:13px;color:var(--muted)}
+#zmf-calc .stat.main{background:var(--ink);color:#fff}
+#zmf-calc .stat.main .l{color:#d9d4c7}
+#zmf-calc .day{border:1px solid var(--line);border-radius:12px;padding:14px;margin:10px 0}
+#zmf-calc .day h4{margin:0 0 6px;font-size:16px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+#zmf-calc .tag{font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--sand)}
+#zmf-calc .tag.w{background:var(--accent);color:#fff}
+#zmf-calc table{width:100%;border-collapse:collapse;font-size:14px;margin:6px 0}
+#zmf-calc th,#zmf-calc td{border-bottom:1px solid var(--line);padding:7px 6px;text-align:left;vertical-align:top}
+#zmf-calc th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+#zmf-calc .offer{background:var(--ink);color:#fff;border-radius:14px;padding:22px}
+#zmf-calc .offer h2{color:#fff}
+#zmf-calc .offer ul{padding-left:18px;color:#d9d4c7}
+#zmf-calc .offer .price{font-size:15px;color:#d9d4c7;margin:10px 0 14px}
+#zmf-calc .offer .price b{color:var(--gold);font-size:22px}
+#zmf-calc .note{background:#fff7e6;border-left:4px solid var(--gold);padding:10px 12px;border-radius:6px;font-size:14px;margin:10px 0}
+#zmf-calc .hidden{display:none!important}
+#zmf-calc .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+#zmf-calc .actions .btn{width:auto;flex:1;min-width:200px}
+@media print{#zmf-calc .noprint{display:none!important}#zmf-calc{max-width:none;padding:0}#zmf-calc .card,#zmf-calc .day{break-inside:avoid}}
+</style>
+
+<header class="hero">
+  <p class="kicker">Free tool · ZmaFit</p>
+  <h1>How many calories do <em>you</em> need to lose fat?</h1>
+  <p>Answer 5 quick questions. Get your daily calorie and protein targets, plus a 7-day home plan that fits your schedule.</p>
+  <ul class="ticks"><li>Takes 60 seconds</li><li>No equipment needed</li><li>100% free</li></ul>
+</header>
+
+<form id="zmf-form" class="card noprint" novalidate>
+  <p class="step">Step 1 of 2</p>
+  <h2>Tell us about you</h2>
+  <div class="grid">
+    <div class="full">
+      <label>Units</label>
+      <div class="seg" role="radiogroup">
+        <input type="radio" name="units" id="u-imp" value="imperial" checked><label for="u-imp">lb / ft</label>
+        <input type="radio" name="units" id="u-met" value="metric"><label for="u-met">kg / cm</label>
+      </div>
+    </div>
+    <div>
+      <label>Sex</label>
+      <div class="seg" role="radiogroup">
+        <input type="radio" name="sex" id="s-f" value="female" checked><label for="s-f">Female</label>
+        <input type="radio" name="sex" id="s-m" value="male"><label for="s-m">Male</label>
+      </div>
+    </div>
+    <div>
+      <label for="age">Age</label>
+      <input type="number" id="age" inputmode="numeric" min="16" max="80" placeholder="e.g. 34" required>
+    </div>
+    <div>
+      <label for="wt">Weight <span class="u-wt">(lb)</span></label>
+      <input type="number" id="wt" inputmode="decimal" placeholder="e.g. 180" required>
+    </div>
+    <div>
+      <label>Height <span class="u-ht">(ft / in)</span></label>
+      <div class="row imp-ht"><input type="number" id="ft" inputmode="numeric" placeholder="ft" min="4" max="7"><input type="number" id="inch" inputmode="numeric" placeholder="in" min="0" max="11"></div>
+      <div class="row met-ht hidden"><input type="number" id="cm" inputmode="numeric" placeholder="e.g. 170"></div>
+    </div>
+    <div class="full">
+      <label>How active are you outside workouts?</label>
+      <div class="seg" role="radiogroup">
+        <input type="radio" name="act" id="a1" value="1.2" checked><label for="a1">Mostly sitting</label>
+        <input type="radio" name="act" id="a2" value="1.3"><label for="a2">On my feet some of the day</label>
+        <input type="radio" name="act" id="a3" value="1.4"><label for="a3">Active job</label>
+      </div>
+    </div>
+    <div>
+      <label>Workout days per week</label>
+      <div class="seg" role="radiogroup">
+        <input type="radio" name="days" id="d3" value="3" checked><label for="d3">3</label>
+        <input type="radio" name="days" id="d4" value="4"><label for="d4">4</label>
+        <input type="radio" name="days" id="d5" value="5"><label for="d5">5</label>
+      </div>
+    </div>
+    <div>
+      <label>Minutes per workout</label>
+      <div class="seg" role="radiogroup">
+        <input type="radio" name="mins" id="m10" value="10"><label for="m10">10</label>
+        <input type="radio" name="mins" id="m15" value="15" checked><label for="m15">15</label>
+        <input type="radio" name="mins" id="m20" value="20"><label for="m20">20</label>
+        <input type="radio" name="mins" id="m30" value="30"><label for="m30">30</label>
+      </div>
+    </div>
+  </div>
+  <p class="err" id="zmf-err1" role="alert"></p>
+  <button type="button" class="btn" id="zmf-next">Calculate my numbers →</button>
+</form>
+
+<form id="zmf-gate" class="card noprint hidden" novalidate>
+  <p class="step">Step 2 of 2</p>
+  <h2>Your results are ready 🎉</h2>
+  <div class="lock" aria-hidden="true"><b>1,850</b><div><strong>Your daily calories, protein target and 7-day plan</strong><br><span class="small">Enter your email to unlock them. We'll also send you the free 30-Day Kickstart PDF.</span></div></div>
+  <div class="grid">
+    <div><label for="fname">First name</label><input type="text" id="fname" autocomplete="given-name" placeholder="Your first name"></div>
+    <div><label for="email">Email</label><input type="email" id="email" autocomplete="email" placeholder="you@example.com" required></div>
+  </div>
+  <p class="err" id="zmf-err2" role="alert"></p>
+  <button type="submit" class="btn" id="zmf-unlock">Show my results &amp; 7-day plan</button>
+  <p class="small" style="margin-top:10px">No spam. Short, useful tips by email. Unsubscribe anytime with one click.</p>
+</form>
+
+<section id="zmf-results" class="hidden" aria-live="polite">
+  <div class="card">
+    <p class="step" id="r-hello">Your numbers</p>
+    <h2>Your daily fat-loss targets</h2>
+    <div class="stats">
+      <div class="stat main"><div class="v" id="r-kcal">–</div><div class="l">calories / day</div></div>
+      <div class="stat"><div class="v" id="r-prot">–</div><div class="l">protein / day</div></div>
+      <div class="stat"><div class="v" id="r-steps">–</div><div class="l">steps / day</div></div>
+    </div>
+    <p class="small" id="r-explain"></p>
+    <div class="note" id="r-pace"></div>
+    <h3>Easy plate guide for each meal</h3>
+    <table>
+      <thead><tr><th>Meal</th><th>Calories</th><th>Protein</th></tr></thead>
+      <tbody id="r-meals"></tbody>
+    </table>
+    <p class="small">These are estimates. Track your weight and waist for 2 weeks, then adjust by about 100–150 calories if progress stalls.</p>
+  </div>
+
+  <div class="card">
+    <p class="step">Your week 1</p>
+    <h2>7-day starter plan · <span id="r-planmeta"></span></h2>
+    <p class="small">Warm up for 2–3 minutes before every workout: march on the spot, arm circles, 10 slow squats. Rest 30–45 seconds between exercises.</p>
+    <div id="r-days"></div>
+  </div>
+
+  <div class="offer">
+    <p class="kicker">Ready for weeks 2–4?</p>
+    <h2>Get your full 4-week plan, built from your answers</h2>
+    <ul>
+      <li>A 4-week program that progresses every week, made for your time and equipment</li>
+      <li>Your calorie and protein targets, a full sample day of eating and easy swaps</li>
+      <li>A grocery list and what to change if progress stalls</li>
+      <li>Ready in a few minutes, delivered to your inbox</li>
+    </ul>
+    <p class="price"><b>$19</b> · one time, no subscription</p>
+    <a class="btn" id="r-cta" href="https://zmafit.com/custom-plan/?utm_source=calculator&amp;utm_medium=tool&amp;utm_campaign=fatloss_calc">Build my 4-week plan →</a>
+  </div>
+
+  <div class="actions noprint" style="margin-top:14px">
+    <button type="button" class="btn dark" onclick="window.print()">Save / print my plan</button>
+    <button type="button" class="btn dark" id="zmf-restart">Start over</button>
+  </div>
+  <p class="small" style="margin-top:14px"><em>General fitness information, not medical advice. If you are pregnant, have a medical condition or an injury, talk to your doctor before starting. Stop any exercise that causes pain.</em></p>
+</section>
+
+<script>
+(function(){
+  /* ---------- SETTINGS: change these if needed ---------- */
+  var ML_ACCOUNT = "2768889";              // MailerLite account id
+  var ML_FORM    = "203224768082609804";   // MailerLite form id (feeds the "Website subscribers – Free guide" group)
+  var HOOK_URL   = "https://hook.eu2.make.com/ocqohj7zur7bkwxchd7m9w2wgfaiqmsq"; // Make: "استراتيجية تسويق — استقبال إيميلات الحاسبة"
+  /* ------------------------------------------------------- */
+
+  var root = document.getElementById("zmf-calc");
+  var $ = function(id){ return document.getElementById(id); };
+  var val = function(name){ var c = root.querySelector('input[name="'+name+'"]:checked'); return c ? c.value : null; };
+  var data = null;
+
+  function setUnits(){
+    var imp = val("units") === "imperial";
+    root.querySelector(".u-wt").textContent = imp ? "(lb)" : "(kg)";
+    root.querySelector(".u-ht").textContent = imp ? "(ft / in)" : "(cm)";
+    $("wt").placeholder = imp ? "e.g. 180" : "e.g. 82";
+    root.querySelector(".imp-ht").classList.toggle("hidden", !imp);
+    root.querySelector(".met-ht").classList.toggle("hidden", imp);
+  }
+  root.querySelectorAll('input[name="units"]').forEach(function(r){ r.addEventListener("change", setUnits); });
+
+  function readInputs(){
+    var imp = val("units") === "imperial";
+    var age = parseFloat($("age").value), wt = parseFloat($("wt").value), cm;
+    if (imp) { var ft = parseFloat($("ft").value) || 0, inch = parseFloat($("inch").value) || 0; cm = (ft*12 + inch) * 2.54; }
+    else { cm = parseFloat($("cm").value); }
+    var kg = imp ? wt * 0.453592 : wt;
+    if (!(age >= 16 && age <= 80)) return "Please enter an age between 16 and 80.";
+    if (!(kg >= 35 && kg <= 250)) return "Please check your weight.";
+    if (!(cm >= 130 && cm <= 220)) return "Please check your height.";
+    return { imp: imp, sex: val("sex"), age: age, kg: kg, cm: cm, act: parseFloat(val("act")),
+             days: parseInt(val("days"), 10), mins: parseInt(val("mins"), 10) };
+  }
+
+  function round(n, step){ return Math.round(n / step) * step; }
+
+  function calc(d){
+    var bmr = 10*d.kg + 6.25*d.cm - 5*d.age + (d.sex === "male" ? 5 : -161);       // Mifflin-St Jeor
+    var exercise = d.days * d.mins * 5 / 7;                                           // ~5 kcal/min, averaged per day
+    var tdee = bmr * d.act + exercise;
+    var floor = d.sex === "male" ? 1500 : 1200;
+    var target = Math.max(floor, tdee * 0.8);                                        // ~20% deficit, never below the floor
+    var hM = d.cm / 100, bmi = d.kg / (hM*hM);
+    var protKg = bmi > 30 ? 25 * hM * hM : d.kg;                                     // use a reference weight when BMI is high
+    var protein = Math.min(protKg * 1.8, 200);
+    var steps = d.act <= 1.2 ? 7000 : (d.act <= 1.3 ? 8000 : 9000);
+    var weekLoss = Math.min((tdee - target) * 7 / 7700, d.kg * 0.01);               // kg per week, capped at 1% bodyweight
+    return { bmr: bmr, tdee: tdee, target: round(target, 10), protein: round(protein, 5), steps: steps, bmi: bmi, weekLoss: weekLoss, floored: target === floor };
+  }
+
+  var EX = {
+    A: { name: "Legs & core", moves: [["Bodyweight squat","12 reps"],["Reverse lunge","8 each leg"],["Glute bridge","15 reps"],["Plank","20–40 sec"]] },
+    B: { name: "Upper body & core", moves: [["Push-up (hands on a table if needed)","8–12 reps"],["Chair dip","8–12 reps"],["Superman hold","20 sec"],["Dead bug","8 each side"]] },
+    C: { name: "Full-body burner (quiet, no jumping)", moves: [["Squat to calf raise","40 sec"],["Step-back mountain climber","30 sec"],["Standing knee-to-elbow","40 sec"],["Inchworm walkout","30 sec"]] }
+  };
+  var SCHED = { 3: ["A","walk","B","walk","C","walk","rest"], 4: ["A","B","walk","C","A","walk","rest"], 5: ["A","B","C","walk","A","B","rest"] };
+  var HABITS = ["Protein at every meal","Half your plate vegetables at lunch and dinner","Swap one sugary drink for water, tea or black coffee","Plan tomorrow's snacks tonight","Get to bed 30 minutes earlier","Prep 2 easy protein meals for the week","Weigh in and measure your waist (same time each week)"];
+
+  function rounds(mins){ return mins <= 10 ? 2 : (mins <= 15 ? 3 : (mins <= 20 ? 4 : 5)); }
+
+  function buildMeals(r){
+    var split = [["Breakfast",0.25,"Eggs or Greek yogurt + fruit"],["Lunch",0.30,"Chicken, tuna or lentils + big salad + a fist of rice or bread"],["Dinner",0.30,"Palm of protein + half plate veg + a fist of carbs"],["Snack",0.15,"Yogurt, fruit or a small handful of nuts"]];
+    return split.map(function(m){
+      return "<tr><td><strong>"+m[0]+"</strong><div class=\"small\">"+m[2]+"</div></td><td>"+round(r.target*m[1],10)+"</td><td>"+round(r.protein*m[1],5)+" g</td></tr>";
+    }).join("");
+  }
+
+  function buildDays(d){
+    var n = rounds(d.mins), out = [];
+    SCHED[d.days].forEach(function(code, i){
+      var html = '<div class="day"><h4><span>Day '+(i+1)+'</span>';
+      if (EX[code]) {
+        var w = EX[code];
+        html += '<span class="tag w">Workout '+code+' · '+d.mins+' min</span></h4>';
+        html += '<div><strong>'+w.name+'</strong> — '+n+' rounds</div><table><tbody>';
+        w.moves.forEach(function(m){ html += "<tr><td>"+m[0]+"</td><td>"+m[1]+"</td></tr>"; });
+        html += "</tbody></table>";
+      } else if (code === "walk") {
+        html += '<span class="tag">Active recovery</span></h4><div>Brisk 20–30 minute walk, or split it into two 15-minute walks.</div>';
+      } else {
+        html += '<span class="tag">Rest</span></h4><div>Full rest. Light stretching if you feel stiff.</div>';
+      }
+      html += '<div class="small" style="margin-top:6px">Habit of the day: '+HABITS[i]+'</div></div>';
+      out.push(html);
+    });
+    return out.join("");
+  }
+
+  function render(d, r, name){
+    var imp = d.imp;
+    $("r-hello").textContent = name ? ("Your numbers, " + name) : "Your numbers";
+    $("r-kcal").textContent = r.target.toLocaleString("en-US");
+    $("r-prot").textContent = r.protein + " g";
+    $("r-steps").textContent = r.steps.toLocaleString("en-US");
+    $("r-explain").textContent = "Your body burns about " + round(r.tdee,10).toLocaleString("en-US") + " calories a day with your activity and workouts. Eating about " + r.target.toLocaleString("en-US") + " creates a steady, sustainable deficit." + (r.floored ? " (We kept you at a safe minimum.)" : "");
+    var loss = imp ? (r.weekLoss * 2.20462).toFixed(1) + " lb" : r.weekLoss.toFixed(1) + " kg";
+    $("r-pace").innerHTML = r.weekLoss < 0.15
+      ? "<strong>You're already close to your maintenance calories.</strong> Focus on the workouts, protein and daily steps: you'll lose fat slowly while building strength, and your waist will often shrink before the scale moves."
+      : "<strong>Realistic pace:</strong> about " + loss + " per week. Your waist and how your clothes fit matter as much as the scale.";
+    $("r-meals").innerHTML = buildMeals(r);
+    $("r-planmeta").textContent = d.days + " workouts · " + d.mins + " min";
+    $("r-days").innerHTML = buildDays(d);
+  }
+
+  function subscribe(email, name, d, r){
+    var jobs = [];
+    try {
+      var q = new URLSearchParams();
+      q.append("email", email); q.append("name", name || "");
+      q.append("calories", r.target); q.append("protein", r.protein);
+      q.append("days", d.days); q.append("minutes", d.mins); q.append("page", location.href);
+      jobs.push(fetch(HOOK_URL, { method: "POST", body: q, mode: "no-cors", keepalive: true }).catch(function(){}));
+    } catch (e) {}
+    try {
+      var fd = new URLSearchParams();
+      fd.append("fields[email]", email);
+      if (name) fd.append("fields[name]", name);
+      fd.append("ml-submit", "1");
+      fd.append("anticsrf", "true");
+      jobs.push(fetch("https://assets.mailerlite.com/jsonp/" + ML_ACCOUNT + "/forms/" + ML_FORM + "/subscribe", { method: "POST", body: fd, mode: "no-cors" }).catch(function(){}));
+    } catch (e) {}
+    return Promise.all(jobs);
+  }
+  $("zmf-next").addEventListener("click", function(){
+    var d = readInputs();
+    if (typeof d === "string") { $("zmf-err1").textContent = d; return; }
+    $("zmf-err1").textContent = "";
+    data = d;
+    $("zmf-form").classList.add("hidden");
+    $("zmf-gate").classList.remove("hidden");
+    $("zmf-gate").scrollIntoView({ behavior: "smooth", block: "start" });
+    $("email").focus({ preventScroll: true });
+  });
+
+  $("zmf-gate").addEventListener("submit", function(e){
+    e.preventDefault();
+    var email = $("email").value.trim(), name = $("fname").value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { $("zmf-err2").textContent = "Please enter a valid email."; return; }
+    $("zmf-err2").textContent = "";
+    var btn = $("zmf-unlock"); btn.disabled = true; btn.textContent = "Unlocking…";
+    var r = calc(data);
+    var done = function(){
+      render(data, r, name);
+      $("zmf-gate").classList.add("hidden");
+      $("zmf-results").classList.remove("hidden");
+      $("zmf-results").scrollIntoView({ behavior: "smooth", block: "start" });
+    };
+    Promise.race([subscribe(email, name, data, r), new Promise(function(res){ setTimeout(res, 2500); })]).then(done);
+  });
+
+  $("zmf-restart").addEventListener("click", function(){
+    $("zmf-results").classList.add("hidden");
+    $("zmf-form").classList.remove("hidden");
+    var b = $("zmf-unlock"); b.disabled = false; b.textContent = "Show my results & 7-day plan";
+    $("zmf-form").scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+
+  setUnits();
+  /* exposed for testing only */
+  root._zmf = { calc: calc };
+})();
+</script>
+</div>
+<!-- ===== END ZmaFit Fat-Loss Calculator ===== -->
+</body>
+</html>
