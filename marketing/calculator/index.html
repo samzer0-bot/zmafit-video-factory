@@ -203,6 +203,7 @@
   /* ---------- SETTINGS: change these if needed ---------- */
   var ML_ACCOUNT = "2768889";              // MailerLite account id
   var ML_FORM    = "203224768082609804";   // MailerLite form id (feeds the "Website subscribers – Free guide" group)
+  var HOOK_URL   = "https://hook.eu2.make.com/ocqohj7zur7bkwxchd7m9w2wgfaiqmsq"; // Make: "استراتيجية تسويق — استقبال إيميلات الحاسبة"
   /* ------------------------------------------------------- */
 
   var root = document.getElementById("zmf-calc");
@@ -304,16 +305,24 @@
   }
 
   function subscribe(email, name, d, r){
+    var jobs = [];
     try {
-      var fd = new FormData();
+      var q = new URLSearchParams();
+      q.append("email", email); q.append("name", name || "");
+      q.append("calories", r.target); q.append("protein", r.protein);
+      q.append("days", d.days); q.append("minutes", d.mins); q.append("page", location.href);
+      jobs.push(fetch(HOOK_URL, { method: "POST", body: q, mode: "no-cors", keepalive: true }).catch(function(){}));
+    } catch (e) {}
+    try {
+      var fd = new URLSearchParams();
       fd.append("fields[email]", email);
       if (name) fd.append("fields[name]", name);
       fd.append("ml-submit", "1");
       fd.append("anticsrf", "true");
-      return fetch("https://assets.mailerlite.com/jsonp/" + ML_ACCOUNT + "/forms/" + ML_FORM + "/subscribe", { method: "POST", body: fd, mode: "no-cors" }).catch(function(){});
-    } catch (e) { return Promise.resolve(); }
+      jobs.push(fetch("https://assets.mailerlite.com/jsonp/" + ML_ACCOUNT + "/forms/" + ML_FORM + "/subscribe", { method: "POST", body: fd, mode: "no-cors" }).catch(function(){}));
+    } catch (e) {}
+    return Promise.all(jobs);
   }
-
   $("zmf-next").addEventListener("click", function(){
     var d = readInputs();
     if (typeof d === "string") { $("zmf-err1").textContent = d; return; }
