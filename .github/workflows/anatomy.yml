@@ -1,0 +1,89 @@
+name: فيديوهات التشريح — القناتان (Anatomy factory)
+
+# إضافة للمصنع الحالي (لا يستبدله). عدد قليل أسبوعياً لتفادي سياسة المحتوى المتكرر.
+on:
+  schedule:
+    - cron: "47 13 * * 1,4"      # Muscle Arabia — شورت (الإثنين والخميس)
+    - cron: "41 16 * * 2,5"      # ZMAFIT — Short (Tue & Fri)
+    - cron: "29 12 1,15 * *"     # Muscle Arabia — فيديو طويل (1 و15 من الشهر)
+    - cron: "37 15 8,22 * *"     # ZMAFIT — long video (8th & 22nd)
+  workflow_dispatch:
+    inputs:
+      lang: {description: "ar / en", type: choice, options: [ar, en], default: ar}
+      format: {description: "الصيغة", type: choice, options: [shorts, long], default: shorts}
+      template: {description: "قالب محدد (اختياري): mistake, myth, rank, compare, chapters", required: false, default: ""}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: anatomy-factory
+  cancel-in-progress: false
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    env:
+      PYTHONUNBUFFERED: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - name: تحديد القناة والصيغة
+        id: cfg
+        run: |
+          S="${{ github.event.schedule }}"
+          case "$S" in
+            "47 13 * * 1,4")  L=ar; F=shorts ;;
+            "41 16 * * 2,5")  L=en; F=shorts ;;
+            "29 12 1,15 * *") L=ar; F=long ;;
+            "37 15 8,22 * *") L=en; F=long ;;
+            *) L="${{ inputs.lang }}"; F="${{ inputs.format }}" ;;
+          esac
+          echo "lang=$L" >> $GITHUB_OUTPUT; echo "format=$F" >> $GITHUB_OUTPUT
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg libraqm0 >/dev/null
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.11"}
+      - run: pip install -q pillow numpy edge-tts gTTS
+      - name: إنتاج الفيديو
+        env:
+          VIDEO_LANG: ${{ steps.cfg.outputs.lang }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          LEAD_MAGNET_URL_AR: ${{ vars.LEAD_MAGNET_URL_AR }}
+          LEAD_MAGNET_URL_EN: ${{ vars.LEAD_MAGNET_URL_EN }}
+          YT_PRIVACY: public
+        run: python scripts/anatomy_main.py --format ${{ steps.cfg.outputs.format }} --template "${{ inputs.template }}"
+      - name: نشر الإصدار
+        id: rel
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          B=$(basename $(ls out/*.mp4 | head -1) .mp4)
+          TAG="anat-${{ steps.cfg.outputs.lang }}-$(date -u +%Y%m%d-%H%M%S)"
+          TITLE=$(python -c "import json;print(json.load(open('out/latest.json',encoding='utf-8'))['title'])")
+          gh release create "$TAG" "out/$B.mp4" "out/$B.jpg" "out/$B.json" --title "$TITLE" --notes "anatomy"
+          BASE="https://github.com/${{ github.repository }}/releases/download/$TAG"
+          echo "video_url=$BASE/$B.mp4" >> $GITHUB_OUTPUT
+          echo "thumb_url=$BASE/$B.jpg" >> $GITHUB_OUTPUT
+      - name: إشعار Make (يوتيوب + فيسبوك)
+        env:
+          HOOK: ${{ steps.cfg.outputs.lang == 'en' && secrets.MAKE_WEBHOOK_EN || secrets.MAKE_WEBHOOK }}
+          VIDEO_URL: ${{ steps.rel.outputs.video_url }}
+          THUMB_URL: ${{ steps.rel.outputs.thumb_url }}
+          L: ${{ steps.cfg.outputs.lang }}
+        run: |
+          [ -z "$HOOK" ] && { echo "no webhook"; exit 0; }
+          python - <<'PY'
+          import json, os, urllib.request
+          m = json.load(open('out/latest.json', encoding='utf-8'))
+          m.update(video_url=os.environ["VIDEO_URL"], thumb_url=os.environ["THUMB_URL"],
+                   tags_text=",".join(m.get("tags", [])), lang=os.environ["L"])
+          req = urllib.request.Request(os.environ["HOOK"], data=json.dumps(m, ensure_ascii=False).encode(),
+                                       headers={"Content-Type": "application/json"})
+          print(urllib.request.urlopen(req, timeout=120).read().decode()[:200])
+          PY
+      - name: حفظ السجل (لمنع التكرار)
+        run: |
+          git config user.name "video-factory"; git config user.email "actions@github.com"
+          git add assets/anatomy/history.json || true
+          git commit -m "anatomy history [skip ci]" || echo "no changes"
+          git pull --rebase || true; git push || true
