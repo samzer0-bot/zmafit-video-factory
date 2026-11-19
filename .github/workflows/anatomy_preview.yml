@@ -15,10 +15,6 @@ jobs:
       max-parallel: 3
       matrix:
         include:
-          - {lang: ar, format: shorts, template: mistake}
-          - {lang: ar, format: shorts, template: myth}
-          - {lang: en, format: shorts, template: rank}
-          - {lang: en, format: shorts, template: compare}
           - {lang: ar, format: long, template: chapters}
           - {lang: en, format: long, template: chapters}
     env:

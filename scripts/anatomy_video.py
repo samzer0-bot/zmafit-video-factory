@@ -209,6 +209,19 @@ def dots(d, p1, p2, col, r):
         d.ellipse((p[0] - r * .26, p[1] - r * .26, p[0] + r * .26, p[1] + r * .26), fill=(255, 255, 255))
 
 
+@lru_cache(maxsize=64)
+def _layer(name, hl_key, lang, intro):
+    """صورة الرسم ملوّنة بالكامل (تُحسب مرة لكل مشهد)."""
+    P = pose(name); T = THEMES[lang]
+    img = P["gray"]
+    if intro:
+        img = tint(img, P["shade"], np.clip(sum(P["masks"].values()), 0, 1), P["base_red"], .95)
+    for m, c in hl_key:
+        if m in P["masks"]:
+            img = tint(img, P["shade"], P["masks"][m], T["ok"] if c == "g" else P["base_red"], 1.0)
+    return Image.fromarray((np.clip(img, 0, 1) * 255).astype(np.uint8))
+
+
 def pose_view(C, sub, t, dur, size, start_box):
     """يرسم منطقة الرسم لمشهد pose (أو نصف مشهد split)."""
     P = pose(sub["pose"])
@@ -221,28 +234,31 @@ def pose_view(C, sub, t, dur, size, start_box):
     cx, cy = (a[0] + a[2]) / 2, (a[1] + a[3]) / 2
     hw, hh = (a[2] - a[0]) / 2 * push, (a[3] - a[1]) / 2 * push
     box = (cx - hw, cy - hh, cx + hw, cy + hh)
-    img = P["gray"]
-    if sub.get("all_red_intro"):
-        allm = np.clip(sum(P["masks"].values()), 0, 1)
-        img = tint(img, P["shade"], allm, P["base_red"], max(0., 1 - t / 1.4) * .95)
-    pulse = .93 + .07 * math.sin(t * 7)
     hl = sub.get("hl", [])
-    for m, c in hl:
-        if m in P["masks"]:
-            img = tint(img, P["shade"], P["masks"][m], C.T["ok"] if c == "g" else P["base_red"], min(1, t / .25) * pulse)
-    pil = Image.fromarray((np.clip(img, 0, 1) * 255).astype(np.uint8))
-    d0 = ImageDraw.Draw(pil)
-    sr = (box[2] - box[0]) / size[0]
+    key = tuple((m, c) for m, c in hl)
+    base = crop(_layer(sub["pose"], (), C.lang, False), box, size, C.T["bg"])
+    if sub.get("all_red_intro"):
+        a_ = max(0., 1 - t / 1.4)
+        if a_ > 0: base = Image.blend(base, crop(_layer(sub["pose"], (), C.lang, True), box, size, C.T["bg"]), a_)
+    if key:
+        alpha = min(1, t / .25) * (.93 + .07 * math.sin(t * 7))
+        view = Image.blend(base, crop(_layer(sub["pose"], key, C.lang, False), box, size, C.T["bg"]), alpha)
+    else:
+        view = base
+    d0 = ImageDraw.Draw(view)
+    sc_ = size[0] / (box[2] - box[0])                  # بكسل شاشة لكل بكسل صورة
+    to = lambda p: ((p[0] - box[0]) * sc_, (p[1] - box[1]) * sc_)   # noqa: E731
     if t > .35 and hl:
         col = C.T["ok_rgb"] if hl[0][1] == "g" else C.T["no_rgb"]
         m0 = hl[0][0]
         if sub.get("dots") and m0 in P["axis"]:
-            dots(d0, *P["axis"][m0], col, 20 * sr)
+            dots(d0, to(P["axis"][m0][0]), to(P["axis"][m0][1]), col, 20)
         if sub.get("arrows") and m0 in P["bbox"]:
-            b = P["bbox"][m0]; my = (b[1] + b[3]) / 2; off = 10 * sr * math.sin(t * 10)
-            arrow(d0, (b[0] - 12 * sr + off, my), "right", 34 * sr, C.T["accent"])
-            arrow(d0, (b[2] + 12 * sr - off, my), "left", 34 * sr, C.T["accent"])
-    return crop(pil, box, size, C.T["bg"]), v
+            b = P["bbox"][m0]; my = (b[1] + b[3]) / 2; off = 10 * math.sin(t * 10)
+            l, r = to((b[0], my)), to((b[2], my))
+            arrow(d0, (l[0] - 12 + off, l[1]), "right", 34, C.T["accent"])
+            arrow(d0, (r[0] + 12 - off, r[1]), "left", 34, C.T["accent"])
+    return view, v
 
 
 def stamp(fr, C, text, kind, cx, cy, size):
