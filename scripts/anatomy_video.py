@@ -46,7 +46,7 @@ def speak(text, lang, out):
     for attempt in range(6):
         try:
             import edge_tts
-            asyncio.run(edge_tts.Communicate(text, voice, rate=rate).save(str(out)))
+            asyncio.run(asyncio.wait_for(edge_tts.Communicate(text, voice, rate=rate).save(str(out)), timeout=45))
             if Path(out).stat().st_size > 1000:
                 return _dur(out)
         except Exception as e:                       # noqa: BLE001
@@ -262,7 +262,7 @@ def layout(C):
     if C.fmt == "short":
         W, H = 1080, 1920
         if C.lang == "ar": area = (0, 230, 1080, 1560)
-        else: area = (0, 0, 1080, 1920)
+        else: area = (0, 330, 1080, 1160)
     else:
         W, H = 1920, 1080
         area = (760, 0, 1160, 1080) if C.lang == "ar" else (0, 0, 1180, 1080)
@@ -295,7 +295,7 @@ def draw_chrome(fr, d, C, spec, sc, t, prog):
         sw = C.w(d, C.tx(spec.get("subtitle", "")), fs)
         d.rectangle((40, 60 + f.size * 1.35, 40 + sw + 50, 60 + f.size * 1.35 + fs.size * 1.6), fill=T["accent"])
         C.text(d, 65, 60 + f.size * 1.35 + fs.size * .2, spec.get("subtitle", ""), fs, T["accent_txt"], "l")
-        y = 1500
+        y = 1520
         if sc.get("label") and t > .2:
             f2 = C.fit(d, sc["label"], "head", 84, W - 220, 46)
             lines = [C.tx(sc["label"])]
@@ -372,9 +372,15 @@ def card_frame(C, spec, sc, t, size):
     maxw = W - 140
     blocks = []
     for i, ln in enumerate(lines):
-        f = C.fit(d, ln, "head" if i == 0 else "body", big if i == 0 else int(big * .55), maxw, 34)
-        for wl in C.wrap(d, ln, f, maxw):
-            blocks.append((wl, f, col if i == 0 else (255, 255, 255)))
+        if not ln: continue
+        size = big if i == 0 else int(big * .55)
+        while True:
+            f = C.font("head" if i == 0 else "body", size)
+            wl = C.wrap(d, ln, f, maxw)
+            if (len(wl) <= 3 and all(C.w(d, x, f) <= maxw for x in wl)) or size < 40: break
+            size -= 6
+        for x in wl:
+            blocks.append((x, f, col if i == 0 else (255, 255, 255)))
     tot = sum(f.size * 1.35 for _, f, _ in blocks) + (big * 1.6 if sc.get("icon") else 0)
     y = (H - tot) / 2 + (1 - k) * 60
     if sc.get("icon"):
@@ -409,23 +415,29 @@ def render(spec, out_path, workdir=None):
             else:
                 fr = Image.new("RGB", (W, H), C.T["bg"])
                 if kind == "split":
-                    hw = aw // 2
+                    vert = ah > aw                      # عمودي: فوق/تحت
+                    sw, sh = (aw, ah // 2 - 4) if vert else (aw // 2 - 6, ah)
                     for j, side in enumerate(("left", "right")):
-                        sub = sc[side]
-                        view, _ = pose_view(C, sub, t, sc["dur"], (hw - 6, ah), None)
-                        fr.paste(view, (ax + j * (hw + 6), ay))
+                        view, _ = pose_view(C, sc[side], t, sc["dur"], (sw, sh), None)
+                        fr.paste(view, (ax, ay + j * (sh + 8)) if vert else (ax + j * (sw + 12), ay))
                     d = ImageDraw.Draw(fr)
-                    d.rectangle((ax + hw - 3, ay, ax + hw + 3, ay + ah), fill=C.T["panel"])
-                    vs = sc.get("center", "VS"); f = C.font("head", 90)
-                    r_ = 85; cx_, cy_ = ax + hw, ay + ah * .45
+                    if vert:
+                        d.rectangle((ax, ay + sh, ax + aw, ay + sh + 8), fill=C.T["panel"]); cx_, cy_ = ax + aw / 2, ay + sh + 4
+                    else:
+                        d.rectangle((ax + sw, ay, ax + sw + 12, ay + ah), fill=C.T["panel"]); cx_, cy_ = ax + sw + 6, ay + ah * .45
+                    vs = sc.get("center", "VS"); f = C.font("head", 90); r_ = 85
                     d.ellipse((cx_ - r_, cy_ - r_, cx_ + r_, cy_ + r_), fill=C.T["accent"], outline=C.T["panel"], width=8)
                     C.text(d, cx_, cy_ - f.size * .62, vs, f, C.T["accent_txt"])
                     for j, side in enumerate(("left", "right")):
                         lab = sc[side].get("label")
                         if lab:
-                            ff = C.fit(d, lab, "head", 64, hw - 60, 30)
-                            C.text(d, ax + j * (hw + 6) + hw / 2, ay + ah - ff.size * 2.2 - (120 if C.fmt == "short" and C.lang == "en" else 0),
-                                   lab, ff, (255, 255, 255), stroke=6, sfill=C.T["panel"])
+                            ff = C.fit(d, lab, "head", 64, sw - 80, 30)
+                            lx = ax + (aw / 2 if vert else j * (sw + 12) + sw / 2)
+                            ly = (ay + j * (sh + 8) + sh - ff.size * 1.8) if vert else (ay + ah - ff.size * 2.2)
+                            lw = C.w(d, C.tx(lab), ff)
+                            bb = d.textbbox((lx - lw / 2, ly), C.tx(lab), font=ff, **C.kw(lab))
+                            d.rounded_rectangle((bb[0] - 24, bb[1] - 14, bb[2] + 24, bb[3] + 14), radius=14, fill=C.T["panel"])
+                            C.text(d, lx, ly, lab, ff, (255, 255, 255))
                 else:
                     key = sc["pose"]
                     sb = prev.get("box") if prev.get("pose") == key else None

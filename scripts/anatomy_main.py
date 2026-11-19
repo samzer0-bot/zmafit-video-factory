@@ -101,6 +101,7 @@ def clean_beat(b):
     b["verdict"] = "r" if b.get("verdict") == "r" else "g"
     for k in ("label", "note", "say", "claim", "chapter"):
         b[k] = ai.clean(str(b.get(k) or ""))
+    b["label"] = re.sub(r"^\s*(No\.?|رقم)?\s*[0-9٠-٩]+\s*[-—:.)]*\s*", "", b["label"])
     return b
 
 

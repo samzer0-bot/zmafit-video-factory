@@ -23,6 +23,7 @@ jobs:
           - {lang: en, format: long, template: chapters}
     env:
       VIDEO_LANG: ${{ matrix.lang }}
+      PYTHONUNBUFFERED: "1"
     steps:
       - uses: actions/checkout@v4
       - run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg libraqm0 >/dev/null
