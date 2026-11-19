@@ -1,0 +1,131 @@
+{
+ "format": "short",
+ "lang": "ar",
+ "title": "السكوات",
+ "subtitle": "أي عضلات يشتغل فعلاً؟",
+ "brand": "MUSCLE ARABIA",
+ "site": "zermixmusclearabia.com",
+ "scenes": [
+  {
+   "pose": "squat",
+   "focus": "full",
+   "hl": [],
+   "all_red_intro": true,
+   "say": "هل تعرف ما العضلات التي يشغلها السكوات فعلاً؟",
+   "dur": 2.0
+  },
+  {
+   "pose": "squat",
+   "focus": "quads",
+   "hl": [
+    [
+     "quads",
+     "g"
+    ]
+   ],
+   "dots": true,
+   "icon": "ok",
+   "label": "الفخذ الأمامي — الأساسية",
+   "say": "أولاً الفخذ الأمامي، هو العضلة الأساسية في الحركة.",
+   "dur": 2.0
+  },
+  {
+   "pose": "back",
+   "focus": "glutes",
+   "hl": [
+    [
+     "glutes",
+     "g"
+    ]
+   ],
+   "arrows": true,
+   "icon": "ok",
+   "label": "الأرداف تشتغل بقوة",
+   "say": "الأرداف تشتغل بقوة، خاصة عند النزول للأسفل.",
+   "dur": 2.0
+  },
+  {
+   "pose": "back",
+   "focus": "hamstrings",
+   "hl": [
+    [
+     "hamstrings",
+     "g"
+    ]
+   ],
+   "dots": true,
+   "icon": "ok",
+   "label": "الفخذ الخلفي يساعد",
+   "say": "والفخذ الخلفي يساعد في الصعود.",
+   "dur": 2.0
+  },
+  {
+   "pose": "squat",
+   "focus": "abs",
+   "hl": [
+    [
+     "abs",
+     "g"
+    ]
+   ],
+   "dots": true,
+   "icon": "ok",
+   "label": "البطن يثبّت ظهرك",
+   "say": "البطن يثبّت جذعك ويحمي ظهرك.",
+   "dur": 2.0
+  },
+  {
+   "pose": "squat",
+   "focus": "calves",
+   "hl": [
+    [
+     "calves",
+     "r"
+    ]
+   ],
+   "icon": "no",
+   "note": "للسمانة: تمرين رفع الكعبين",
+   "label": "السمانة؟ دورها خفيف",
+   "say": "أما السمانة فدورها خفيف، دربها برفع الكعبين.",
+   "dur": 2.0
+  },
+  {
+   "pose": "front",
+   "focus": "biceps",
+   "hl": [
+    [
+     "biceps",
+     "r"
+    ]
+   ],
+   "arrows": true,
+   "icon": "no",
+   "label": "الذراعين؟ لا تشتغل",
+   "say": "والذراعين لا تشتغل تقريباً.",
+   "dur": 2.0
+  },
+  {
+   "pose": "side",
+   "focus": "full",
+   "hl": [
+    [
+     "quads",
+     "g"
+    ],
+    [
+     "glutes",
+     "g"
+    ],
+    [
+     "abs",
+     "g"
+    ]
+   ],
+   "icon": "ok",
+   "cta": "احفظ الفيديو وجرّبه اليوم",
+   "label": "فخذ + أرداف + بطن",
+   "say": "فخذ، أرداف، وبطن. احفظ الفيديو وجربه اليوم.",
+   "dur": 2.0
+  }
+ ]
+}

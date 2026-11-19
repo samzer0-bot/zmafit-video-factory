@@ -1,0 +1,148 @@
+{
+ "format": "long",
+ "lang": "en",
+ "title": "PUSH-UPS",
+ "subtitle": "THE FULL MUSCLE BREAKDOWN",
+ "brand": "ZMAFIT",
+ "site": "zmafit.com",
+ "scenes": [
+  {
+   "pose": "pushup",
+   "focus": "full",
+   "hl": [],
+   "all_red_intro": true,
+   "label": "WHICH MUSCLES DO PUSH-UPS REALLY BUILD?",
+   "say": "Push-ups are the most popular home exercise. But which muscles do they really build? Let's break it down, one by one.",
+   "dur": 3.0
+  },
+  {
+   "pose": "pushup",
+   "focus": "chest",
+   "hl": [
+    [
+     "chest",
+     "g"
+    ]
+   ],
+   "dots": true,
+   "icon": "ok",
+   "chapter": "1 — MAIN MUSCLES",
+   "note": "PUSHES YOU UP ON EVERY REP",
+   "label": "CHEST",
+   "say": "The first muscle is your chest. It pushes your body up on every rep, that's why you feel it the most.",
+   "dur": 3.0
+  },
+  {
+   "pose": "pushup",
+   "focus": "triceps",
+   "hl": [
+    [
+     "triceps",
+     "g"
+    ]
+   ],
+   "arrows": true,
+   "icon": "ok",
+   "chapter": "1 — MAIN MUSCLES",
+   "note": "LOCKS OUT YOUR ELBOWS",
+   "label": "TRICEPS",
+   "say": "Second, the triceps, at the back of your arm. They straighten your elbow at the top.",
+   "dur": 3.0
+  },
+  {
+   "pose": "back",
+   "focus": "triceps",
+   "hl": [
+    [
+     "triceps",
+     "g"
+    ]
+   ],
+   "dots": true,
+   "icon": "ok",
+   "chapter": "1 — MAIN MUSCLES",
+   "note": "TWO THIRDS OF YOUR ARM",
+   "label": "TRICEPS FROM BEHIND",
+   "say": "Your triceps make up about two thirds of your arm size, so don't skip them.",
+   "dur": 3.0
+  },
+  {
+   "pose": "pushup",
+   "focus": "delts",
+   "hl": [
+    [
+     "delts",
+     "g"
+    ]
+   ],
+   "dots": true,
+   "icon": "ok",
+   "chapter": "1 — MAIN MUSCLES",
+   "label": "FRONT DELTS",
+   "say": "Third, your front delts. They help your chest push.",
+   "dur": 3.0
+  },
+  {
+   "pose": "front",
+   "focus": "abs",
+   "hl": [
+    [
+     "abs",
+     "g"
+    ]
+   ],
+   "dots": true,
+   "icon": "ok",
+   "chapter": "2 — STABILIZERS",
+   "note": "STOPS YOUR HIPS FROM SAGGING",
+   "label": "ABS",
+   "say": "Your abs work like a belt. They stop your hips from sagging and keep your body straight.",
+   "dur": 3.0
+  },
+  {
+   "pose": "front",
+   "focus": "biceps",
+   "hl": [
+    [
+     "biceps",
+     "r"
+    ]
+   ],
+   "arrows": true,
+   "icon": "no",
+   "chapter": "3 — COMMON MISTAKES",
+   "note_ok": false,
+   "note": "DON'T EXPECT BIG ARMS FROM PUSH-UPS ALONE",
+   "label": "BICEPS BARELY WORK",
+   "say": "Common mistake: your biceps barely work in push-ups, so don't expect big arms from them alone.",
+   "dur": 3.0
+  },
+  {
+   "pose": "pushup",
+   "focus": "full",
+   "hl": [
+    [
+     "chest",
+     "g"
+    ],
+    [
+     "triceps",
+     "g"
+    ],
+    [
+     "delts",
+     "g"
+    ],
+    [
+     "abs",
+     "g"
+    ]
+   ],
+   "icon": "ok",
+   "cta": "SUBSCRIBE FOR MORE WORKOUTS",
+   "label": "CHEST + TRICEPS + SHOULDERS + ABS",
+   "say": "So push-ups build your chest, triceps, shoulders and abs. Subscribe for more workouts.",
+   "dur": 3.0
+  }
+ ]
+}

@@ -1,0 +1,28 @@
+name: معاينة فيديو التشريح (Anatomy preview)
+on:
+  push:
+    branches: [anatomy-preview]
+    paths: ["scripts/anatomy_video.py", "scripts/anatomy_specs/**", "assets/anatomy/**", ".github/workflows/anatomy_preview.yml"]
+  workflow_dispatch:
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        spec: [squat_short_ar, squat_short_en, pushup_long_ar, pushup_long_en]
+    steps:
+      - uses: actions/checkout@v4
+      - name: تثبيت ffmpeg
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg libraqm0 >/dev/null
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -q pillow numpy edge-tts gTTS
+      - name: رندر
+        run: python scripts/anatomy_video.py scripts/anatomy_specs/${{ matrix.spec }}.json ${{ matrix.spec }}.mp4
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.spec }}
+          path: ${{ matrix.spec }}.mp4
