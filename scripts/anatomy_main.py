@@ -64,7 +64,7 @@ def gemini_content(template, fmt, hist):
     mine = [h["topic"] for h in hist if h["lang"] == LANG][-40:]
     other_recent = [h["topic"] for h in hist if h["lang"] != LANG and
                     datetime.fromisoformat(h["date"]) > now - timedelta(days=10)]
-    cat = "\n".join(f"- {k}: {v['desc']} | muscles: {', '.join(AV.POSES.get(k, {}).keys())}" for k, v in CATALOG.items() if k in AV.POSES)
+    cat = "\n".join(f"- {k}: {v['desc']} | muscles: {', '.join(m for m in AV.POSES.get(k, {}) if not m.startswith('_'))}" for k, v in CATALOG.items() if k in AV.POSES)
     lang_rules = ("Write ALL on-screen text and narration in natural, energetic Modern Standard Arabic (simple, clear). "
                   "Audience: Arab beginners training at home without equipment."
                   if not EN else
@@ -116,7 +116,8 @@ Return JSON only: {{"beats": [4 to 6 beats in the same beat format, each with "c
 
 def clean_beat(b):
     pose = b.get("pose") if b.get("pose") in AV.POSES else random.choice([p for p in CATALOG if p in AV.POSES])
-    ms = [m for m in (b.get("muscles") or []) if m in AV.POSES[pose]] or [next(iter(AV.POSES[pose]))]
+    ok = [m for m in AV.POSES[pose] if not m.startswith("_")]
+    ms = [m for m in (b.get("muscles") or []) if m in ok] or ok[:1]
     b["pose"], b["muscles"] = pose, ms
     b["verdict"] = "r" if b.get("verdict") == "r" else "g"
     for k in ("label", "note", "say", "claim", "chapter"):

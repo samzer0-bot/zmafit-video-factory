@@ -1,8 +1,35 @@
 {
- "front":  {"desc": "standing man, front view (anatomy chart: chest, shoulders, biceps, abs, quads, calves)"},
- "back":   {"desc": "standing man, back view (anatomy chart: traps, lats, rear delts, triceps, glutes, hamstrings, calves)"},
- "side":   {"desc": "standing man, side view (anatomy chart)"},
- "biceps": {"desc": "front double-biceps flex pose"},
- "squat":  {"desc": "bodyweight squat exercise, bottom position"},
- "pushup": {"desc": "push-up exercise, top position"}
+ "front": {
+  "desc": "standing man, front view (anatomy chart: chest, shoulders, biceps, abs, quads, calves)"
+ },
+ "back": {
+  "desc": "standing man, back view (anatomy chart: traps, lats, rear delts, triceps, glutes, hamstrings, calves)"
+ },
+ "side": {
+  "desc": "standing man, side view (anatomy chart)"
+ },
+ "biceps": {
+  "desc": "front double-biceps flex pose"
+ },
+ "squat": {
+  "desc": "bodyweight squat exercise, bottom position"
+ },
+ "pushup": {
+  "desc": "push-up exercise, top position"
+ },
+ "calfraise": {
+  "desc": "standing calf raise on a step, seen from behind (calves)"
+ },
+ "lunge": {
+  "desc": "forward lunge, side three-quarter view (quads/thighs)"
+ },
+ "climber": {
+  "desc": "mountain climber, knee driven toward chest (hip flexors/quads)"
+ },
+ "pike": {
+  "desc": "pike push-up, hips high, head down (shoulders; hamstrings stretched)"
+ },
+ "vup": {
+  "desc": "V-up / leg raise on the floor (abs)"
+ }
 }
