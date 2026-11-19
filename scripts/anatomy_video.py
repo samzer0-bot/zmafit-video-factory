@@ -425,8 +425,12 @@ def render(spec, out_path, workdir=None):
         starts.append(t0)
         kind = sc.get("type", "pose")
         n = int(round(sc["dur"] * FPS))
+        held = None
         for i in range(n):
             t = i / FPS; prog = (frame + 1) / nft
+            dst = wd / f"f_{frame:05d}.jpg"
+            if fmt == "long" and held is not None:          # الطويل: نثبّت الإطار بعد ثانية من الحركة
+                os.link(held, dst); frame += 1; continue
             if kind == "card":
                 fr = card_frame(C, spec, sc, t, (W, H))
             else:
@@ -468,7 +472,8 @@ def render(spec, out_path, workdir=None):
                     C.text(d, bx, by - f.size * .62, sc["badge"], f, C.T["accent_txt"])
                 if sc.get("stamp") and t > .25:
                     stamp(fr, C, sc["stamp"], sc.get("icon", "no"), ax + aw / 2, ay + ah * .22, 96 if C.fmt == "short" else 80)
-            fr.save(wd / f"f_{frame:05d}.jpg", quality=90)
+            fr.save(dst, quality=90)
+            if fmt == "long" and t >= 1.2: held = dst
             frame += 1
         if kind == "pose":
             P = pose(sc["pose"]); prev = {"pose": sc["pose"], "box": viewport(P, sc.get("focus"), aw / ah)}
