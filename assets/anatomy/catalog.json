@@ -34,5 +34,32 @@
  },
  "highplank": {
   "desc": "high plank (straight-arm plank) seen from the side (abs/core)"
+ },
+ "crunch": {
+  "desc": "abdominal crunch lying on the back, hands behind head (abs)"
+ },
+ "pushup3q": {
+  "desc": "push-up / high plank, three-quarter view (front delts, chest, core)"
+ },
+ "kickback": {
+  "desc": "kneeling glute kickback, one straight leg kicked up behind (glutes, hamstrings)"
+ },
+ "decline": {
+  "desc": "DECLINE push-up: feet up on a bench, hands on the floor (front delts, upper chest)"
+ },
+ "jacks": {
+  "desc": "jumping jacks, arms overhead, legs wide, front view (legs, calves; cardio)"
+ },
+ "sidelunge": {
+  "desc": "side lunge, front view (quads of bent leg, inner thighs/adductors)"
+ },
+ "stepup": {
+  "desc": "step-up onto a box (quads, legs)"
+ },
+ "sumo": {
+  "desc": "sumo squat, wide stance, front view (inner thighs/adductors, quads)"
+ },
+ "wallsit": {
+  "desc": "wall sit, back against the wall, knees 90 degrees (quads)"
  }
 }
