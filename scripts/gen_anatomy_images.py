@@ -68,6 +68,39 @@ def gen_gemini(models, prompt, aspect, dest):
     return False
 
 
+CF_ACC = os.environ.get("CF_ACCOUNT_ID", ""); CF_TOK = os.environ.get("CF_API_TOKEN", "")
+
+
+def gen_cloudflare(prompt, aspect, dest, seed):
+    """Cloudflare Workers AI (حصة مجانية يومية): FLUX.2 klein 4B مع الرسم المرجعي لنفس الأسلوب."""
+    if not (CF_ACC and CF_TOK): return False
+    import io, uuid
+    from PIL import Image
+    ref = Image.open(REF).convert("RGB"); ref.thumbnail((500, 500))
+    buf = io.BytesIO(); ref.save(buf, "PNG")
+    w, h = (768, 1344) if aspect == "portrait" else (1344, 768)
+    fields = {"prompt": "Use image 0 only as the style and character reference. " + STYLE + " " + prompt,
+              "width": str(w), "height": str(h), "seed": str(seed)}
+    for model in ("flux-2-klein-4b", "flux-2-klein-9b"):
+        b = uuid.uuid4().hex; body = b""
+        for k, v in fields.items():
+            body += f"--{b}\r\nContent-Disposition: form-data; name=\"{k}\"\r\n\r\n{v}\r\n".encode()
+        body += (f"--{b}\r\nContent-Disposition: form-data; name=\"input_image_0\"; filename=\"ref.png\"\r\n"
+                 f"Content-Type: image/png\r\n\r\n").encode() + buf.getvalue() + f"\r\n--{b}--\r\n".encode()
+        req = urllib.request.Request(f"https://api.cloudflare.com/client/v4/accounts/{CF_ACC}/ai/run/@cf/black-forest-labs/{model}",
+                                     data=body, headers={"Authorization": f"Bearer {CF_TOK}", "Content-Type": f"multipart/form-data; boundary={b}"})
+        try:
+            with urllib.request.urlopen(req, timeout=240) as r:
+                d = json.loads(r.read())
+            img = (d.get("result") or {}).get("image")
+            if img:
+                dest.write_bytes(base64.b64decode(img)); print("  OK cloudflare", model); return True
+            print("  cloudflare no image:", str(d)[:200])
+        except Exception as e:
+            print("  cloudflare", model, "failed:", e, getattr(e, "read", lambda: b"")()[:300])
+    return False
+
+
 def gen_pollinations(prompt, aspect, dest, seed):
     w, h = (1152, 2048) if aspect == "portrait" else (2048, 1152)
     q = urllib.parse.quote(STYLE.replace("in the exact style of the reference image", "") + " " + prompt)
@@ -85,10 +118,10 @@ def gen_pollinations(prompt, aspect, dest, seed):
 
 if __name__ == "__main__":
     only = sys.argv[2].split(",") if len(sys.argv) > 2 else list(EX)
-    models = gemini_models()
+    if not (CF_ACC and CF_TOK):
+        sys.exit("✗ أضف CF_ACCOUNT_ID و CF_API_TOKEN في GitHub Secrets (Cloudflare Workers AI مجاني)")
     for i, name in enumerate(only):
         aspect, p = EX[name]
         print("•", name)
-        ok = gen_gemini(models, p, aspect, OUT / f"g_{name}.png") if models else False
-        ok2 = gen_pollinations(p, aspect, OUT / f"p_{name}.jpg", 1000 + i)
-        print("  result:", ok, ok2)
+        for v in range(2):                        # نسختان لكل تمرين للاختيار
+            gen_cloudflare(p, aspect, OUT / f"cf_{name}_{v + 1}.png", 1000 + i * 10 + v)

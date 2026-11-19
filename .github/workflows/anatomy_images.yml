@@ -2,7 +2,7 @@ name: توليد رسومات التمارين (Anatomy images)
 on:
   push:
     branches: [anatomy-preview]
-    paths: ["scripts/gen_anatomy_images.py", ".github/workflows/anatomy_images.yml"]
+    paths: ["assets/anatomy/GENERATE"]
   workflow_dispatch:
 permissions:
   contents: write
@@ -17,8 +17,10 @@ jobs:
           python-version: "3.11"
       - name: توليد
         env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        run: python scripts/gen_anatomy_images.py gen
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          PYTHONUNBUFFERED: "1"
+        run: pip install -q pillow && python scripts/gen_anatomy_images.py gen
       - name: نشر
         env:
           GH_TOKEN: ${{ github.token }}
