@@ -15,16 +15,11 @@ STYLE = ("Detailed anatomical pencil illustration in the exact style of the refe
          "centered, generous even margins. No text, no labels, no arrows, no watermark, no logo.")
 
 EX = {
- "pullup":   ("portrait", "Pose: hanging from a horizontal pull-up bar mid pull-up, chin near the bar, seen from behind. Red muscles: latissimus dorsi (lats), biceps, rear shoulders."),
- "plank":    ("landscape", "Pose: forearm plank on the floor, body in a straight line, seen from the side. Red muscles: rectus abdominis (abs), obliques, front shoulders."),
- "lunge":    ("portrait", "Pose: forward lunge, front knee bent 90 degrees, back knee near the floor, seen from the side at a three-quarter angle. Red muscles: quadriceps, glutes, hamstrings."),
- "bridge":   ("landscape", "Pose: glute bridge lying on the back on the floor, feet flat, hips raised high, seen from the side. Red muscles: glutes, hamstrings, lower back."),
- "dips":     ("portrait", "Pose: bench dips with hands on a low bench behind him, elbows bent, legs extended forward, seen from the side. Red muscles: triceps, front shoulders, lower chest."),
- "pike":     ("landscape", "Pose: pike push-up, hips high in an inverted V, head lowered toward the floor between the hands, seen from the side. Red muscles: shoulders (deltoids), triceps, upper chest."),
- "calfraise":("portrait", "Pose: standing calf raise on the tips of the toes on the edge of a step, seen from behind. Red muscles: calves (gastrocnemius and soleus) only."),
- "legraise": ("landscape", "Pose: lying leg raise on the floor, legs straight and lifted to 90 degrees, hands by the sides, seen from the side. Red muscles: lower abs, hip flexors, obliques."),
- "superman": ("landscape", "Pose: superman exercise lying face down, arms and legs lifted off the floor, seen from the side. Red muscles: lower back (erector spinae), glutes, hamstrings, rear shoulders."),
- "climber":  ("landscape", "Pose: mountain climber in a high plank, one knee driven toward the chest, seen from the side. Red muscles: abs, hip flexors, front shoulders, quadriceps."),
+ "pullup":   ("portrait", "Pose: pull-up seen from behind, at the TOP of the movement: elbows deeply bent and pulled down to the ribs, chin above the bar, feet off the ground. Red muscles: the large V-shaped latissimus dorsi on both sides of the back, plus the biceps."),
+ "plank":    ("landscape", "Pose: forearm plank seen from the side: both forearms and elbows flat on the floor under the shoulders, body a perfectly straight line from head to heels, only toes and forearms touch the floor. Red muscles: the abdominal six-pack and the obliques on the side of the waist."),
+ "bridge":   ("landscape", "Pose: glute bridge seen from the side: lying on his back, shoulders on the floor, both knees bent, both feet flat on the floor, hips pushed HIGH so the thighs and torso form a straight diagonal line. Red muscles: the gluteus (buttocks) and the hamstrings on the back of the thighs."),
+ "dips":     ("portrait", "Pose: bench dips seen from the side: hands on the edge of a bench BEHIND his back, arms bent 90 degrees at the elbows, hips lowered in front of the bench below seat level, legs extended forward with heels on the floor. Red muscles: triceps on the back of the upper arms."),
+ "superman": ("landscape", "Pose: superman exercise seen from the side: lying face down on the floor, both arms stretched forward and lifted, chest lifted, both straight legs lifted off the floor, body forming a gentle banana curve. Red muscles: lower back (erector spinae) and glutes."),
 }
 
 
