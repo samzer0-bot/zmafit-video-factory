@@ -15,11 +15,16 @@ STYLE = ("Detailed anatomical pencil illustration in the exact style of the refe
          "centered, generous even margins. No text, no labels, no arrows, no watermark, no logo.")
 
 EX = {
- "pullup":   ("portrait", "Pose: pull-up seen from behind, at the TOP of the movement: elbows deeply bent and pulled down to the ribs, chin above the bar, feet off the ground. Red muscles: the large V-shaped latissimus dorsi on both sides of the back, plus the biceps."),
- "plank":    ("landscape", "Pose: forearm plank seen from the side: both forearms and elbows flat on the floor under the shoulders, body a perfectly straight line from head to heels, only toes and forearms touch the floor. Red muscles: the abdominal six-pack and the obliques on the side of the waist."),
- "bridge":   ("landscape", "Pose: glute bridge seen from the side: lying on his back, shoulders on the floor, both knees bent, both feet flat on the floor, hips pushed HIGH so the thighs and torso form a straight diagonal line. Red muscles: the gluteus (buttocks) and the hamstrings on the back of the thighs."),
- "dips":     ("portrait", "Pose: bench dips seen from the side: hands on the edge of a bench BEHIND his back, arms bent 90 degrees at the elbows, hips lowered in front of the bench below seat level, legs extended forward with heels on the floor. Red muscles: triceps on the back of the upper arms."),
- "superman": ("landscape", "Pose: superman exercise seen from the side: lying face down on the floor, both arms stretched forward and lifted, chest lifted, both straight legs lifted off the floor, body forming a gentle banana curve. Red muscles: lower back (erector spinae) and glutes."),
+ "sumo":     ("portrait", "Pose: sumo squat seen from the front: feet much wider than shoulders, toes pointing out, knees bent deeply, hands clasped at the chest. Red muscles: inner thighs (adductors) and quadriceps."),
+ "sidelunge":("portrait", "Pose: side lunge seen from the front: one leg bent deeply to the side, the other leg straight, hands clasped at the chest. Red muscles: inner thighs (adductors), glutes and quadriceps of the bent leg."),
+ "wallsit":  ("portrait", "Pose: wall sit seen from the side: back flat against a wall, knees bent at 90 degrees like sitting on an invisible chair, arms crossed on the chest. Red muscles: quadriceps on the front of the thighs."),
+ "crunch":   ("landscape", "Pose: abdominal crunch seen from the side: lying on the back, knees bent, feet flat on the floor, hands behind the head, shoulders lifted slightly off the floor. Red muscles: the abdominal six-pack."),
+ "donkey":   ("landscape", "Pose: donkey kick seen from the side: on hands and knees on the floor, one leg kicking up behind with the knee bent 90 degrees and the sole facing the ceiling. Red muscles: glutes of the kicking leg and hamstrings."),
+ "birddog":  ("landscape", "Pose: bird dog seen from the side: on hands and knees, one arm stretched straight forward and the opposite leg stretched straight back, both parallel to the floor. Red muscles: lower back and glutes."),
+ "diamond":  ("landscape", "Pose: diamond push-up seen from the side and slightly front: high plank, hands together under the chest with thumbs and index fingers touching in a diamond shape, elbows close to the body. Red muscles: triceps and chest."),
+ "incline":  ("landscape", "Pose: incline push-up seen from the side: hands on a low bench, feet on the floor, body straight and angled. Red muscles: chest and triceps."),
+ "stepup":   ("portrait", "Pose: step-up seen from the side: one foot on a low box stepping up, the other leg lifting, torso upright. Red muscles: quadriceps and glutes of the leg on the box."),
+ "jacks":    ("portrait", "Pose: jumping jack seen from the front, mid-jump: arms straight up overhead with hands nearly touching, legs spread wide. Red muscles: shoulders (deltoids) and calves."),
 }
 
 
