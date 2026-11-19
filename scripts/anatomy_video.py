@@ -1,21 +1,37 @@
-"""محرك فيديو تشريحي: رسم رمادي + العضلة المستهدفة بالأخضر (صحيح) أو الأحمر (خطأ).
+"""محرك فيديو تشريحي (v2): رسم رمادي + العضلات المستهدفة ملوّنة، بقوالب وثيمات مختلفة لكل قناة.
 
-الاستخدام:
-    python anatomy_video.py spec.json out.mp4
-spec.json يصف الفيديو (short/long، اللغة، المشاهد). يكتبه Gemini تلقائياً في المصنع.
+    python scripts/anatomy_video.py spec.json out.mp4
+
+spec: format short|long, lang ar|en, title, subtitle, brand, site, scenes[].
+أنواع المشاهد:
+  pose  (افتراضي): pose, focus, hl[[muscle,"g"|"r"]], dots, arrows, label, icon ok|no, note, badge, stamp
+  card : lines[], kind hook|myth|fact|vs|chapter|tip, icon
+  split: left{pose,focus,hl,label}, right{...}, center "VS"
+كل مشهد فيه say (نص التعليق الصوتي) يحدد مدته.
 """
-import json, math, subprocess, sys, shutil
+import asyncio, json, math, os, shutil, subprocess, sys, time
 from functools import lru_cache
 from pathlib import Path
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
-import os, asyncio
 ROOT = Path(__file__).resolve().parent
 REPO = ROOT.parent
 IMG = Path(os.environ.get("ANATOMY_IMG", REPO / "assets" / "anatomy"))
 FONTS = Path(os.environ.get("FONTS_DIR", REPO / "assets" / "fonts"))
+FPS = 30
+POSES = json.loads((IMG / "poses.json").read_text())
 VOICES = {"ar": ("ar-EG-ShakirNeural", "+8%"), "en": ("en-US-AndrewNeural", "+5%")}
+
+# ---------------- الثيمات: هوية مختلفة لكل قناة ----------------
+THEMES = {
+ "ar": dict(bg=(250, 250, 250), panel=(18, 18, 18), accent=(255, 210, 0), accent_txt=(0, 0, 0),
+            ok=np.array([0.15, 0.74, 0.36]), ok_rgb=(40, 190, 90), no_rgb=(230, 60, 40),
+            head=("Cairo-Black.ttf", 1.0), body=("Cairo-Bold.ttf", 1.0), rtl=True, upper=False),
+ "en": dict(bg=(243, 246, 251), panel=(14, 26, 50), accent=(0, 196, 214), accent_txt=(10, 20, 40),
+            ok=np.array([0.17, 0.50, 0.95]), ok_rgb=(45, 128, 240), no_rgb=(235, 70, 50),
+            head=("Anton-Regular.ttf", 1.05), body=("Oswald-Bold.ttf", 0.95), rtl=False, upper=True),
+}
 
 
 def _dur(path):
@@ -24,43 +40,24 @@ def _dur(path):
 
 
 def speak(text, lang, out):
-    """تعليق صوتي مجاني: edge-tts (نفس صوت المصنع) ثم gTTS احتياطاً."""
+    """تعليق صوتي مجاني: edge-tts (صوت المصنع) مع إعادة المحاولة، ثم gTTS."""
     voice, rate = VOICES[lang]
-    voice = os.environ.get("TTS_VOICE", voice)
-    import time
-    for attempt, v in enumerate([voice, voice, voice, "en-US-GuyNeural" if lang == "en" else "ar-SA-HamedNeural"]):
+    voice = os.environ.get("TTS_VOICE_EN" if lang == "en" else "TTS_VOICE", voice)
+    for attempt in range(6):
         try:
             import edge_tts
-            asyncio.run(edge_tts.Communicate(text, v, rate=rate).save(str(out)))
+            asyncio.run(edge_tts.Communicate(text, voice, rate=rate).save(str(out)))
             if Path(out).stat().st_size > 1000:
                 return _dur(out)
-        except Exception as e:                   # noqa: BLE001
-            print(f"  ! edge-tts ({v}, محاولة {attempt + 1}):", e)
-            time.sleep(3 + attempt * 3)
+        except Exception as e:                       # noqa: BLE001
+            print(f"  ! edge-tts ({voice}, {attempt + 1}):", str(e)[:80])
+        time.sleep(4 * (attempt + 1))
     from gtts import gTTS
     gTTS(text=text, lang=lang).save(str(out))
     return _dur(out)
-FPS = 30
-
-# نقاط مرجعية لكل عضلة في كل رسم (إحداثيات الصورة الأصلية)
-POSES = {
- "front": {"chest": [(440, 440), (680, 445)], "delts": [(300, 410), (815, 385)], "biceps": [(300, 570), (790, 570)],
-           "abs": [(560, 620), (560, 760)], "quads": [(400, 1220), (700, 1210)], "calves": [(360, 1560), (680, 1570)]},
- "back": {"traps": [(560, 330)], "delts": [(300, 420), (830, 420)], "triceps": [(290, 580), (860, 580)],
-          "lats": [(430, 620), (700, 620)], "glutes": [(470, 960), (650, 960)],
-          "hamstrings": [(440, 1240), (700, 1240)], "calves": [(410, 1590), (720, 1590)]},
- "side": {"chest": [(500, 470)], "delts": [(640, 400)], "triceps": [(690, 570)], "abs": [(560, 680)],
-          "glutes": [(720, 950)], "quads": [(560, 1250)], "calves": [(650, 1580)]},
- "biceps": {"delts": [(380, 300), (780, 300)], "biceps": [(250, 350), (900, 350)], "chest": [(500, 420), (690, 420)],
-            "abs": [(590, 640)], "quads": [(420, 1150), (740, 1150)]},
- "squat": {"abs": [(660, 640)], "chest": [(780, 560)], "quads": [(430, 870), (850, 860)], "calves": [(470, 1080), (880, 1070)]},
- "pushup": {"delts": [(1470, 320)], "chest": [(1650, 430)], "triceps": [(1420, 560), (1730, 580)], "abs": [(1240, 500)]},
-}
-
-GREEN = np.array([0.15, 0.74, 0.36]); RED = np.array([0.95, 0.30, 0.18])
-YEL = (255, 210, 0); OKC = (40, 200, 70); NOC = (235, 40, 35)
 
 
+# ---------------- الرسومات والعضلات ----------------
 @lru_cache(maxsize=None)
 def pose(name):
     src = np.asarray(Image.open(IMG / f"{name}.jpg").convert("RGB")).astype(np.float32) / 255
@@ -75,15 +72,14 @@ def pose(name):
                       .filter(ImageFilter.GaussianBlur(2))) / 255.0
     g1 = np.clip(lum * 1.55 + 0.12, 0, 1)[..., None].repeat(3, -1)
     gray = src * (1 - soft[..., None]) + np.where(red[..., None], g1, lum[..., None].repeat(3, -1)) * soft[..., None]
-    lo, hi = np.percentile(lum[red], 3), np.percentile(lum[red], 97)
+    lo, hi = (np.percentile(lum[red], 3), np.percentile(lum[red], 97)) if red.any() else (0, 1)
     shade = np.where(red, np.clip((lum - lo) / (hi - lo + 1e-6), 0, 1), np.clip(lum * 1.2, 0, 1))
-    base_red = src[red].mean(0)                               # نفس أحمر الرسم الأصلي
-    # تقسيم الأحمر حسب أقرب نقطة مرجعية
+    base_red = src[red].mean(0) if red.any() else np.array([0.95, 0.3, 0.18])
     seeds = POSES[name]
     names = list(seeds); pts = [(n, p) for n in names for p in seeds[n]]
     yy, xx = np.mgrid[0:H, 0:W]
     dist = np.stack([(xx - p[0]) ** 2 + (yy - p[1]) ** 2 for _, p in pts])
-    near = dist.argmin(0)                                   # أقرب نقطة مرجعية (لكل جهة)
+    near = dist.argmin(0)
     owner = np.array([names.index(n) for n, _ in pts])[near]
     redm = np.asarray(Image.fromarray((red * 255).astype(np.uint8)).filter(ImageFilter.MaxFilter(3))) > 0
     masks, bbox, axis = {}, {}, {}
@@ -94,16 +90,15 @@ def pose(name):
         if len(xs):
             bbox[n] = (xs.min(), ys.min(), xs.max(), ys.max())
             first = [j for j, (nn, _) in enumerate(pts) if nn == n][0]
-            py, px = np.nonzero((near == first) & redm)          # جهة واحدة فقط
+            py, px = np.nonzero((near == first) & redm)
             if len(px) > 50:
                 c = np.array([px.mean(), py.mean()])
-                cov = np.cov(np.stack([px - c[0], py - c[1]]))
-                ev, evec = np.linalg.eigh(cov)
+                ev, evec = np.linalg.eigh(np.cov(np.stack([px - c[0], py - c[1]])))
                 v = evec[:, -1]; L = 1.5 * math.sqrt(ev[-1])
                 axis[n] = (tuple(c - v * L), tuple(c + v * L))
-    ys, xs = np.nonzero(lum < 0.86)                           # حدود الشخص (بدون الخلفية البيضاء)
-    person = (np.percentile(xs, 0.2), np.percentile(ys, 0.2), np.percentile(xs, 99.8), np.percentile(ys, 99.8))
-    return dict(base_red=base_red, person=person, src=src, gray=gray, shade=shade, masks=masks, bbox=bbox, axis=axis, W=W, H=H)
+    ys, xs = np.nonzero(lum < 0.86)
+    person = (np.percentile(xs, .2), np.percentile(ys, .2), np.percentile(xs, 99.8), np.percentile(ys, 99.8))
+    return dict(gray=gray, shade=shade, masks=masks, bbox=bbox, axis=axis, W=W, H=H, person=person, base_red=base_red)
 
 
 def tint(base, shade, mask, color, a):
@@ -112,89 +107,13 @@ def tint(base, shade, mask, color, a):
     return base * (1 - m) + np.clip(col, 0, 1) * m
 
 
-def F(size, w="Black"):
-    return ImageFont.truetype(str(FONTS / f"Cairo-{w}.ttf"), size)
-
-
-class Canvas:
-    def __init__(self, fmt, rtl):
-        self.fmt, self.rtl = fmt, rtl
-        if fmt == "short":
-            self.W, self.H = 1080, 1920
-            self.area = (0, 230, 1080, 1560)        # x, y, w, h لمنطقة الرسم
-        else:
-            self.W, self.H = 1920, 1080
-            self.area = (760, 0, 1160, 1080) if rtl else (0, 0, 1160, 1080)
-
-    def kw(self, s):
-        return dict(direction="rtl", language="ar") if self.rtl and not s.isascii() else {}
-
-    def text(self, d, x, y, s, font, fill, align="c", stroke=0):
-        w = d.textlength(s, font=font, **self.kw(s))
-        x0 = x - w / 2 if align == "c" else (x - w if align == "r" else x)
-        d.text((x0, y), s, font=font, fill=fill, stroke_width=stroke, stroke_fill=(0, 0, 0), **self.kw(s))
-        return w
-
-    def wrap(self, d, s, font, maxw):
-        words, lines, cur = s.split(), [], ""
-        for w in words:
-            t = (cur + " " + w).strip()
-            if d.textlength(t, font=font, **self.kw(t)) <= maxw or not cur:
-                cur = t
-            else:
-                lines.append(cur); cur = w
-        if cur: lines.append(cur)
-        return lines
-
-    def pill(self, d, x, y, s, font, bg, fg, icon=None, align="c", maxw=None):
-        tw = d.textlength(s, font=font, **self.kw(s)); h = font.size + 36
-        iw = h if icon else 0; w = tw + 70 + iw
-        x0 = x - w / 2 if align == "c" else (x - w if align == "r" else x)
-        d.rounded_rectangle((x0, y, x0 + w, y + h), radius=h / 2, fill=bg)
-        d.text((x0 + 35 + (0 if self.rtl else iw), y + 6), s, font=font, fill=fg, **self.kw(s))
-        if icon:
-            cx = x0 + w - 35 - iw * 0.4 if self.rtl else x0 + 35 + iw * 0.25
-            icon_draw(d, cx, y + h / 2, iw * 0.36, icon)
-        return h
-
-
-def icon_draw(d, cx, cy, rr, kind):
-    d.ellipse((cx - rr, cy - rr, cx + rr, cy + rr), fill=OKC if kind == "ok" else NOC, outline=(255, 255, 255), width=5)
-    k = rr * 0.5; wdt = max(3, int(rr * 0.28))
-    if kind == "ok":
-        d.line([(cx - k, cy), (cx - k * 0.2, cy + k * 0.8), (cx + k, cy - k * 0.7)], fill="white", width=wdt, joint="curve")
-    else:
-        d.line([(cx - k, cy - k), (cx + k, cy + k)], fill="white", width=wdt)
-        d.line([(cx - k, cy + k), (cx + k, cy - k)], fill="white", width=wdt)
-
-
-def arrow(d, tip, direction, s, col=YEL):
-    x, y = tip; sg = 1 if direction == "right" else -1
-    pts = [(x, y), (x - sg * s, y - s * .7), (x - sg * s, y - s * .3), (x - sg * s * 2.1, y - s * .3),
-           (x - sg * s * 2.1, y + s * .3), (x - sg * s, y + s * .3), (x - sg * s, y + s * .7)]
-    d.polygon(pts, fill=col, outline=(0, 0, 0))
-
-
-def dots(d, p1, p2, col, r):
-    d.line([p1, p2], fill=(255, 255, 255), width=max(4, int(r * 0.4)))
-    for p in (p1, p2):
-        d.ellipse((p[0] - r, p[1] - r, p[0] + r, p[1] + r), fill=(255, 255, 255))
-        d.ellipse((p[0] - r * .63, p[1] - r * .63, p[0] + r * .63, p[1] + r * .63), fill=col)
-        d.ellipse((p[0] - r * .26, p[1] - r * .26, p[0] + r * .26, p[1] + r * .26), fill=(255, 255, 255))
-
-
-def ease(t): return 1 - (1 - t) ** 3
-
-
-def viewport(P, sc, aspect):
-    """نافذة التكبير: كل الجسم أو العضلات المطلوبة مع هامش."""
+def viewport(P, focus, aspect):
     W, H = P["W"], P["H"]
-    focus = sc.get("focus")
     if not focus or focus == "full":
-        x0, y0, x1, y1 = P["person"]
-        pad = 1.08
+        x0, y0, x1, y1 = P["person"]; pad = 1.08
     else:
-        bbs = [P["bbox"][m] for m in (focus if isinstance(focus, list) else [focus]) if m in P["bbox"]]
+        fl = focus if isinstance(focus, list) else [focus]
+        bbs = [P["bbox"][m] for m in fl if m in P["bbox"]] or [P["person"]]
         x0 = min(b[0] for b in bbs); y0 = min(b[1] for b in bbs); x1 = max(b[2] for b in bbs); y1 = max(b[3] for b in bbs)
         pad = 1.7
     cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
@@ -207,175 +126,362 @@ def viewport(P, sc, aspect):
     return (cx - w / 2, cy - h / 2, cx + w / 2, cy + h / 2)
 
 
-def crop(arr_img, box, size):
-    """قص مع حشو أبيض إن خرجت النافذة عن الصورة."""
-    W, H = arr_img.size
+def crop(img, box, size, bg):
+    W, H = img.size
     x0, y0, x1, y1 = box
     sc = size[0] / (x1 - x0)
-    out = Image.new("RGB", size, (250, 250, 250))
+    out = Image.new("RGB", size, bg)
     ix0, iy0, ix1, iy1 = max(0, x0), max(0, y0), min(W, x1), min(H, y1)
     if ix1 <= ix0 or iy1 <= iy0: return out
-    part = arr_img.crop((int(ix0), int(iy0), int(ix1), int(iy1)))
+    part = img.crop((int(ix0), int(iy0), int(ix1), int(iy1)))
     pw, ph = max(1, round((ix1 - ix0) * sc)), max(1, round((iy1 - iy0) * sc))
-    out.paste(part.resize((pw, ph), Image.LANCZOS), (round((ix0 - x0) * sc), round((iy0 - y0) * sc)))
+    part = part.resize((pw, ph), Image.LANCZOS)
+    # الخلفية البيضاء للرسم → لون الثيم
+    a = np.asarray(part).astype(np.float32)
+    wmask = (a.min(-1) > 238)[..., None]
+    a = np.where(wmask, np.array(bg, np.float32), a)
+    out.paste(Image.fromarray(a.astype(np.uint8)), (round((ix0 - x0) * sc), round((iy0 - y0) * sc)))
     return out
 
 
+def ease(t): return 1 - (1 - t) ** 3
+
+
+# ---------------- رسم العناصر ----------------
+class Ctx:
+    def __init__(self, lang, fmt):
+        self.T = THEMES[lang]; self.lang = lang; self.fmt = fmt; self.rtl = self.T["rtl"]
+
+    def font(self, kind, size):
+        f, k = self.T[kind]
+        return ImageFont.truetype(str(FONTS / f), int(size * k))
+
+    def kw(self, s):
+        return dict(direction="rtl", language="ar") if self.rtl and not s.isascii() else {}
+
+    def tx(self, s):
+        return s.upper() if self.T["upper"] else s
+
+    def w(self, d, s, f): return d.textlength(s, font=f, **self.kw(s))
+
+    def text(self, d, x, y, s, f, fill, align="c", stroke=0, sfill=(0, 0, 0)):
+        s = self.tx(s); w = self.w(d, s, f)
+        x0 = x - w / 2 if align == "c" else (x - w if align == "r" else x)
+        d.text((x0, y), s, font=f, fill=fill, stroke_width=stroke, stroke_fill=sfill, **self.kw(s))
+        return w
+
+    def wrap(self, d, s, f, maxw):
+        s = self.tx(s); lines, cur = [], ""
+        for wd in s.split():
+            t = (cur + " " + wd).strip()
+            if self.w(d, t, f) <= maxw or not cur: cur = t
+            else: lines.append(cur); cur = wd
+        if cur: lines.append(cur)
+        return lines
+
+    def fit(self, d, s, kind, size, maxw, minsize=28):
+        while size > minsize and self.w(d, self.tx(s), self.font(kind, size)) > maxw: size -= 2
+        return self.font(kind, size)
+
+
+def icon(d, cx, cy, rr, kind, C):
+    d.ellipse((cx - rr, cy - rr, cx + rr, cy + rr), fill=C.T["ok_rgb"] if kind == "ok" else C.T["no_rgb"], outline=(255, 255, 255), width=max(3, int(rr * .14)))
+    k = rr * .5; wd = max(3, int(rr * .28))
+    if kind == "ok":
+        d.line([(cx - k, cy), (cx - k * .2, cy + k * .8), (cx + k, cy - k * .7)], fill="white", width=wd, joint="curve")
+    else:
+        d.line([(cx - k, cy - k), (cx + k, cy + k)], fill="white", width=wd)
+        d.line([(cx - k, cy + k), (cx + k, cy - k)], fill="white", width=wd)
+
+
+def arrow(d, tip, direction, s, col):
+    x, y = tip; sg = 1 if direction == "right" else -1
+    pts = [(x, y), (x - sg * s, y - s * .7), (x - sg * s, y - s * .3), (x - sg * s * 2.1, y - s * .3),
+           (x - sg * s * 2.1, y + s * .3), (x - sg * s, y + s * .3), (x - sg * s, y + s * .7)]
+    d.polygon(pts, fill=col, outline=(0, 0, 0))
+
+
+def dots(d, p1, p2, col, r):
+    d.line([p1, p2], fill=(255, 255, 255), width=max(4, int(r * .4)))
+    for p in (p1, p2):
+        d.ellipse((p[0] - r, p[1] - r, p[0] + r, p[1] + r), fill=(255, 255, 255))
+        d.ellipse((p[0] - r * .63, p[1] - r * .63, p[0] + r * .63, p[1] + r * .63), fill=col)
+        d.ellipse((p[0] - r * .26, p[1] - r * .26, p[0] + r * .26, p[1] + r * .26), fill=(255, 255, 255))
+
+
+def pose_view(C, sub, t, dur, size, start_box):
+    """يرسم منطقة الرسم لمشهد pose (أو نصف مشهد split)."""
+    P = pose(sub["pose"])
+    aspect = size[0] / size[1]
+    v = viewport(P, sub.get("focus"), aspect)
+    sb = start_box or viewport(P, "full", aspect)
+    k = ease(min(1, t / .35))
+    a = [sb[j] + (v[j] - sb[j]) * k for j in range(4)]
+    push = 1 - .05 * (t / max(dur, .1))
+    cx, cy = (a[0] + a[2]) / 2, (a[1] + a[3]) / 2
+    hw, hh = (a[2] - a[0]) / 2 * push, (a[3] - a[1]) / 2 * push
+    box = (cx - hw, cy - hh, cx + hw, cy + hh)
+    img = P["gray"]
+    if sub.get("all_red_intro"):
+        allm = np.clip(sum(P["masks"].values()), 0, 1)
+        img = tint(img, P["shade"], allm, P["base_red"], max(0., 1 - t / 1.4) * .95)
+    pulse = .93 + .07 * math.sin(t * 7)
+    hl = sub.get("hl", [])
+    for m, c in hl:
+        if m in P["masks"]:
+            img = tint(img, P["shade"], P["masks"][m], C.T["ok"] if c == "g" else P["base_red"], min(1, t / .25) * pulse)
+    pil = Image.fromarray((np.clip(img, 0, 1) * 255).astype(np.uint8))
+    d0 = ImageDraw.Draw(pil)
+    sr = (box[2] - box[0]) / size[0]
+    if t > .35 and hl:
+        col = C.T["ok_rgb"] if hl[0][1] == "g" else C.T["no_rgb"]
+        m0 = hl[0][0]
+        if sub.get("dots") and m0 in P["axis"]:
+            dots(d0, *P["axis"][m0], col, 20 * sr)
+        if sub.get("arrows") and m0 in P["bbox"]:
+            b = P["bbox"][m0]; my = (b[1] + b[3]) / 2; off = 10 * sr * math.sin(t * 10)
+            arrow(d0, (b[0] - 12 * sr + off, my), "right", 34 * sr, C.T["accent"])
+            arrow(d0, (b[2] + 12 * sr - off, my), "left", 34 * sr, C.T["accent"])
+    return crop(pil, box, size, C.T["bg"]), v
+
+
+def stamp(fr, C, text, kind, cx, cy, size):
+    """ختم «خرافة/حقيقة» مائل."""
+    f = C.font("head", size)
+    lay = Image.new("RGBA", fr.size, (0, 0, 0, 0)); d = ImageDraw.Draw(lay)
+    col = C.T["ok_rgb"] if kind == "ok" else C.T["no_rgb"]
+    s = C.tx(text); w = C.w(d, s, f); h = size * 1.35
+    d.rounded_rectangle((cx - w / 2 - 40, cy - h / 2, cx + w / 2 + 40, cy + h / 2), radius=18, outline=col + (255,), width=10, fill=(255, 255, 255, 215))
+    d.text((cx - w / 2, cy - h / 2 + size * .05), s, font=f, fill=col + (255,), **C.kw(s))
+    lay = lay.rotate(-8 if C.rtl else 8, center=(cx, cy), resample=Image.BICUBIC)
+    fr.paste(lay, (0, 0), lay)
+
+
+# ---------------- التخطيطات ----------------
+def layout(C):
+    if C.fmt == "short":
+        W, H = 1080, 1920
+        if C.lang == "ar": area = (0, 230, 1080, 1560)
+        else: area = (0, 0, 1080, 1920)
+    else:
+        W, H = 1920, 1080
+        area = (760, 0, 1160, 1080) if C.lang == "ar" else (0, 0, 1180, 1080)
+    return W, H, area
+
+
+def draw_chrome(fr, d, C, spec, sc, t, prog):
+    """العناوين والتسميات حسب الثيم والتنسيق."""
+    T = C.T; W, H = fr.size
+    if C.fmt == "short" and C.lang == "ar":
+        d.rectangle((0, 0, W, 230), fill=T["panel"])
+        C.text(d, W / 2, 18, spec["title"], C.fit(d, spec["title"], "head", 92, W - 80), T["accent"])
+        C.text(d, W / 2, 138, spec.get("subtitle", ""), C.fit(d, spec.get("subtitle", ""), "body", 50, W - 80), (255, 255, 255))
+        d.rectangle((0, 222, W * prog, 230), fill=T["accent"])
+        y = 1570
+        if sc.get("label") and t > .2:
+            f = C.fit(d, sc["label"], "head", 64, W - 220, 40)
+            y += pill(d, C, W / 2, y, sc["label"], f, (20, 20, 20), (255, 255, 255), sc.get("icon")) + 16
+        if sc.get("note") and t > .9:
+            f = C.fit(d, sc["note"], "body", 42, W - 160, 30)
+            pill(d, C, W / 2, y, sc["note"], f, T["ok_rgb"] if sc.get("note_ok", True) else T["no_rgb"], (255, 255, 255))
+        C.text(d, W - 40, H - 62, spec["brand"], C.font("body", 30), (120, 120, 120), "r")
+    elif C.fmt == "short":                       # ZMAFIT: عنوان في صندوق أعلى اليسار، تسمية أسفل اليسار
+        f = C.fit(d, spec["title"], "head", 110, W - 160, 60)
+        tw = C.w(d, C.tx(spec["title"]), f)
+        d.rectangle((40, 60, 40 + tw + 60, 60 + f.size * 1.35), fill=T["panel"])
+        d.rectangle((40, 60, 52, 60 + f.size * 1.35), fill=T["accent"])
+        C.text(d, 80, 60 + f.size * .1, spec["title"], f, (255, 255, 255), "l")
+        fs = C.fit(d, spec.get("subtitle", ""), "body", 46, W - 120, 28)
+        sw = C.w(d, C.tx(spec.get("subtitle", "")), fs)
+        d.rectangle((40, 60 + f.size * 1.35, 40 + sw + 50, 60 + f.size * 1.35 + fs.size * 1.6), fill=T["accent"])
+        C.text(d, 65, 60 + f.size * 1.35 + fs.size * .2, spec.get("subtitle", ""), fs, T["accent_txt"], "l")
+        y = 1500
+        if sc.get("label") and t > .2:
+            f2 = C.fit(d, sc["label"], "head", 84, W - 220, 46)
+            lines = [C.tx(sc["label"])]
+            lw = C.w(d, lines[0], f2)
+            d.rectangle((40, y, 40 + lw + 140, y + f2.size * 1.4), fill=T["panel"])
+            if sc.get("icon"): icon(d, 40 + 60, y + f2.size * .7, f2.size * .42, sc["icon"], C)
+            C.text(d, 40 + (115 if sc.get("icon") else 30), y + f2.size * .12, sc["label"], f2, (255, 255, 255), "l")
+            y += f2.size * 1.4 + 14
+        if sc.get("note") and t > .9:
+            f3 = C.fit(d, sc["note"], "body", 46, W - 160, 28)
+            nw = C.w(d, C.tx(sc["note"]), f3)
+            d.rectangle((40, y, 40 + nw + 50, y + f3.size * 1.6), fill=T["accent"] if sc.get("note_ok", True) else T["no_rgb"])
+            C.text(d, 65, y + f3.size * .2, sc["note"], f3, T["accent_txt"], "l")
+        d.rectangle((0, H - 14, W * prog, H), fill=T["accent"])
+        C.text(d, W - 40, H - 70, spec["brand"], C.font("head", 34), T["panel"], "r")
+    else:                                        # long
+        ar = C.lang == "ar"
+        aw = 1160 if ar else 1180
+        px0 = 0 if ar else aw; pw = W - aw
+        d.rectangle((px0, 0, px0 + pw, H), fill=T["panel"])
+        d.rectangle((px0 + (pw - 10 if ar else 0), 0, px0 + (pw if ar else 10), H), fill=T["accent"])
+        xr = px0 + pw - 60 if ar else px0 + 60; al = "r" if ar else "l"
+        C.text(d, xr, 50, spec["title"], C.fit(d, spec["title"], "head", 70, pw - 120, 40), T["accent"], al)
+        C.text(d, xr, 150, spec.get("subtitle", ""), C.fit(d, spec.get("subtitle", ""), "body", 38, pw - 120, 24), (210, 210, 210), al)
+        if sc.get("chapter"):
+            C.text(d, xr, 255, sc["chapter"], C.fit(d, sc["chapter"], "body", 38, pw - 120, 24), (150, 150, 150), al)
+        y = 340
+        if sc.get("label") and t > .2:
+            f = C.font("head", 60)
+            if sc.get("icon"): icon(d, xr - 28 if ar else xr + 28, y + 46, 30, sc["icon"], C)
+            for ln in C.wrap(d, sc["label"], f, pw - 200):
+                C.text(d, xr - (75 if ar and sc.get("icon") else 0) + (0 if ar else (75 if sc.get("icon") else 0)), y, ln, f, (255, 255, 255), al)
+                y += 92
+        if sc.get("note") and t > .9:
+            y += 20; f = C.font("body", 40)
+            for ln in C.wrap(d, sc["note"], f, pw - 140):
+                C.text(d, xr, y, ln, f, (130, 230, 150) if sc.get("note_ok", True) and ar else (T["accent"] if sc.get("note_ok", True) else (255, 120, 110)), al)
+                y += 62
+        d.rectangle((px0 + 60, H - 40, px0 + 60 + (pw - 120) * prog, H - 30), fill=T["accent"])
+        C.text(d, xr, H - 110, spec["brand"], C.font("body", 32), (140, 140, 140), al)
+    if sc.get("cta") and t > .3:
+        if C.fmt == "short":
+            bx, by = W / 2, 1720 if C.lang == "ar" else 1760
+        else:
+            bx, by = ((0 if C.lang == "ar" else 1180) + (W - (1160 if C.lang == "ar" else 1180)) / 2), 820
+        maxw = (W - 160) if C.fmt == "short" else (W - 1180 - 120)
+        f = C.fit(d, sc["cta"], "body", 48, maxw - 80, 26)
+        pill(d, C, bx, by, sc["cta"], f, T["accent"], T["accent_txt"])
+        if spec.get("site"): C.text(d, bx, by + f.size + 60, spec["site"], C.font("body", 32), (150, 150, 150))
+
+
+def pill(d, C, x, y, s, f, bg, fg, ic=None):
+    s = C.tx(s); tw = C.w(d, s, f); h = f.size + 36
+    iw = h if ic else 0; w = tw + 70 + iw
+    x0 = x - w / 2
+    d.rounded_rectangle((x0, y, x0 + w, y + h), radius=h / 2, fill=bg)
+    d.text((x0 + 35 + (0 if C.rtl else iw), y + 6), s, font=f, fill=fg, **C.kw(s))
+    if ic:
+        cx = x0 + w - 35 - iw * .4 if C.rtl else x0 + 35 + iw * .25
+        icon(d, cx, y + h / 2, iw * .36, ic, C)
+    return h
+
+
+def card_frame(C, spec, sc, t, size):
+    """بطاقة نصية كاملة (خطاف، خرافة، حقيقة، VS، فصل)."""
+    T = C.T; W, H = size
+    fr = Image.new("RGB", size, T["panel"]); d = ImageDraw.Draw(fr)
+    kind = sc.get("kind", "hook")
+    k = ease(min(1, t / .3))
+    col = {"myth": T["no_rgb"], "fact": T["ok_rgb"]}.get(kind, T["accent"])
+    d.rectangle((0, 0, W, 16 + 8 * k), fill=col); d.rectangle((0, H - 16 - 8 * k, W, H), fill=col)
+    lines = sc.get("lines", [])
+    big = 120 if C.fmt == "short" else 100
+    maxw = W - 140
+    blocks = []
+    for i, ln in enumerate(lines):
+        f = C.fit(d, ln, "head" if i == 0 else "body", big if i == 0 else int(big * .55), maxw, 34)
+        for wl in C.wrap(d, ln, f, maxw):
+            blocks.append((wl, f, col if i == 0 else (255, 255, 255)))
+    tot = sum(f.size * 1.35 for _, f, _ in blocks) + (big * 1.6 if sc.get("icon") else 0)
+    y = (H - tot) / 2 + (1 - k) * 60
+    if sc.get("icon"):
+        icon(d, W / 2, y + big * .6, big * .55, sc["icon"], C); y += big * 1.6
+    for wl, f, c in blocks:
+        C.text(d, W / 2, y, wl, f, c); y += f.size * 1.35
+    return fr
+
+
 def render(spec, out_path, workdir=None):
-    fmt = spec.get("format", "short"); lang = spec.get("lang", "ar"); rtl = lang == "ar"
-    C = Canvas(fmt, rtl)
-    ax, ay, aw, ah = C.area
-    aspect = aw / ah
-    wd = Path(workdir or (ROOT / "work")); shutil.rmtree(wd, ignore_errors=True); wd.mkdir(parents=True)
-    scenes = spec["scenes"]
-    voice_parts = []
+    fmt = spec.get("format", "short"); lang = spec.get("lang", "ar")
+    C = Ctx(lang, fmt)
+    W, H, (ax, ay, aw, ah) = layout(C)
+    wd = Path(workdir or (REPO / "work_anat")); shutil.rmtree(wd, ignore_errors=True); wd.mkdir(parents=True)
+    scenes = spec["scenes"]; voice = []
     for i, sc in enumerate(scenes):
+        sc.setdefault("dur", 2.0)
         if sc.get("say") and not os.environ.get("NO_VOICE"):
             mp3 = wd / f"v_{i:02d}.mp3"
-            d_ = speak(sc["say"], lang, mp3)
-            sc["dur"] = max(sc.get("dur", 1.5), d_ + 0.35)
-            voice_parts.append((i, mp3))
-    total = sum(s["dur"] for s in scenes)
-    nframes_total = int(round(total * FPS))
-    frame = 0; prev = None; prev_pose = None; cuts = []
-    t0 = 0.0
+            sc["dur"] = max(sc["dur"] if not sc.get("say") else 1.4, speak(sc["say"], lang, mp3) + .35)
+            voice.append((i, mp3))
+    total = sum(s["dur"] for s in scenes); nft = int(round(total * FPS))
+    frame = 0; t0 = 0.; starts = []; prev = {}
     for sc in scenes:
-        P = pose(sc["pose"])
-        v = viewport(P, sc, aspect)
-        start_v = prev if (prev is not None and prev_pose == sc["pose"]) else viewport(P, {"focus": "full"}, aspect)
-        if prev_pose != sc["pose"] and (sc.get("focus") in (None, "full")):
-            start_v = (v[0] + (v[2] - v[0]) * .06, v[1] + (v[3] - v[1]) * .06, v[2] - (v[2] - v[0]) * .06, v[3] - (v[3] - v[1]) * .06)
-        cuts.append((t0, sc))
+        starts.append(t0)
+        kind = sc.get("type", "pose")
         n = int(round(sc["dur"] * FPS))
-        hl = sc.get("hl", [])
         for i in range(n):
-            t = i / FPS
-            k = ease(min(1, t / 0.35))
-            a = [start_v[j] + (v[j] - start_v[j]) * k for j in range(4)]
-            push = 1 - 0.05 * (t / sc["dur"])
-            cx, cy = (a[0] + a[2]) / 2, (a[1] + a[3]) / 2
-            hw, hh = (a[2] - a[0]) / 2 * push, (a[3] - a[1]) / 2 * push
-            box = (cx - hw, cy - hh, cx + hw, cy + hh)
-            img = P["gray"]
-            if sc.get("all_red_intro"):
-                allm = np.clip(sum(P["masks"].values()), 0, 1)
-                img = tint(img, P["shade"], allm, RED, max(0.0, 1 - t / 1.4) * .95)
-            pulse = .93 + .07 * math.sin(t * 7)
-            for m, c in hl:
-                if m in P["masks"]:
-                    img = tint(img, P["shade"], P["masks"][m], GREEN if c == "g" else P["base_red"], min(1, t / .25) * pulse)
-            pil = Image.fromarray((np.clip(img, 0, 1) * 255).astype(np.uint8))
-            d0 = ImageDraw.Draw(pil)
-            scale_ref = (box[2] - box[0]) / aw          # بكسل الصورة لكل بكسل شاشة
-            if t > .35 and hl:
-                col = OKC if hl[0][1] == "g" else NOC
-                if sc.get("dots") and hl[0][0] in P["axis"]:
-                    p1, p2 = P["axis"][hl[0][0]]
-                    dots(d0, p1, p2, col, 20 * scale_ref)
-                if sc.get("arrows") and hl[0][0] in P["bbox"]:
-                    b = P["bbox"][hl[0][0]]; my = (b[1] + b[3]) / 2; off = 10 * scale_ref * math.sin(t * 10)
-                    s = 34 * scale_ref
-                    arrow(d0, (b[0] - 12 * scale_ref + off, my), "right", s)
-                    arrow(d0, (b[2] + 12 * scale_ref - off, my), "left", s)
-            view = crop(pil, box, (aw, ah))
-            fr = Image.new("RGB", (C.W, C.H), (250, 250, 250))
-            fr.paste(view, (ax, ay))
-            d = ImageDraw.Draw(fr)
-            prog = (frame + 1) / nframes_total
-            if fmt == "short":
-                d.rectangle((0, 0, C.W, ay), fill=(18, 18, 18))
-                C.text(d, C.W / 2, 18, spec["title"], F(92), YEL)
-                C.text(d, C.W / 2, 138, spec.get("subtitle", ""), F(50, "Bold"), (255, 255, 255))
-                d.rectangle((0, ay - 8, C.W * prog, ay), fill=YEL)
-                y = 1560
-                if sc.get("label") and t > .2:
-                    y += C.pill(d, C.W / 2, y, sc["label"], F(64 if len(sc["label"]) < 26 else 52), (20, 20, 20), (255, 255, 255), sc.get("icon")) + 16
-                if sc.get("note") and t > .9:
-                    C.pill(d, C.W / 2, y, sc["note"], F(42, "Bold"), OKC if sc.get("note_ok", True) else NOC, (255, 255, 255))
-                d.text((C.W - 30 - d.textlength(spec["brand"], font=F(30, "Bold")) if rtl else 30, C.H - 64), spec["brand"],
-                       font=F(30, "Bold"), fill=(120, 120, 120))
-            else:   # long: لوحة نص جانبية
-                px0 = 0 if rtl else aw
-                pw = C.W - aw
-                d.rectangle((px0, 0, px0 + pw, C.H), fill=(18, 18, 18))
-                d.rectangle((px0 + (pw - 10 if rtl else 0), 0, px0 + (pw if rtl else 10), C.H), fill=YEL)
-                xr = px0 + pw - 60 if rtl else px0 + 60
-                al = "r" if rtl else "l"
-                C.text(d, xr, 50, spec["title"], F(70), YEL, al)
-                C.text(d, xr, 150, spec.get("subtitle", ""), F(38, "Bold"), (210, 210, 210), al)
-                if sc.get("chapter"):
-                    C.text(d, xr, 260, sc["chapter"], F(40, "Bold"), (150, 150, 150), al)
-                y = 340
-                if sc.get("label") and t > .2:
-                    for ln in C.wrap(d, sc["label"], F(62), pw - 170):
-                        C.text(d, xr - (70 if rtl and sc.get("icon") else 0) + (0 if rtl else (70 if sc.get("icon") else 0)), y, ln, F(62), (255, 255, 255), al)
-                        y += 92
-                    if sc.get("icon"):
-                        icon_draw(d, xr - 28 if rtl else xr + 28, 340 + 50, 30, sc["icon"])
-                if sc.get("note") and t > .9:
-                    y += 20
-                    for ln in C.wrap(d, sc["note"], F(42, "Bold"), pw - 140):
-                        C.text(d, xr, y, ln, F(42, "Bold"), (120, 230, 140) if sc.get("note_ok", True) else (255, 120, 110), al)
-                        y += 66
-                d.rectangle((px0 + 60, C.H - 40, px0 + 60 + (pw - 120) * prog, C.H - 30), fill=YEL)
-                C.text(d, xr, C.H - 110, spec["brand"], F(32, "Bold"), (140, 140, 140), al)
-            if sc.get("cta") and t > .3:
-                bx = C.W / 2 if fmt == "short" else (px0 + pw / 2)
-                by = 1700 if fmt == "short" else 760
-                C.pill(d, bx, by, sc["cta"], F(48, "Bold"), YEL, (0, 0, 0))
-                if spec.get("site"):
-                    C.text(d, bx, by + 110, spec["site"], F(34, "Bold"), (150, 150, 150))
+            t = i / FPS; prog = (frame + 1) / nft
+            if kind == "card":
+                fr = card_frame(C, spec, sc, t, (W, H))
+            else:
+                fr = Image.new("RGB", (W, H), C.T["bg"])
+                if kind == "split":
+                    hw = aw // 2
+                    for j, side in enumerate(("left", "right")):
+                        sub = sc[side]
+                        view, _ = pose_view(C, sub, t, sc["dur"], (hw - 6, ah), None)
+                        fr.paste(view, (ax + j * (hw + 6), ay))
+                    d = ImageDraw.Draw(fr)
+                    d.rectangle((ax + hw - 3, ay, ax + hw + 3, ay + ah), fill=C.T["panel"])
+                    vs = sc.get("center", "VS"); f = C.font("head", 90)
+                    r_ = 85; cx_, cy_ = ax + hw, ay + ah * .45
+                    d.ellipse((cx_ - r_, cy_ - r_, cx_ + r_, cy_ + r_), fill=C.T["accent"], outline=C.T["panel"], width=8)
+                    C.text(d, cx_, cy_ - f.size * .62, vs, f, C.T["accent_txt"])
+                    for j, side in enumerate(("left", "right")):
+                        lab = sc[side].get("label")
+                        if lab:
+                            ff = C.fit(d, lab, "head", 64, hw - 60, 30)
+                            C.text(d, ax + j * (hw + 6) + hw / 2, ay + ah - ff.size * 2.2 - (120 if C.fmt == "short" and C.lang == "en" else 0),
+                                   lab, ff, (255, 255, 255), stroke=6, sfill=C.T["panel"])
+                else:
+                    key = sc["pose"]
+                    sb = prev.get("box") if prev.get("pose") == key else None
+                    view, vb = pose_view(C, sc, t, sc["dur"], (aw, ah), sb)
+                    fr.paste(view, (ax, ay))
+                d = ImageDraw.Draw(fr)
+                draw_chrome(fr, d, C, spec, sc, t, prog)
+                if sc.get("badge") and t > .15:
+                    f = C.font("head", 80); bx = ax + (aw - 120 if C.rtl else aw - 130); by = ay + (150 if C.lang == "ar" else 470)
+                    d.ellipse((bx - 80, by - 80, bx + 80, by + 80), fill=C.T["accent"], outline=C.T["panel"], width=8)
+                    C.text(d, bx, by - f.size * .62, sc["badge"], f, C.T["accent_txt"])
+                if sc.get("stamp") and t > .25:
+                    stamp(fr, C, sc["stamp"], sc.get("icon", "no"), ax + aw / 2, ay + ah * .22, 96 if C.fmt == "short" else 80)
             fr.save(wd / f"f_{frame:05d}.jpg", quality=90)
             frame += 1
-        prev, prev_pose = v, sc["pose"]
+        if kind == "pose":
+            P = pose(sc["pose"]); prev = {"pose": sc["pose"], "box": viewport(P, sc.get("focus"), aw / ah)}
+        else:
+            prev = {}
         t0 += sc["dur"]
 
-    # صوت: موسيقى/صوت معلّق اختياري + ووش عند القطع + نغمة صح/خطأ
-    inputs, filt, parts = [], [], []
-    inputs += ["-f", "lavfi", "-i", f"anoisesrc=d={total}:c=pink:a=0.0001"]
-    idx = 2
-    starts = [c[0] for c in cuts]
-    for i, mp3 in voice_parts:
-        inputs += ["-i", str(mp3)]
-        ms = int((starts[i] + 0.15) * 1000)
+    inputs = ["-f", "lavfi", "-i", f"anoisesrc=d={total}:c=pink:a=0.0001"]; filt, parts = [], []; idx = 2
+    for i, mp3 in voice:
+        inputs += ["-i", str(mp3)]; ms = int((starts[i] + .15) * 1000)
         filt.append(f"[{idx}]aresample=44100,volume=1.6,adelay={ms}|{ms}[a{idx}]"); parts.append(f"[a{idx}]"); idx += 1
-    music = spec.get("music")
-    if music and Path(music).exists():
-        inputs += ["-stream_loop", "-1", "-i", music]
-        filt.append(f"[{idx}]volume=0.10,atrim=0:{total:.2f}[a{idx}]"); parts.append(f"[a{idx}]"); idx += 1
-    for ct, sc in cuts:
-        inputs += ["-f", "lavfi", "-i", "anoisesrc=d=0.35:c=white:a=0.5"]
-        ms = int(ct * 1000)
+    for ct, sc in zip(starts, scenes):
+        inputs += ["-f", "lavfi", "-i", "anoisesrc=d=0.35:c=white:a=0.5"]; ms = int(ct * 1000)
         filt.append(f"[{idx}]highpass=f=800,lowpass=f=5000,afade=t=in:d=0.12,afade=t=out:st=0.15:d=0.2,volume=0.22,adelay={ms}|{ms}[a{idx}]")
         parts.append(f"[a{idx}]"); idx += 1
         if sc.get("icon"):
-            inputs += ["-f", "lavfi", "-i", f"sine=f={'880' if sc['icon']=='ok' else '160'}:d=0.25"]
-            ms = int((ct + .3) * 1000)
-            filt.append(f"[{idx}]afade=t=out:st=0.1:d=0.15,volume={'0.18' if sc['icon']=='ok' else '0.28'},adelay={ms}|{ms}[a{idx}]")
+            inputs += ["-f", "lavfi", "-i", f"sine=f={'880' if sc['icon'] == 'ok' else '160'}:d=0.25"]; ms = int((ct + .3) * 1000)
+            filt.append(f"[{idx}]afade=t=out:st=0.1:d=0.15,volume={'0.18' if sc['icon'] == 'ok' else '0.28'},adelay={ms}|{ms}[a{idx}]")
             parts.append(f"[a{idx}]"); idx += 1
-    fc = ";".join(filt) + f";[1]{''.join(parts)}amix=inputs={len(parts)+1}:normalize=0:duration=first,aformat=channel_layouts=stereo[aout]"
+    fc = ";".join(filt) + f";[1]{''.join(parts)}amix=inputs={len(parts) + 1}:normalize=0:duration=first,aformat=channel_layouts=stereo[aout]"
     subprocess.run(["ffmpeg", "-y", "-v", "error", "-framerate", str(FPS), "-i", str(wd / "f_%05d.jpg"), *inputs,
                     "-filter_complex", fc, "-map", "0:v", "-map", "[aout]", "-c:v", "libx264", "-preset", "veryfast",
                     "-crf", "20", "-pix_fmt", "yuv420p", "-c:a", "aac", "-t", f"{total:.2f}", str(out_path)], check=True)
     return out_path
 
 
-def debug_maps(out_dir):
+def debug_maps(out_dir, names=None):
     pal = [(46, 204, 113), (52, 152, 219), (241, 196, 15), (231, 76, 60), (155, 89, 182), (26, 188, 156), (230, 126, 34)]
-    for name in POSES:
+    Path(out_dir).mkdir(exist_ok=True, parents=True)
+    for name in names or POSES:
         P = pose(name); img = P["gray"].copy()
         for i, (m, mk) in enumerate(P["masks"].items()):
             img = tint(img, P["shade"], mk, np.array(pal[i % len(pal)]) / 255, .9)
         pil = Image.fromarray((img * 255).astype(np.uint8)); d = ImageDraw.Draw(pil)
+        f = ImageFont.truetype(str(FONTS / "Cairo-Bold.ttf"), max(24, pil.size[0] // 30))
         for m, b in P["bbox"].items():
-            d.text(((b[0] + b[2]) / 2 - 30, (b[1] + b[3]) / 2), m, font=F(36, "Bold"), fill=(0, 0, 0))
-        for m, (p1, p2) in P["axis"].items():
-            dots(d, p1, p2, (0, 0, 0), 12)
-        pil.thumbnail((700, 700)); pil.save(Path(out_dir) / f"dbg_{name}.jpg")
+            d.text(((b[0] + b[2]) / 2 - 30, (b[1] + b[3]) / 2), m, font=f, fill=(0, 0, 0))
+        pil.thumbnail((800, 800)); pil.save(Path(out_dir) / f"dbg_{name}.jpg")
 
 
 if __name__ == "__main__":
     if sys.argv[1] == "debug":
-        debug_maps(sys.argv[2])
+        debug_maps(sys.argv[2], sys.argv[3].split(",") if len(sys.argv) > 3 else None)
     else:
         render(json.loads(Path(sys.argv[1]).read_text(encoding="utf-8")), sys.argv[2])

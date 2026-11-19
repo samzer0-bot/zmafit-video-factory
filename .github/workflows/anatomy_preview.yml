@@ -2,32 +2,43 @@ name: معاينة فيديو التشريح (Anatomy preview)
 on:
   push:
     branches: [anatomy-preview]
-    paths: ["scripts/anatomy_video.py", "scripts/anatomy_specs/**", "assets/anatomy/**", ".github/workflows/anatomy_preview.yml"]
+    paths: ["scripts/anatomy_video.py", "scripts/anatomy_main.py", "assets/anatomy/**", ".github/workflows/anatomy_preview.yml"]
   workflow_dispatch:
 permissions:
   contents: write
 jobs:
   render:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 60
     strategy:
       fail-fast: false
-      max-parallel: 2
+      max-parallel: 3
       matrix:
-        spec: [squat_short_ar, squat_short_en, pushup_long_ar, pushup_long_en]
+        include:
+          - {lang: ar, format: shorts, template: mistake}
+          - {lang: ar, format: shorts, template: myth}
+          - {lang: en, format: shorts, template: rank}
+          - {lang: en, format: shorts, template: compare}
+          - {lang: ar, format: long, template: chapters}
+          - {lang: en, format: long, template: chapters}
+    env:
+      VIDEO_LANG: ${{ matrix.lang }}
     steps:
       - uses: actions/checkout@v4
-      - name: تثبيت ffmpeg
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg libraqm0 >/dev/null
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg libraqm0 >/dev/null
       - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
+        with: {python-version: "3.11"}
       - run: pip install -q pillow numpy edge-tts gTTS
       - name: رندر
-        run: python scripts/anatomy_video.py scripts/anatomy_specs/${{ matrix.spec }}.json ${{ matrix.spec }}.mp4
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python scripts/anatomy_main.py --format ${{ matrix.format }} --template ${{ matrix.template }}
       - name: نشر المعاينة
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          N=$(ls out/*.mp4 | head -1); B=$(basename "$N" .mp4)
+          P="${{ matrix.lang }}_${{ matrix.format }}_${{ matrix.template }}"
+          cp "out/$B.mp4" "$P.mp4"; cp "out/$B.jpg" "$P.jpg"; cp out/latest.json "$P.json"
           gh release view anatomy-preview >/dev/null 2>&1 || gh release create anatomy-preview --prerelease --title "Anatomy preview" --notes "معاينات" --target anatomy-preview || true
-          gh release upload anatomy-preview ${{ matrix.spec }}.mp4 --clobber
+          gh release upload anatomy-preview "$P.mp4" "$P.jpg" "$P.json" --clobber
