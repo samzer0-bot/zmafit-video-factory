@@ -46,6 +46,19 @@ def pick_template(fmt, hist):
     return random.choice(cand)
 
 
+def ask_json(prompt, tokens=16384):
+    payload = {"contents": [{"parts": [{"text": prompt}]}],
+               "generationConfig": {"temperature": 1.0, "responseMimeType": "application/json", "maxOutputTokens": tokens}}
+    for attempt in range(4):
+        out = ai.ask(payload)
+        txt = "".join(p.get("text", "") for p in out["candidates"][0]["content"]["parts"])
+        try:
+            return json.loads(re.sub(r"^```(json)?|```$", "", txt.strip()))
+        except Exception as e:
+            print(f"  ! JSON غير صالح ({e}) — إعادة الطلب {attempt + 1}")
+    raise RuntimeError("Gemini لم يُرجع JSON صالحاً")
+
+
 def gemini_content(template, fmt, hist):
     now = datetime.now(timezone.utc)
     mine = [h["topic"] for h in hist if h["lang"] == LANG][-40:]
@@ -82,16 +95,23 @@ Return JSON only:
   "claim": "for myth template only", "rank": 0, "chapter": "for long template only"}}],
 "compare": {{"left_pose": "", "left_muscles": [], "left_label": "", "right_pose": "", "right_muscles": [], "right_label": "", "say": ""}},
 "outro_label": "max 5 words", "outro_say": "closing sentence with a call to subscribe/save", "cta": "max 5 words"}}"""
-    payload = {"contents": [{"parts": [{"text": prompt}]}],
-               "generationConfig": {"temperature": 1.0, "responseMimeType": "application/json", "maxOutputTokens": 8192}}
-    for attempt in range(3):
-        out = ai.ask(payload)
-        txt = "".join(p.get("text", "") for p in out["candidates"][0]["content"]["parts"])
-        try:
-            return json.loads(re.sub(r"^```(json)?|```$", "", txt.strip()))
-        except Exception as e:
-            print(f"  ! JSON غير صالح ({e}) — إعادة الطلب {attempt + 1}")
-    raise RuntimeError("Gemini لم يُرجع JSON صالحاً")
+    if short:
+        return ask_json(prompt)
+    # الفيديو الطويل على مراحل: خطة الفصول أولاً ثم مشاهد كل فصل (لتفادي قطع الرد)
+    plan = ask_json(prompt + """
+IMPORTANT for this long video: do NOT write the beats now. Instead return the same JSON but replace "beats" with
+"chapters": [{"title": "chapter title", "focus": "what this chapter teaches, which poses and muscles"}] (3-4 chapters).""", 8192)
+    beats = []
+    for ch in (plan.get("chapters") or [])[:4]:
+        part = ask_json(f"""{prompt}
+
+We are writing ONE chapter of this long video. Topic: {plan.get('topic')}. Chapter: {ch.get('title')} — {ch.get('focus')}.
+Return JSON only: {{"beats": [4 to 6 beats in the same beat format, each with "chapter": "{ch.get('title')}"]}}""", 8192)
+        for b in part.get("beats", []):
+            b["chapter"] = ch.get("title", "")
+            beats.append(b)
+    plan["beats"] = beats
+    return plan
 
 
 def clean_beat(b):
