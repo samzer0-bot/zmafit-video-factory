@@ -31,5 +31,8 @@
  },
  "vup": {
   "desc": "V-up / leg raise on the floor (abs)"
+ },
+ "highplank": {
+  "desc": "high plank (straight-arm plank) seen from the side (abs/core)"
  }
 }
