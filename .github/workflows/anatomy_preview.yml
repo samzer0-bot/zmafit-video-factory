@@ -4,12 +4,15 @@ on:
     branches: [anatomy-preview]
     paths: ["scripts/anatomy_video.py", "scripts/anatomy_specs/**", "assets/anatomy/**", ".github/workflows/anatomy_preview.yml"]
   workflow_dispatch:
+permissions:
+  contents: write
 jobs:
   render:
     runs-on: ubuntu-latest
     timeout-minutes: 40
     strategy:
       fail-fast: false
+      max-parallel: 2
       matrix:
         spec: [squat_short_ar, squat_short_en, pushup_long_ar, pushup_long_en]
     steps:
@@ -22,7 +25,9 @@ jobs:
       - run: pip install -q pillow numpy edge-tts gTTS
       - name: رندر
         run: python scripts/anatomy_video.py scripts/anatomy_specs/${{ matrix.spec }}.json ${{ matrix.spec }}.mp4
-      - uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.spec }}
-          path: ${{ matrix.spec }}.mp4
+      - name: نشر المعاينة
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view anatomy-preview >/dev/null 2>&1 || gh release create anatomy-preview --prerelease --title "Anatomy preview" --notes "معاينات" --target anatomy-preview || true
+          gh release upload anatomy-preview ${{ matrix.spec }}.mp4 --clobber

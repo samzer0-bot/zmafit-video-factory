@@ -27,13 +27,16 @@ def speak(text, lang, out):
     """تعليق صوتي مجاني: edge-tts (نفس صوت المصنع) ثم gTTS احتياطاً."""
     voice, rate = VOICES[lang]
     voice = os.environ.get("TTS_VOICE", voice)
-    try:
-        import edge_tts
-        asyncio.run(edge_tts.Communicate(text, voice, rate=rate).save(str(out)))
-        if Path(out).stat().st_size > 1000:
-            return _dur(out)
-    except Exception as e:                       # noqa: BLE001
-        print("  ! edge-tts:", e)
+    import time
+    for attempt, v in enumerate([voice, voice, voice, "en-US-GuyNeural" if lang == "en" else "ar-SA-HamedNeural"]):
+        try:
+            import edge_tts
+            asyncio.run(edge_tts.Communicate(text, v, rate=rate).save(str(out)))
+            if Path(out).stat().st_size > 1000:
+                return _dur(out)
+        except Exception as e:                   # noqa: BLE001
+            print(f"  ! edge-tts ({v}, محاولة {attempt + 1}):", e)
+            time.sleep(3 + attempt * 3)
     from gtts import gTTS
     gTTS(text=text, lang=lang).save(str(out))
     return _dur(out)
