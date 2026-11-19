@@ -70,6 +70,12 @@ def gemini_content(template, fmt, hist):
                   if not EN else
                   "Write ALL text in punchy, natural American English. Audience: busy people training at home.")
     short = fmt == "shorts"
+    offer = ("outro_say must naturally invite viewers to get our book «خريطة التشريح البصري لتدريب وزن الجسم» "
+             "(the link is in the description) to see every muscle and the home exercises that build it, then to subscribe. "
+             "cta must be short, e.g. «الكتاب في الوصف»."
+             if not EN else
+             "outro_say must naturally invite viewers to get their personalized 4-week home workout plan from zmafit.com "
+             "(link in the description), then to subscribe. cta must be short, e.g. \"Plan in description\".")
     prompt = f"""You are the head coach and scriptwriter of a fitness YouTube channel ({config.BRAND}, {config.SITE}).
 Create ONE {'YouTube Short (25-45 seconds total narration)' if short else 'long YouTube video (5-7 minutes of narration)'} using animated anatomy drawings.
 Template: {template.upper()} — {TEMPLATE_GUIDE[template]}
@@ -83,6 +89,7 @@ Inspired by what trends now in home fitness (abs, glutes, triceps, V-taper shoul
 Do NOT reuse these topics of this channel: {mine}
 Do NOT use these topics recently covered by our other channel: {other_recent}
 {lang_rules}
+{offer}
 Accuracy matters: only state anatomy and training facts that are correct and widely accepted. No invented statistics or percentages.
 
 Return JSON only:
