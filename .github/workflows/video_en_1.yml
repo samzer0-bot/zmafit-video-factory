@@ -1,9 +1,7 @@
 name: English TikTok factory — ZMAFIT
 
 on:
-  schedule:
-    - cron: "27 21 * * *"         # 1 short per day (reduced from 2 to avoid repetitive-content policy)
-    - cron: "11 16 * * 3,0"        # 2 long videos/week: Wed, Sun 16:11 UTC
+  # الجدولة متوقفة (22 نوفمبر): كل الإنتاج صار فيديوهات تشريح عبر anatomy.yml — يبقى التشغيل اليدوي فقط
   workflow_dispatch:
     inputs:
       format:

@@ -3,10 +3,10 @@ name: فيديوهات التشريح — القناتان (Anatomy factory)
 # إضافة للمصنع الحالي (لا يستبدله). عدد قليل أسبوعياً لتفادي سياسة المحتوى المتكرر.
 on:
   schedule:
-    - cron: "47 13 * * 1,4"      # Muscle Arabia — شورت (الإثنين والخميس)
-    - cron: "41 16 * * 2,5"      # ZMAFIT — Short (Tue & Fri)
-    - cron: "29 12 1,15 * *"     # Muscle Arabia — فيديو طويل (1 و15 من الشهر)
-    - cron: "37 15 8,22 * *"     # ZMAFIT — long video (8th & 22nd)
+    - cron: "23 18 * * *"        # Muscle Arabia — شورت يومياً 19:23 بتوقيت الجزائر
+    - cron: "27 21 * * *"        # ZMAFIT — Short daily (4:27pm US Eastern)
+    - cron: "13 11 * * 2,6"      # Muscle Arabia — فيديو طويل الثلاثاء والسبت
+    - cron: "11 16 * * 3,0"      # ZMAFIT — long video Wed & Sun
   workflow_dispatch:
     inputs:
       lang: {description: "ar / en", type: choice, options: [ar, en], default: ar}
@@ -17,13 +17,13 @@ permissions:
   contents: write
 
 concurrency:
-  group: anatomy-factory
+  group: anatomy-${{ github.event.schedule || inputs.lang }}
   cancel-in-progress: false
 
 jobs:
   render:
     runs-on: ubuntu-latest
-    timeout-minutes: 75
+    timeout-minutes: 150
     env:
       PYTHONUNBUFFERED: "1"
     steps:
@@ -33,10 +33,10 @@ jobs:
         run: |
           S="${{ github.event.schedule }}"
           case "$S" in
-            "47 13 * * 1,4")  L=ar; F=shorts ;;
-            "41 16 * * 2,5")  L=en; F=shorts ;;
-            "29 12 1,15 * *") L=ar; F=long ;;
-            "37 15 8,22 * *") L=en; F=long ;;
+            "23 18 * * *")   L=ar; F=shorts ;;
+            "27 21 * * *")   L=en; F=shorts ;;
+            "13 11 * * 2,6") L=ar; F=long ;;
+            "11 16 * * 3,0") L=en; F=long ;;
             *) L="${{ inputs.lang }}"; F="${{ inputs.format }}" ;;
           esac
           echo "lang=$L" >> $GITHUB_OUTPUT; echo "format=$F" >> $GITHUB_OUTPUT
@@ -80,6 +80,26 @@ jobs:
           req = urllib.request.Request(os.environ["HOOK"], data=json.dumps(m, ensure_ascii=False).encode(),
                                        headers={"Content-Type": "application/json"})
           print(urllib.request.urlopen(req, timeout=120).read().decode()[:200])
+          PY
+      - name: إرسال إلى تيليغرام (جاهز لتيك توك)
+        if: steps.cfg.outputs.lang == 'en' && steps.cfg.outputs.format == 'shorts'
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          [ -z "$TELEGRAM_BOT_TOKEN" ] && { echo "no telegram"; exit 0; }
+          python - <<'PY'
+          import json, os, subprocess, glob
+          m = json.load(open('out/latest.json', encoding='utf-8'))
+          tags = " ".join("#" + t.replace("#", "").replace(" ", "") for t in m.get("tags", []) if t.strip())
+          caption = f"{m['title']}\n\n{m['description']}\n\n{tags}"[:1000]
+          vf = glob.glob('out/*.mp4')[0]
+          subprocess.run(["curl", "-s", "-F", f"chat_id={os.environ['TELEGRAM_CHAT_ID']}", "-F", f"video=@{vf}",
+                          "-F", "caption=🎬 New TikTok video ready — caption below 👇", "-F", "supports_streaming=true",
+                          f"https://api.telegram.org/bot{os.environ['TELEGRAM_BOT_TOKEN']}/sendVideo"], check=True)
+          subprocess.run(["curl", "-s", "--data-urlencode", f"chat_id={os.environ['TELEGRAM_CHAT_ID']}",
+                          "--data-urlencode", f"text={caption}",
+                          f"https://api.telegram.org/bot{os.environ['TELEGRAM_BOT_TOKEN']}/sendMessage"], check=True)
           PY
       - name: حفظ السجل (لمنع التكرار)
         run: |
