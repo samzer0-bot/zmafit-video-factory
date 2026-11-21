@@ -49,12 +49,13 @@ def ask_json(parts, tokens=4096):
 
 
 def propose(n, cat, log):
-    failed = [k for k, v in log.items() if v.get("fails", 0) >= 2]
+    failed = [f"{k} ({v.get('name', '')})" for k, v in log.items() if v.get("fails", 0) >= 2]
     have = {k: v["desc"] for k, v in cat.items()}
     d = ask_json([{"text": f"""We have anatomy drawings of these home/bodyweight exercises: {json.dumps(have)}.
-Already tried and failed (do NOT propose): {failed}.
+Already tried and failed — the image model cannot draw them; do NOT propose these or variants of them: {failed}.
 Propose {n} NEW, popular, trending home exercises (no gym machines) that are easy to draw as ONE clear static frame
-(prefer standing, kneeling, or simple floor positions; avoid hanging, complex twists, equipment other than a bench/box/wall).
+STRONGLY prefer standing exercises seen from the front or side (squat/lunge/raise/hinge/stretch variations, standing core moves),
+then kneeling ones. Avoid: lying on the floor, supporting body weight on hands/forearms, hanging, twists, holding objects.
 Return JSON: {{"exercises": [{{"id": "short_snake_case_id", "name": "Exercise name",
 "aspect": "portrait or landscape", "pose": "precise single-frame body position, which way he faces, what touches the floor",
 "view": "front / side / back / three-quarter", "muscles": ["2-3 ids from {MUSCLES}"]}}]}}"""}])
@@ -137,7 +138,7 @@ def main():
     for e in propose(n, cat, log):
         print(f"• {e['id']} — {e['name']} | {e['muscles']}")
         best = None
-        for v in range(2):
+        for v in range(3):
             p = OUT / f"{e['id']}_{v + 1}.png"
             if not cloudflare(e, int(time.time()) % 100000 + v, p): continue
             ok, d, seeds = review(e, p)

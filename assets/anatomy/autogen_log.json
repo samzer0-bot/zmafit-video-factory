@@ -1,20 +1,75 @@
 {
  "glute_bridge": {
   "name": "Glute Bridge",
-  "fails": 1,
+  "fails": 2,
   "last": "2026-11-21T23:20:04.830074+00:00",
   "status": "rejected"
  },
  "bench_dip": {
   "name": "Bench Dip",
-  "fails": 1,
+  "fails": 2,
   "last": "2026-11-21T23:24:50.606318+00:00",
   "status": "rejected"
  },
  "side_plank": {
   "name": "Side Plank",
-  "fails": 1,
+  "fails": 2,
   "last": "2026-11-21T23:31:18.009853+00:00",
+  "status": "rejected"
+ },
+ "bridge": {
+  "name": "Glute Bridge",
+  "fails": 2,
+  "status": "rejected"
+ },
+ "dips": {
+  "name": "Bench Dips",
+  "fails": 2,
+  "status": "rejected"
+ },
+ "superman": {
+  "name": "Superman",
+  "fails": 2,
+  "status": "rejected"
+ },
+ "pullup": {
+  "name": "Pull-up",
+  "fails": 2,
+  "status": "rejected"
+ },
+ "chinup": {
+  "name": "Chin-up",
+  "fails": 2,
+  "status": "rejected"
+ },
+ "plank": {
+  "name": "Forearm Plank",
+  "fails": 2,
+  "status": "rejected"
+ },
+ "forearm_plank": {
+  "name": "Forearm Plank",
+  "fails": 2,
+  "status": "rejected"
+ },
+ "bird_dog": {
+  "name": "Bird Dog",
+  "fails": 2,
+  "status": "rejected"
+ },
+ "birddog": {
+  "name": "Bird Dog",
+  "fails": 2,
+  "status": "rejected"
+ },
+ "hip_thrust": {
+  "name": "Hip Thrust",
+  "fails": 2,
+  "status": "rejected"
+ },
+ "single_leg_bridge": {
+  "name": "Single-leg Glute Bridge",
+  "fails": 2,
   "status": "rejected"
  }
 }
