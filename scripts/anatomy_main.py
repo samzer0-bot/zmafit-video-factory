@@ -64,7 +64,8 @@ def gemini_content(template, fmt, hist):
     mine = [h["topic"] for h in hist if h["lang"] == LANG][-40:]
     other_recent = [h["topic"] for h in hist if h["lang"] != LANG and
                     datetime.fromisoformat(h["date"]) > now - timedelta(days=10)]
-    cat = "\n".join(f"- {k}: {v['desc']} | muscles: {', '.join(m for m in AV.POSES.get(k, {}) if not m.startswith('_'))}" for k, v in CATALOG.items() if k in AV.POSES)
+    recent = (now - timedelta(days=7)).date().isoformat()
+    cat = "\n".join(f"- {k}{' (NEW)' if v.get('added', '') >= recent else ''}: {v['desc']} | muscles: {', '.join(m for m in AV.POSES.get(k, {}) if not m.startswith('_'))}" for k, v in CATALOG.items() if k in AV.POSES)
     lang_rules = ("Write ALL on-screen text and narration in natural, energetic Modern Standard Arabic (simple, clear). "
                   "Audience: Arab beginners training at home without equipment."
                   if not EN else
@@ -82,7 +83,7 @@ Template: {template.upper()} — {TEMPLATE_GUIDE[template]}
 
 Available drawings (pose id: description | muscles that can be highlighted):
 {cat}
-Use ONLY these pose ids and ONLY the listed muscle ids for each pose.
+Use ONLY these pose ids and ONLY the listed muscle ids for each pose. Prefer drawings marked (NEW) when they fit the topic.
 
 Pick a fresh, specific, genuinely useful topic that fits the template and the drawings (an exercise, a muscle, a common mistake or myth).
 Inspired by what trends now in home fitness (abs, glutes, triceps, V-taper shoulders, legs, push-ups, squats), but with original angle and wording.
