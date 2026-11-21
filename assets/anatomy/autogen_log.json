@@ -1,0 +1,20 @@
+{
+ "glute_bridge": {
+  "name": "Glute Bridge",
+  "fails": 1,
+  "last": "2026-11-21T23:20:04.830074+00:00",
+  "status": "rejected"
+ },
+ "bench_dip": {
+  "name": "Bench Dip",
+  "fails": 1,
+  "last": "2026-11-21T23:24:50.606318+00:00",
+  "status": "rejected"
+ },
+ "side_plank": {
+  "name": "Side Plank",
+  "fails": 1,
+  "last": "2026-11-21T23:31:18.009853+00:00",
+  "status": "rejected"
+ }
+}
