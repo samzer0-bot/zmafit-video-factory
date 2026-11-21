@@ -71,5 +71,23 @@
   "name": "Single-leg Glute Bridge",
   "fails": 2,
   "status": "rejected"
+ },
+ "good_morning": {
+  "name": "Good Morning",
+  "fails": 1,
+  "last": "2026-11-21T23:42:57.205129+00:00",
+  "status": "rejected"
+ },
+ "side_leg_raise": {
+  "name": "Side Leg Raise",
+  "fails": 1,
+  "last": "2026-11-21T23:47:45.566199+00:00",
+  "status": "rejected"
+ },
+ "standing_oblique_cru": {
+  "name": "Standing Oblique Crunch",
+  "fails": 1,
+  "last": "2026-11-21T23:55:42.009285+00:00",
+  "status": "rejected"
  }
 }
