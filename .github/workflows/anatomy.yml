@@ -7,6 +7,16 @@ on:
     - cron: "27 21 * * *"        # ZMAFIT — Short daily (4:27pm US Eastern)
     - cron: "13 11 * * 2,6"      # Muscle Arabia — فيديو طويل الثلاثاء والسبت
     - cron: "11 16 * * 3,0"      # ZMAFIT — long video Wed & Sun
+    # مواعيد احتياطية: جدولة GitHub تتأخر ساعات أو تُسقط التشغيل أحياناً.
+    # كل احتياطي يتحقق من السجل ولا ينشر إن كان فيديو اليوم قد نُشر بالفعل.
+    - cron: "43 20 * * *"        # احتياطي 1 — شورت عربي
+    - cron: "13 23 * * *"        # احتياطي 2 — شورت عربي
+    - cron: "47 22 * * *"        # backup 1 — EN short
+    - cron: "49 23 * * *"        # backup 2 — EN short
+    - cron: "13 14 * * 2,6"      # احتياطي 1 — طويل عربي
+    - cron: "13 18 * * 2,6"      # احتياطي 2 — طويل عربي
+    - cron: "11 19 * * 3,0"      # backup 1 — EN long
+    - cron: "21 22 * * 3,0"      # backup 2 — EN long
   workflow_dispatch:
     inputs:
       lang: {description: "ar / en", type: choice, options: [ar, en], default: ar}
@@ -33,18 +43,43 @@ jobs:
         run: |
           S="${{ github.event.schedule }}"
           case "$S" in
-            "23 18 * * *")   L=ar; F=shorts ;;
-            "27 21 * * *")   L=en; F=shorts ;;
-            "13 11 * * 2,6") L=ar; F=long ;;
-            "11 16 * * 3,0") L=en; F=long ;;
+            "23 18 * * *"|"43 20 * * *"|"13 23 * * *")          L=ar; F=shorts ;;
+            "27 21 * * *"|"47 22 * * *"|"49 23 * * *")          L=en; F=shorts ;;
+            "13 11 * * 2,6"|"13 14 * * 2,6"|"13 18 * * 2,6")    L=ar; F=long ;;
+            "11 16 * * 3,0"|"11 19 * * 3,0"|"21 22 * * 3,0")    L=en; F=long ;;
             *) L="${{ inputs.lang }}"; F="${{ inputs.format }}" ;;
           esac
           echo "lang=$L" >> $GITHUB_OUTPUT; echo "format=$F" >> $GITHUB_OUTPUT
-      - run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg libraqm0 >/dev/null
+      - name: هل نُشر فيديو اليوم بالفعل؟ (لمنع التكرار مع المواعيد الاحتياطية)
+        id: guard
+        env:
+          L: ${{ steps.cfg.outputs.lang }}
+          F: ${{ steps.cfg.outputs.format }}
+          EV: ${{ github.event_name }}
+        run: |
+          git pull -q --ff-only || true
+          python - <<'PY'
+          import json, os, datetime
+          skip = "false"
+          if os.environ["EV"] == "schedule":
+              today = datetime.datetime.now(datetime.timezone.utc).date().isoformat()
+              try: h = json.load(open("assets/anatomy/history.json", encoding="utf-8"))
+              except Exception: h = []
+              if any(x.get("date", "")[:10] == today and x.get("lang") == os.environ["L"]
+                     and x.get("format") == os.environ["F"] for x in h):
+                  skip = "true"
+          print("already published today:", skip)
+          open(os.environ["GITHUB_OUTPUT"], "a").write(f"skip={skip}\n")
+          PY
+      - if: steps.guard.outputs.skip != 'true'
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg libraqm0 >/dev/null
       - uses: actions/setup-python@v5
+        if: steps.guard.outputs.skip != 'true'
         with: {python-version: "3.11"}
-      - run: pip install -q pillow numpy edge-tts gTTS
+      - if: steps.guard.outputs.skip != 'true'
+        run: pip install -q pillow numpy edge-tts gTTS
       - name: إنتاج الفيديو
+        if: steps.guard.outputs.skip != 'true'
         env:
           VIDEO_LANG: ${{ steps.cfg.outputs.lang }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
@@ -53,6 +88,7 @@ jobs:
           YT_PRIVACY: public
         run: python scripts/anatomy_main.py --format ${{ steps.cfg.outputs.format }} --template "${{ inputs.template }}"
       - name: نشر الإصدار
+        if: steps.guard.outputs.skip != 'true'
         id: rel
         env:
           GH_TOKEN: ${{ github.token }}
@@ -65,6 +101,7 @@ jobs:
           echo "video_url=$BASE/$B.mp4" >> $GITHUB_OUTPUT
           echo "thumb_url=$BASE/$B.jpg" >> $GITHUB_OUTPUT
       - name: إشعار Make (يوتيوب + فيسبوك)
+        if: steps.guard.outputs.skip != 'true'
         env:
           HOOK: ${{ steps.cfg.outputs.lang == 'en' && secrets.MAKE_WEBHOOK_EN || secrets.MAKE_WEBHOOK }}
           VIDEO_URL: ${{ steps.rel.outputs.video_url }}
@@ -82,7 +119,7 @@ jobs:
           print(urllib.request.urlopen(req, timeout=120).read().decode()[:200])
           PY
       - name: إرسال إلى تيليغرام (جاهز لتيك توك)
-        if: steps.cfg.outputs.lang == 'en' && steps.cfg.outputs.format == 'shorts'
+        if: steps.guard.outputs.skip != 'true' && steps.cfg.outputs.lang == 'en' && steps.cfg.outputs.format == 'shorts'
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
@@ -102,6 +139,7 @@ jobs:
                           f"https://api.telegram.org/bot{os.environ['TELEGRAM_BOT_TOKEN']}/sendMessage"], check=True)
           PY
       - name: حفظ السجل (لمنع التكرار)
+        if: steps.guard.outputs.skip != 'true'
         run: |
           git config user.name "video-factory"; git config user.email "actions@github.com"
           git add assets/anatomy/history.json || true
