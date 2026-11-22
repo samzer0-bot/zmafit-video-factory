@@ -58,7 +58,8 @@ STRONGLY prefer standing exercises seen from the front or side (squat/lunge/rais
 then kneeling ones. Avoid: lying on the floor, supporting body weight on hands/forearms, hanging, twists, holding objects.
 Return JSON: {{"exercises": [{{"id": "short_snake_case_id", "name": "Exercise name",
 "aspect": "portrait or landscape", "pose": "precise single-frame body position, which way he faces, what touches the floor",
-"view": "front / side / back / three-quarter", "muscles": ["2-3 ids from {MUSCLES}"]}}]}}"""}])
+"view": "front / side / back / three-quarter",
+"ref": "id of the existing drawing above whose BODY POSITION is closest (used as pose reference)", "muscles": ["2-3 ids from {MUSCLES}"]}}]}}"""}])
     out = []
     for e in d.get("exercises", []):
         eid = re.sub(r"[^a-z0-9_]", "", str(e.get("id", "")).lower())[:20]
@@ -69,10 +70,11 @@ Return JSON: {{"exercises": [{{"id": "short_snake_case_id", "name": "Exercise na
 
 
 def cloudflare(e, seed, dest):
-    ref = Image.open(A / "front.jpg").convert("RGB"); ref.thumbnail((500, 500))
+    rp = A / f"{e.get('ref', '')}.jpg"
+    ref = Image.open(rp if rp.exists() else A / "front.jpg").convert("RGB"); ref.thumbnail((500, 500))
     buf = io.BytesIO(); ref.save(buf, "PNG")
     w, h = (768, 1344) if e.get("aspect") == "portrait" else (1344, 768)
-    prompt = (f"Use image 0 only as the style and character reference. {STYLE} Exercise: {e['name']}. "
+    prompt = (f"Image 0 is the style and character reference; redraw the SAME man in the SAME drawing style but in a NEW body position. {STYLE} Exercise: {e['name']}. "
               f"Pose ({e.get('view', 'side')} view): {e['pose']}. Red muscles: {', '.join(e['muscles'])}.")
     b = uuid.uuid4().hex; body = b""
     for k, v in {"prompt": prompt, "width": str(w), "height": str(h), "seed": str(seed)}.items():
