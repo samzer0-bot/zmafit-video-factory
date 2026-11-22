@@ -22,5 +22,16 @@
    "pushup3q",
    "squat"
   ]
+ },
+ {
+  "date": "2026-11-22T20:47:00.041507+00:00",
+  "lang": "en",
+  "format": "shorts",
+  "template": "compare",
+  "topic": "Squat vs Sumo Squat: Quad vs Inner Thigh Activation",
+  "poses": [
+   "squat",
+   "sumo"
+  ]
  }
 ]
