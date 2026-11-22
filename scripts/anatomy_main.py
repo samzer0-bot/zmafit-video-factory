@@ -5,7 +5,7 @@
 
 المخرجات بنفس شكل main.py (out/<name>.mp4/.jpg/.json + out/latest.json) ليرفعها سيناريو Make الحالي.
 """
-import argparse, json, random, re, shutil, sys
+import argparse, time, json, random, re, shutil, sys
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
@@ -203,8 +203,11 @@ def main():
     hist = load_hist()
     template = a.template or pick_template(fmt, hist)
     print(f"=== {LANG} | {fmt} | قالب: {template} ===")
-    c = gemini_content(template, fmt, hist)
-    print("  الموضوع:", c.get("topic"))
+    for attempt in range(3):                       # الموديل الاحتياطي يرد أحياناً بلا مشاهد: نعيد الطلب
+        c = gemini_content(template, fmt, hist)
+        print("  الموضوع:", c.get("topic"))
+        if any(isinstance(b, dict) for b in (c.get("beats") or [])): break
+        print(f"  رد بلا مشاهد — محاولة جديدة ({attempt + 1}/3)"); time.sleep(20)
     scenes = build_scenes(template, c)
     spec = {"format": "short" if fmt == "shorts" else "long", "lang": LANG,
             "title": ai.clean(c.get("screen_title", "")), "subtitle": ai.clean(c.get("screen_subtitle", "")),
