@@ -61,5 +61,10 @@
  },
  "wallsit": {
   "desc": "wall sit, back against the wall, knees 90 degrees (quads)"
+ },
+ "high_knee_hold": {
+  "desc": "Standing High Knee: standing tall on one leg, opposite knee driven up high with thigh parallel to floor, arms bent in athletic running pose, facing forward (front view)",
+  "added": "2026-11-22",
+  "auto": true
  }
 }

@@ -74,14 +74,14 @@
  },
  "good_morning": {
   "name": "Good Morning",
-  "fails": 1,
-  "last": "2026-11-21T23:42:57.205129+00:00",
+  "fails": 2,
+  "last": "2026-11-22T00:20:39.182999+00:00",
   "status": "rejected"
  },
  "side_leg_raise": {
   "name": "Side Leg Raise",
-  "fails": 1,
-  "last": "2026-11-21T23:47:45.566199+00:00",
+  "fails": 2,
+  "last": "2026-11-22T00:23:38.479112+00:00",
   "status": "rejected"
  },
  "standing_oblique_cru": {
@@ -89,5 +89,11 @@
   "fails": 1,
   "last": "2026-11-21T23:55:42.009285+00:00",
   "status": "rejected"
+ },
+ "high_knee_hold": {
+  "name": "Standing High Knee",
+  "fails": 0,
+  "last": "2026-11-22T00:24:14.098961+00:00",
+  "status": "added"
  }
 }
