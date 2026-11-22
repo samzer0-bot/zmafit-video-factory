@@ -1,0 +1,466 @@
+{
+ "_note": "خطة الشهر: الوكيل يأخذ أول موضوع لم يُنشر من نفس الصيغة. عدّل أو أضف بحرية.",
+ "items": [
+  {
+   "id": "ar-s01",
+   "format": "shorts",
+   "template": "mistake",
+   "topic": "الكرنش وحده لا يكفي للبطن: ماذا يشغل الكرنش وماذا يهمل",
+   "title": "تتمرن البطن بالكرنش فقط؟ أنت تُهمل جزءاً مهماً",
+   "poses": [
+    "crunch",
+    "vup",
+    "highplank"
+   ]
+  },
+  {
+   "id": "ar-s02",
+   "format": "shorts",
+   "template": "compare",
+   "topic": "الضغط العادي مقابل الضغط المائل (القدمان مرفوعتان)",
+   "title": "الضغط العادي أم المائل؟ الفرق في صدرك وأكتافك",
+   "poses": [
+    "pushup",
+    "decline"
+   ]
+  },
+  {
+   "id": "ar-s03",
+   "format": "shorts",
+   "template": "myth",
+   "topic": "خرافات السكوات للمبتدئين (الركبة، العمق، الظهر)",
+   "title": "السكوات يضر الركبة؟ 3 خرافات يصدقها الجميع",
+   "poses": [
+    "squat",
+    "side",
+    "front"
+   ]
+  },
+  {
+   "id": "ar-s04",
+   "format": "shorts",
+   "template": "rank",
+   "topic": "ترتيب العضلات التي يشغلها تمرين الطعن",
+   "title": "تمرين الطعن يبني هذه العضلات بالترتيب",
+   "poses": [
+    "lunge",
+    "back",
+    "side"
+   ]
+  },
+  {
+   "id": "ar-s05",
+   "format": "shorts",
+   "template": "mistake",
+   "topic": "أخطاء تمرين الضغط في البيت (الورك، المرفقين، المدى)",
+   "title": "خطأ في الضغط يسرق نتيجة صدرك",
+   "poses": [
+    "pushup",
+    "pushup3q",
+    "highplank"
+   ]
+  },
+  {
+   "id": "ar-s06",
+   "format": "shorts",
+   "template": "myth",
+   "topic": "هل تمارين البطن تحرق دهون البطن؟ (خرافة الحرق الموضعي)",
+   "title": "تمارين البطن تُذيب الكرش؟ الحقيقة التي لا يقولها أحد",
+   "poses": [
+    "crunch",
+    "vup",
+    "front"
+   ]
+  },
+  {
+   "id": "ar-s07",
+   "format": "shorts",
+   "template": "rank",
+   "topic": "ترتيب العضلات في تمرين البايك للأكتاف",
+   "title": "البايك: أقوى تمرين أكتاف بدون أوزان؟",
+   "poses": [
+    "pike",
+    "front",
+    "side"
+   ]
+  },
+  {
+   "id": "ar-s08",
+   "format": "shorts",
+   "template": "compare",
+   "topic": "الكرنش مقابل V-up: أيهما يشغل البطن أكثر",
+   "title": "الكرنش أم V-up؟ أيهما يشغل بطنك أكثر",
+   "poses": [
+    "crunch",
+    "vup"
+   ]
+  },
+  {
+   "id": "ar-s09",
+   "format": "shorts",
+   "template": "mistake",
+   "topic": "أخطاء تمرين الجلوس على الحائط",
+   "title": "أخطاء تمرين الحائط تريح فخذك بدل أن تتعبه",
+   "poses": [
+    "wallsit",
+    "squat"
+   ]
+  },
+  {
+   "id": "ar-s10",
+   "format": "shorts",
+   "template": "rank",
+   "topic": "ترتيب العضلات في تمرين الصعود على الدرج/الصندوق",
+   "title": "الصعود على الدرج: تمرين أرجل كامل في بيتك",
+   "poses": [
+    "stepup",
+    "back",
+    "front"
+   ]
+  },
+  {
+   "id": "ar-s11",
+   "format": "shorts",
+   "template": "myth",
+   "topic": "خرافات عضلة السمانة وتمرين رفع الكعبين",
+   "title": "السمانة لا تكبر أبداً؟ 3 خرافات عن عضلة الساق",
+   "poses": [
+    "calfraise",
+    "back",
+    "front"
+   ]
+  },
+  {
+   "id": "ar-s12",
+   "format": "shorts",
+   "template": "compare",
+   "topic": "السكوات العادي مقابل سكوات السومو",
+   "title": "سكوات عادي أم سومو؟ هذه العضلة تصنع الفرق",
+   "poses": [
+    "squat",
+    "sumo"
+   ]
+  },
+  {
+   "id": "ar-s13",
+   "format": "shorts",
+   "template": "mistake",
+   "topic": "أخطاء ركلة الأرداف (تقوس الظهر، السرعة)",
+   "title": "ركلة الأرداف: خطأ يحولها لتمرين ظهر",
+   "poses": [
+    "kickback",
+    "back",
+    "side"
+   ]
+  },
+  {
+   "id": "ar-s14",
+   "format": "shorts",
+   "template": "rank",
+   "topic": "ترتيب العضلات في الضغط المائل",
+   "title": "الضغط المائل يبني أعلى الصدر؟ ترتيب العضلات",
+   "poses": [
+    "decline",
+    "pushup3q"
+   ]
+  },
+  {
+   "id": "ar-s15",
+   "format": "shorts",
+   "template": "myth",
+   "topic": "خرافات البلانك (المدة الطويلة، البطن فقط)",
+   "title": "البلانك 5 دقائق أفضل؟ خرافات البلانك",
+   "poses": [
+    "highplank",
+    "side"
+   ]
+  },
+  {
+   "id": "ar-s16",
+   "format": "shorts",
+   "template": "compare",
+   "topic": "الطعن الأمامي مقابل الطعن الجانبي",
+   "title": "الطعن الأمامي أم الجانبي؟ عضلات مختلفة تماماً",
+   "poses": [
+    "lunge",
+    "sidelunge"
+   ]
+  },
+  {
+   "id": "ar-s17",
+   "format": "shorts",
+   "template": "compare",
+   "topic": "تسلق الجبل مقابل البلانك للبطن",
+   "title": "تسلق الجبل أم البلانك؟ أيهما لبطنك",
+   "poses": [
+    "climber",
+    "highplank"
+   ]
+  },
+  {
+   "id": "ar-s18",
+   "format": "shorts",
+   "template": "rank",
+   "topic": "الضغط لا يبني الصدر فقط: ترتيب كل العضلات",
+   "title": "الضغط لا يبني الصدر فقط! ترتيب العضلات",
+   "poses": [
+    "pushup3q",
+    "pushup",
+    "back"
+   ]
+  },
+  {
+   "id": "ar-s19",
+   "format": "shorts",
+   "template": "myth",
+   "topic": "خرافة: لا يمكن بناء الذراع بدون أوزان",
+   "title": "لا يمكنك بناء الذراع بدون أوزان؟ خرافة",
+   "poses": [
+    "biceps",
+    "back",
+    "pushup"
+   ]
+  },
+  {
+   "id": "ar-s20",
+   "format": "shorts",
+   "template": "compare",
+   "topic": "الضغط العادي مقابل البايك: صدر أم أكتاف",
+   "title": "الضغط أم البايك؟ صدر أم أكتاف",
+   "poses": [
+    "pushup",
+    "pike"
+   ]
+  },
+  {
+   "id": "ar-s21",
+   "format": "shorts",
+   "template": "mistake",
+   "topic": "أخطاء سكوات السومو (القدمان، الركبتان)",
+   "title": "السومو: خطأ القدمين الذي يضيع تمرين الفخذ الداخلي",
+   "poses": [
+    "sumo",
+    "front"
+   ]
+  },
+  {
+   "id": "ar-s22",
+   "format": "shorts",
+   "template": "rank",
+   "topic": "ترتيب العضلات في تمرين القفز (جامبينغ جاك)",
+   "title": "القفز يشغل عضلات أكثر مما تظن",
+   "poses": [
+    "jacks",
+    "front",
+    "back"
+   ]
+  },
+  {
+   "id": "ar-s23",
+   "format": "shorts",
+   "template": "myth",
+   "topic": "هل السكوات وحده يكفي للأرداف؟",
+   "title": "السكوات وحده يكفي للمؤخرة؟ 3 خرافات",
+   "poses": [
+    "squat",
+    "kickback",
+    "back"
+   ]
+  },
+  {
+   "id": "ar-s24",
+   "format": "shorts",
+   "template": "compare",
+   "topic": "الجلوس على الحائط مقابل السكوات: الثبات أم الحركة",
+   "title": "الثبات أم الحركة؟ الحائط ضد السكوات",
+   "poses": [
+    "wallsit",
+    "squat"
+   ]
+  },
+  {
+   "id": "ar-s25",
+   "format": "shorts",
+   "template": "mistake",
+   "topic": "أخطاء الطعن الجانبي",
+   "title": "خطأ في الطعن الجانبي يضيّع تمرين فخذك",
+   "poses": [
+    "sidelunge",
+    "front"
+   ]
+  },
+  {
+   "id": "ar-s26",
+   "format": "shorts",
+   "template": "rank",
+   "topic": "ترتيب العضلات في تمرين رفع الركبة",
+   "title": "رفع الركبة: تمرين بطن وأرجل معاً",
+   "poses": [
+    "high_knee_hold",
+    "front",
+    "climber"
+   ]
+  },
+  {
+   "id": "ar-s27",
+   "format": "shorts",
+   "template": "myth",
+   "topic": "خرافات البطن السداسي (عضلة واحدة أم ست؟)",
+   "title": "البطن 6 عضلات منفصلة؟ الحقيقة التشريحية",
+   "poses": [
+    "front",
+    "crunch",
+    "vup"
+   ]
+  },
+  {
+   "id": "ar-s28",
+   "format": "shorts",
+   "template": "compare",
+   "topic": "الصعود على الصندوق مقابل الطعن",
+   "title": "الصعود أم الطعن؟ أيهما لفخذيك",
+   "poses": [
+    "stepup",
+    "lunge"
+   ]
+  },
+  {
+   "id": "ar-s29",
+   "format": "shorts",
+   "template": "mistake",
+   "topic": "أخطاء البايك التي تنقل الحمل من الأكتاف",
+   "title": "أخطاء البايك التي تسرق تمرين أكتافك",
+   "poses": [
+    "pike",
+    "decline"
+   ]
+  },
+  {
+   "id": "ar-s30",
+   "format": "shorts",
+   "template": "rank",
+   "topic": "أكبر عضلات جسمك بالترتيب (خريطة أمام وخلف)",
+   "title": "أكبر عضلات جسمك بالترتيب في 40 ثانية",
+   "poses": [
+    "front",
+    "back",
+    "side"
+   ]
+  },
+  {
+   "id": "ar-l01",
+   "format": "long",
+   "template": "chapters",
+   "topic": "البطن في البيت كاملاً: الكرنش، V-up، البلانك، تسلق الجبل — ماذا يشغل كل تمرين",
+   "title": "درس البطن الكامل في البيت: كل تمرين وأي عضلة يشغل",
+   "poses": [
+    "crunch",
+    "vup",
+    "highplank",
+    "climber"
+   ]
+  },
+  {
+   "id": "ar-l02",
+   "format": "long",
+   "template": "chapters",
+   "topic": "الأرجل بدون أوزان: السكوات، الطعن، الصعود، الجلوس على الحائط",
+   "title": "أرجل قوية بدون أوزان: الدليل التشريحي الكامل",
+   "poses": [
+    "squat",
+    "lunge",
+    "stepup",
+    "wallsit"
+   ]
+  },
+  {
+   "id": "ar-l03",
+   "format": "long",
+   "template": "chapters",
+   "topic": "الصدر والأكتاف والترايسبس بالضغط: العادي، المائل، البايك",
+   "title": "3 أنواع ضغط تبني الجزء العلوي كاملاً في البيت",
+   "poses": [
+    "pushup",
+    "decline",
+    "pike",
+    "pushup3q"
+   ]
+  },
+  {
+   "id": "ar-l04",
+   "format": "long",
+   "template": "chapters",
+   "topic": "الأرداف والفخذ الخلفي في البيت: ركلة الأرداف، السكوات، السومو",
+   "title": "دليل الأرداف في البيت: تمارين وعضلات وأخطاء",
+   "poses": [
+    "kickback",
+    "squat",
+    "sumo",
+    "back"
+   ]
+  },
+  {
+   "id": "ar-l05",
+   "format": "long",
+   "template": "chapters",
+   "topic": "خريطة عضلات الجسم للمبتدئين: من الأمام والخلف والجانب",
+   "title": "خريطة عضلات جسمك: درس المبتدئين الكامل",
+   "poses": [
+    "front",
+    "back",
+    "side",
+    "biceps"
+   ]
+  },
+  {
+   "id": "ar-l06",
+   "format": "long",
+   "template": "chapters",
+   "topic": "الفخذ الداخلي والحركة الجانبية: السومو والطعن الجانبي",
+   "title": "الفخذ الداخلي: التمارين التي ينساها الجميع",
+   "poses": [
+    "sumo",
+    "sidelunge",
+    "front"
+   ]
+  },
+  {
+   "id": "ar-l07",
+   "format": "long",
+   "template": "chapters",
+   "topic": "تمارين الكارديو بوزن الجسم وعضلاتها: القفز، تسلق الجبل، رفع الركبة",
+   "title": "كارديو بدون أجهزة: أي عضلات تشتغل فعلاً؟",
+   "poses": [
+    "jacks",
+    "climber",
+    "high_knee_hold"
+   ]
+  },
+  {
+   "id": "ar-l08",
+   "format": "long",
+   "template": "chapters",
+   "topic": "السمانة والساق: رفع الكعبين، القفز، الصعود",
+   "title": "السمانة القوية في البيت: درس كامل",
+   "poses": [
+    "calfraise",
+    "jacks",
+    "stepup",
+    "back"
+   ]
+  },
+  {
+   "id": "ar-l09",
+   "format": "long",
+   "template": "chapters",
+   "topic": "تمرين الجسم كامل في البيت: أي عضلة يشغل كل تمرين",
+   "title": "تمرين كامل للجسم في البيت: خريطة العضلات",
+   "poses": [
+    "squat",
+    "pushup",
+    "lunge",
+    "highplank"
+   ]
+  }
+ ]
+}

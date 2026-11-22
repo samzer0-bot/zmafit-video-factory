@@ -1,0 +1,460 @@
+{
+ "_note": "خطة الشهر: الوكيل يأخذ أول موضوع لم يُنشر من نفس الصيغة. عدّل أو أضف بحرية.",
+ "items": [
+  {
+   "id": "en-s01",
+   "format": "shorts",
+   "template": "compare",
+   "topic": "Push-up vs pike push-up: chest or shoulders",
+   "title": "Push-Up vs Pike Push-Up: Chest or Shoulders?",
+   "poses": [
+    "pushup",
+    "pike"
+   ]
+  },
+  {
+   "id": "en-s02",
+   "format": "shorts",
+   "template": "myth",
+   "topic": "Plank myths (longer is better, abs only)",
+   "title": "Longer Planks = Better Abs? 3 Plank Myths",
+   "poses": [
+    "highplank",
+    "side"
+   ]
+  },
+  {
+   "id": "en-s03",
+   "format": "shorts",
+   "template": "rank",
+   "topic": "Glute kickback: muscles it works, ranked",
+   "title": "Glute Kickback: What It Really Works, Ranked",
+   "poses": [
+    "kickback",
+    "back"
+   ]
+  },
+  {
+   "id": "en-s04",
+   "format": "shorts",
+   "template": "mistake",
+   "topic": "Calf raise mistakes (bouncing, short range)",
+   "title": "Calf Raise Mistakes Keeping Your Calves Small",
+   "poses": [
+    "calfraise",
+    "back"
+   ]
+  },
+  {
+   "id": "en-s05",
+   "format": "shorts",
+   "template": "compare",
+   "topic": "Crunch vs plank for your core",
+   "title": "Crunch vs Plank: Which One Your Abs Need",
+   "poses": [
+    "crunch",
+    "highplank"
+   ]
+  },
+  {
+   "id": "en-s06",
+   "format": "shorts",
+   "template": "rank",
+   "topic": "Side lunge: muscles it works, ranked",
+   "title": "Side Lunge: Every Muscle It Hits, Ranked",
+   "poses": [
+    "sidelunge",
+    "front",
+    "back"
+   ]
+  },
+  {
+   "id": "en-s07",
+   "format": "shorts",
+   "template": "myth",
+   "topic": "Cardio moves don't build muscle? (jacks, climbers, high knees)",
+   "title": "Cardio Moves Don't Build Muscle? Think Again",
+   "poses": [
+    "jacks",
+    "climber",
+    "high_knee_hold"
+   ]
+  },
+  {
+   "id": "en-s08",
+   "format": "shorts",
+   "template": "mistake",
+   "topic": "Lunge mistakes that waste your leg day",
+   "title": "Lunge Mistakes That Waste Your Leg Day",
+   "poses": [
+    "lunge",
+    "side"
+   ]
+  },
+  {
+   "id": "en-s09",
+   "format": "shorts",
+   "template": "compare",
+   "topic": "Forward lunge vs side lunge",
+   "title": "Forward vs Side Lunge: Totally Different Muscles",
+   "poses": [
+    "lunge",
+    "sidelunge"
+   ]
+  },
+  {
+   "id": "en-s10",
+   "format": "shorts",
+   "template": "rank",
+   "topic": "Crunch: which abs it really hits",
+   "title": "The Crunch: Which Abs It Really Hits",
+   "poses": [
+    "crunch",
+    "front"
+   ]
+  },
+  {
+   "id": "en-s11",
+   "format": "shorts",
+   "template": "myth",
+   "topic": "Push-ups only work your chest? (triceps, shoulders, core)",
+   "title": "Push-Ups Only Work Your Chest? Big Myth",
+   "poses": [
+    "pushup",
+    "back",
+    "pushup3q"
+   ]
+  },
+  {
+   "id": "en-s12",
+   "format": "shorts",
+   "template": "mistake",
+   "topic": "Mountain climber mistakes (hips, speed)",
+   "title": "Mountain Climber Mistakes Killing Your Results",
+   "poses": [
+    "climber",
+    "highplank"
+   ]
+  },
+  {
+   "id": "en-s13",
+   "format": "shorts",
+   "template": "compare",
+   "topic": "Wall sit vs squat: hold or move",
+   "title": "Wall Sit vs Squat: Which Builds Your Legs?",
+   "poses": [
+    "wallsit",
+    "squat"
+   ]
+  },
+  {
+   "id": "en-s14",
+   "format": "shorts",
+   "template": "rank",
+   "topic": "Jumping jacks: muscles ranked",
+   "title": "Jumping Jacks Work More Muscles Than You Think",
+   "poses": [
+    "jacks",
+    "front",
+    "back"
+   ]
+  },
+  {
+   "id": "en-s15",
+   "format": "shorts",
+   "template": "myth",
+   "topic": "Home leg training isn't enough? (squats, lunges, step-ups)",
+   "title": "Leg Day at Home Isn't Enough? 3 Myths",
+   "poses": [
+    "squat",
+    "lunge",
+    "stepup"
+   ]
+  },
+  {
+   "id": "en-s16",
+   "format": "shorts",
+   "template": "mistake",
+   "topic": "Step-up mistakes (pushing off the back leg)",
+   "title": "Step-Up Mistakes That Make It Too Easy",
+   "poses": [
+    "stepup",
+    "lunge"
+   ]
+  },
+  {
+   "id": "en-s17",
+   "format": "shorts",
+   "template": "compare",
+   "topic": "Sumo squat vs side lunge for inner thighs",
+   "title": "Sumo Squat vs Side Lunge: Inner Thigh Showdown",
+   "poses": [
+    "sumo",
+    "sidelunge"
+   ]
+  },
+  {
+   "id": "en-s18",
+   "format": "shorts",
+   "template": "rank",
+   "topic": "Lunge: muscles ranked",
+   "title": "The Lunge Builds These Muscles, Ranked",
+   "poses": [
+    "lunge",
+    "back",
+    "side"
+   ]
+  },
+  {
+   "id": "en-s19",
+   "format": "shorts",
+   "template": "myth",
+   "topic": "Six-pack anatomy myths (one muscle or six?)",
+   "title": "Is Your Six-Pack Really 6 Muscles? The Truth",
+   "poses": [
+    "front",
+    "crunch",
+    "vup"
+   ]
+  },
+  {
+   "id": "en-s20",
+   "format": "shorts",
+   "template": "mistake",
+   "topic": "Glute kickback mistakes (arching the back)",
+   "title": "Glute Kickback Mistake That Turns It Into a Back Move",
+   "poses": [
+    "kickback",
+    "back"
+   ]
+  },
+  {
+   "id": "en-s21",
+   "format": "shorts",
+   "template": "compare",
+   "topic": "Push-up vs decline push-up",
+   "title": "Push-Up vs Decline Push-Up: Upper Chest Secret",
+   "poses": [
+    "pushup",
+    "decline"
+   ]
+  },
+  {
+   "id": "en-s22",
+   "format": "shorts",
+   "template": "rank",
+   "topic": "Mountain climber: muscles ranked",
+   "title": "Mountain Climbers: Every Muscle Ranked",
+   "poses": [
+    "climber",
+    "highplank",
+    "front"
+   ]
+  },
+  {
+   "id": "en-s23",
+   "format": "shorts",
+   "template": "myth",
+   "topic": "You can't train shoulders without weights?",
+   "title": "No Weights, No Shoulders? 3 Myths Busted",
+   "poses": [
+    "pike",
+    "front"
+   ]
+  },
+  {
+   "id": "en-s24",
+   "format": "shorts",
+   "template": "mistake",
+   "topic": "High plank mistakes (sagging hips, shoulders)",
+   "title": "High Plank Mistakes Most Beginners Make",
+   "poses": [
+    "highplank",
+    "pushup3q"
+   ]
+  },
+  {
+   "id": "en-s25",
+   "format": "shorts",
+   "template": "compare",
+   "topic": "Plank vs mountain climber",
+   "title": "Plank vs Mountain Climber: Which Wins for Abs?",
+   "poses": [
+    "highplank",
+    "climber"
+   ]
+  },
+  {
+   "id": "en-s26",
+   "format": "shorts",
+   "template": "rank",
+   "topic": "Sumo squat: muscles ranked",
+   "title": "Sumo Squat: What It Really Works, Ranked",
+   "poses": [
+    "sumo",
+    "front",
+    "back"
+   ]
+  },
+  {
+   "id": "en-s27",
+   "format": "shorts",
+   "template": "myth",
+   "topic": "Squat knee myths (knees past toes)",
+   "title": "Knees Past Toes Is Bad? Squat Myths Busted",
+   "poses": [
+    "squat",
+    "side"
+   ]
+  },
+  {
+   "id": "en-s28",
+   "format": "shorts",
+   "template": "mistake",
+   "topic": "Side lunge mistakes",
+   "title": "Side Lunge Mistakes That Waste the Move",
+   "poses": [
+    "sidelunge",
+    "front"
+   ]
+  },
+  {
+   "id": "en-s29",
+   "format": "shorts",
+   "template": "compare",
+   "topic": "Jumping jacks vs high knees",
+   "title": "Jumping Jacks vs High Knees: Which Works More?",
+   "poses": [
+    "jacks",
+    "high_knee_hold"
+   ]
+  },
+  {
+   "id": "en-s30",
+   "format": "shorts",
+   "template": "rank",
+   "topic": "Pike push-up: muscles ranked",
+   "title": "Pike Push-Up: Every Muscle It Hits, Ranked",
+   "poses": [
+    "pike",
+    "front",
+    "back"
+   ]
+  },
+  {
+   "id": "en-l01",
+   "format": "long",
+   "template": "chapters",
+   "topic": "Muscle map for beginners: front, back and side view",
+   "title": "Your Muscle Map: The Complete Beginner Anatomy Lesson",
+   "poses": [
+    "front",
+    "back",
+    "side",
+    "biceps"
+   ]
+  },
+  {
+   "id": "en-l02",
+   "format": "long",
+   "template": "chapters",
+   "topic": "Inner thighs and lateral movement at home: sumo squat and side lunge",
+   "title": "Inner Thighs at Home: The Moves Everyone Forgets",
+   "poses": [
+    "sumo",
+    "sidelunge",
+    "front"
+   ]
+  },
+  {
+   "id": "en-l03",
+   "format": "long",
+   "template": "chapters",
+   "topic": "Bodyweight cardio anatomy: jumping jacks, mountain climbers, high knees",
+   "title": "No-Equipment Cardio: Which Muscles Actually Work?",
+   "poses": [
+    "jacks",
+    "climber",
+    "high_knee_hold"
+   ]
+  },
+  {
+   "id": "en-l04",
+   "format": "long",
+   "template": "chapters",
+   "topic": "Calves at home: calf raises, jumping jacks, step-ups",
+   "title": "Stronger Calves at Home: The Full Lesson",
+   "poses": [
+    "calfraise",
+    "jacks",
+    "stepup",
+    "back"
+   ]
+  },
+  {
+   "id": "en-l05",
+   "format": "long",
+   "template": "chapters",
+   "topic": "Full home ab workout: crunch, V-up, plank, mountain climber — what each one works",
+   "title": "The Complete Home Ab Lesson: Every Move, Every Muscle",
+   "poses": [
+    "crunch",
+    "vup",
+    "highplank",
+    "climber"
+   ]
+  },
+  {
+   "id": "en-l06",
+   "format": "long",
+   "template": "chapters",
+   "topic": "Bodyweight legs: squat, lunge, step-up, wall sit",
+   "title": "Strong Legs Without Weights: The Full Anatomy Guide",
+   "poses": [
+    "squat",
+    "lunge",
+    "stepup",
+    "wallsit"
+   ]
+  },
+  {
+   "id": "en-l07",
+   "format": "long",
+   "template": "chapters",
+   "topic": "The push-up family: regular, decline and pike for chest, shoulders and triceps",
+   "title": "3 Push-Ups That Build Your Whole Upper Body at Home",
+   "poses": [
+    "pushup",
+    "decline",
+    "pike",
+    "pushup3q"
+   ]
+  },
+  {
+   "id": "en-l08",
+   "format": "long",
+   "template": "chapters",
+   "topic": "Glutes and hamstrings at home: kickbacks, squats, sumo squats",
+   "title": "Home Glute Guide: Moves, Muscles and Mistakes",
+   "poses": [
+    "kickback",
+    "squat",
+    "sumo",
+    "back"
+   ]
+  },
+  {
+   "id": "en-l09",
+   "format": "long",
+   "template": "chapters",
+   "topic": "Full-body home workout: which muscle each move trains",
+   "title": "Full-Body Home Workout: Your Muscle Map",
+   "poses": [
+    "squat",
+    "pushup",
+    "lunge",
+    "highplank"
+   ]
+  }
+ ]
+}

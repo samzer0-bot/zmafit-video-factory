@@ -38,6 +38,21 @@ def load_hist():
     except Exception: return []
 
 
+PLAN = config.ROOT / "topics" / f"anatomy_plan_{LANG}.json"
+
+
+def next_planned(fmt, hist):
+    """الموضوع التالي من خطة الشهر (لم يُنشر بعد ولنفس الصيغة)، أو None فيختار Gemini بنفسه."""
+    try: items = json.loads(PLAN.read_text(encoding="utf-8")).get("items", [])
+    except Exception: return None
+    done = {h.get("plan_id") for h in hist if h.get("lang") == LANG}
+    for it in items:
+        if it.get("format") == fmt and it.get("id") not in done and it.get("topic"):
+            it["poses"] = [x for x in it.get("poses", []) if x in AV.POSES]
+            return it
+    return None
+
+
 def pick_template(fmt, hist):
     mine = [h for h in hist if h["lang"] == LANG and h["format"] == fmt]
     opts = TEMPLATES[fmt][:]
@@ -59,7 +74,7 @@ def ask_json(prompt, tokens=16384):
     raise RuntimeError("Gemini لم يُرجع JSON صالحاً")
 
 
-def gemini_content(template, fmt, hist):
+def gemini_content(template, fmt, hist, plan=None):
     now = datetime.now(timezone.utc)
     mine = [h["topic"] for h in hist if h["lang"] == LANG][-40:]
     other_recent = [h["topic"] for h in hist if h["lang"] != LANG and
@@ -70,6 +85,15 @@ def gemini_content(template, fmt, hist):
                   "Audience: Arab beginners training at home without equipment."
                   if not EN else
                   "Write ALL text in punchy, natural American English. Audience: busy people training at home.")
+    if plan:
+        topic_rule = (f"TOPIC (fixed by our monthly plan, do not change it): {plan['topic']}\n"
+                      f"Planned title: {plan.get('title', '')} (keep this meaning; the 'title' field may be this exact title).\n"
+                      f"Build the video mainly with these drawings: {', '.join(plan.get('poses') or [])}.")
+    else:
+        topic_rule = ("Pick a fresh, specific, genuinely useful topic that fits the template and the drawings (an exercise, a muscle, a common mistake or myth).\n"
+                      "Inspired by what trends now in home fitness (abs, glutes, triceps, V-taper shoulders, legs, push-ups, squats), but with original angle and wording.\n"
+                      f"Do NOT reuse these topics of this channel: {mine}\n"
+                      f"Do NOT use these topics recently covered by our other channel: {other_recent}")
     short = fmt == "shorts"
     offer = ("outro_say must naturally invite viewers to get our book «خريطة التشريح البصري لتدريب وزن الجسم» "
              "(the link is in the description) to see every muscle and the home exercises that build it, then to subscribe. "
@@ -85,10 +109,10 @@ Available drawings (pose id: description | muscles that can be highlighted):
 {cat}
 Use ONLY these pose ids and ONLY the listed muscle ids for each pose. Prefer drawings marked (NEW) when they fit the topic.
 
-Pick a fresh, specific, genuinely useful topic that fits the template and the drawings (an exercise, a muscle, a common mistake or myth).
-Inspired by what trends now in home fitness (abs, glutes, triceps, V-taper shoulders, legs, push-ups, squats), but with original angle and wording.
-Do NOT reuse these topics of this channel: {mine}
-Do NOT use these topics recently covered by our other channel: {other_recent}
+{topic_rule}
+NICHE (strict): bodyweight training at home with no equipment, and the anatomy of the muscles each exercise works.
+Never cover nutrition, diets, meals, supplements, weight-loss products, gym machines, dumbbells or barbells, medical or injury treatment,
+or anything outside this niche. Every beat must show one of the drawings above and teach which muscle works and why.
 {lang_rules}
 {offer}
 Accuracy matters: only state anatomy and training facts that are correct and widely accepted. No invented statistics or percentages.
@@ -201,10 +225,12 @@ def main():
     ap.add_argument("--template", default="")
     a = ap.parse_args(); fmt = a.format
     hist = load_hist()
-    template = a.template or pick_template(fmt, hist)
-    print(f"=== {LANG} | {fmt} | قالب: {template} ===")
+    plan = None if a.template else next_planned(fmt, hist)
+    template = a.template or (plan and plan.get("template")) or pick_template(fmt, hist)
+    if template not in TEMPLATE_GUIDE: template = pick_template(fmt, hist)
+    print(f"=== {LANG} | {fmt} | قالب: {template} | خطة: {plan['id'] if plan else 'لا (اختيار تلقائي)'} ===")
     for attempt in range(3):                       # الموديل الاحتياطي يرد أحياناً بلا مشاهد: نعيد الطلب
-        c = gemini_content(template, fmt, hist)
+        c = gemini_content(template, fmt, hist, plan)
         print("  الموضوع:", c.get("topic"))
         if any(isinstance(b, dict) for b in (c.get("beats") or [])): break
         print(f"  رد بلا مشاهد — محاولة جديدة ({attempt + 1}/3)"); time.sleep(20)
@@ -228,6 +254,7 @@ def main():
     lead = config.LEAD_MAGNET_URL
     if lead and lead not in desc:
         desc = ((f"FREE 30-day home workout plan: {lead}\n\n" if EN else f"احصل مجاناً على جدول تمارين 30 يوم في البيت: {lead}\n\n") + desc)
+    if plan and plan.get("title"): c["title"] = plan["title"]
     title = ai.clean(c.get("title", ""))[:90]
     if fmt == "shorts": title = title[:85] + " #shorts"
     meta = {"title": title, "description": desc, "tags": c.get("tags", [])[:15], "format": fmt, "topic": c.get("topic", ""),
@@ -237,7 +264,7 @@ def main():
     for p in (config.OUT / f"{name}.json", config.OUT / "latest.json"):
         p.write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
     hist.append({"date": datetime.now(timezone.utc).isoformat(), "lang": LANG, "format": fmt, "template": template,
-                 "topic": c.get("topic", ""), "poses": sorted({s.get("pose") for s in scenes if s.get("pose")})})
+                 "topic": c.get("topic", ""), "plan_id": plan["id"] if plan else "", "poses": sorted({s.get("pose") for s in scenes if s.get("pose")})})
     HIST.write_text(json.dumps(hist[-300:], ensure_ascii=False, indent=1), encoding="utf-8")
     print(f"✓ {video.name} ({total:.0f}s)")
 
