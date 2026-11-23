@@ -75,5 +75,18 @@
    "pike",
    "pushup"
   ]
+ },
+ {
+  "date": "2026-11-23T03:13:40.812467+00:00",
+  "lang": "en",
+  "format": "long",
+  "template": "chapters",
+  "topic": "Inner thighs and lateral movement at home: sumo squat and side lunge",
+  "plan_id": "en-l02",
+  "poses": [
+   "front",
+   "sidelunge",
+   "sumo"
+  ]
  }
 ]
