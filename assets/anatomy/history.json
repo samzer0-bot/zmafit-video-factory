@@ -50,5 +50,18 @@
    "pike",
    "side"
   ]
+ },
+ {
+  "date": "2026-11-23T01:13:23.592915+00:00",
+  "lang": "ar",
+  "format": "shorts",
+  "template": "mistake",
+  "topic": "الكرنش وحده لا يكفي للبطن: ماذا يشغل الكرنش وماذا يهمل",
+  "plan_id": "ar-s01",
+  "poses": [
+   "crunch",
+   "highplank",
+   "vup"
+  ]
  }
 ]
