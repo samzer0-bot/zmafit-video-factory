@@ -66,5 +66,10 @@
   "desc": "Standing High Knee: standing tall on one leg, opposite knee driven up high with thigh parallel to floor, arms bent in athletic running pose, facing forward (front view)",
   "added": "2026-11-22",
   "auto": true
+ },
+ "standing_side_crunch": {
+  "desc": "Standing Oblique Crunch: standing tall on one leg, opposite knee raised high to the side toward the elbow, hands behind the head, facing forward, one foot flat on the floor (front view)",
+  "added": "2026-11-23",
+  "auto": true
  }
 }
