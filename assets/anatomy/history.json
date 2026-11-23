@@ -63,5 +63,17 @@
    "highplank",
    "vup"
   ]
+ },
+ {
+  "date": "2026-11-23T02:04:15.678543+00:00",
+  "lang": "en",
+  "format": "shorts",
+  "template": "compare",
+  "topic": "Push-up vs pike push-up: chest or shoulders",
+  "plan_id": "en-s01",
+  "poses": [
+   "pike",
+   "pushup"
+  ]
  }
 ]
