@@ -2,3 +2,4 @@ out/
 __pycache__/
 *.pyc
 work_anat/
+*.blend1
