@@ -1,0 +1,142 @@
+{
+ "all_body_exercises_grid": {
+  "file": "all_body_exercises_grid.jpg",
+  "desc": "Grid of 25 exercises for every muscle group, target muscles in red (Arabic labels)",
+  "muscle_group": "full_body",
+  "lang": "ar",
+  "size": [
+   1312,
+   1199
+  ]
+ },
+ "barbell_bench_press_labeled": {
+  "file": "barbell_bench_press_labeled.jpg",
+  "desc": "Barbell bench press with labeled muscles (chest, front delt, triceps)",
+  "muscle_group": "chest",
+  "lang": "ar",
+  "size": [
+   1536,
+   1024
+  ]
+ },
+ "flat_dumbbell_press_v1": {
+  "file": "flat_dumbbell_press_v1.jpg",
+  "desc": "Flat dumbbell press: start/mid frames, 4 steps, sets x reps",
+  "muscle_group": "chest",
+  "lang": "ar",
+  "size": [
+   1536,
+   1024
+  ]
+ },
+ "incline_dumbbell_press_v1": {
+  "file": "incline_dumbbell_press_v1.jpg",
+  "desc": "Incline dumbbell press (upper chest): start/mid, 4 steps",
+  "muscle_group": "chest",
+  "lang": "ar",
+  "size": [
+   1536,
+   1024
+  ]
+ },
+ "incline_dumbbell_press_v2": {
+  "file": "incline_dumbbell_press_v2.jpg",
+  "desc": "Incline dumbbell press, variant 2 with muscle color legend",
+  "muscle_group": "chest",
+  "lang": "ar",
+  "size": [
+   1536,
+   1024
+  ]
+ },
+ "chest_exercises_3to7": {
+  "file": "chest_exercises_3to7.jpg",
+  "desc": "Chest: flat DB press, DB fly, decline barbell, incline barbell, dips",
+  "muscle_group": "chest",
+  "lang": "ar",
+  "size": [
+   1536,
+   1024
+  ]
+ },
+ "flat_dumbbell_press_v2": {
+  "file": "flat_dumbbell_press_v2.jpg",
+  "desc": "Flat dumbbell press: start/end frames, tips",
+  "muscle_group": "chest",
+  "lang": "ar",
+  "size": [
+   1536,
+   1024
+  ]
+ },
+ "chest_back_5_exercises": {
+  "file": "chest_back_5_exercises.jpg",
+  "desc": "Flat DB press, bent-over DB row, lat pulldown, seated cable row, pull-up",
+  "muscle_group": "chest_back",
+  "lang": "ar",
+  "size": [
+   1312,
+   1199
+  ]
+ },
+ "flat_dumbbell_press_v3": {
+  "file": "flat_dumbbell_press_v3.jpg",
+  "desc": "Flat dumbbell press with front/back anatomy, benefits, tips",
+  "muscle_group": "chest",
+  "lang": "ar",
+  "size": [
+   1312,
+   1199
+  ]
+ },
+ "chest_5_exercises_pushup_cable": {
+  "file": "chest_5_exercises_pushup_cable.jpg",
+  "desc": "Chest: flat DB press, push-ups, DB fly, cable fly, decline DB press",
+  "muscle_group": "chest",
+  "lang": "ar",
+  "size": [
+   1536,
+   1024
+  ]
+ },
+ "chest_5_exercises_barbell_dumbbell": {
+  "file": "chest_5_exercises_barbell_dumbbell.jpg",
+  "desc": "Chest: flat DB press, barbell bench, DB fly, decline DB, decline barbell",
+  "muscle_group": "chest",
+  "lang": "ar",
+  "size": [
+   1536,
+   1024
+  ]
+ },
+ "barbell_bench_press_v2": {
+  "file": "barbell_bench_press_v2.jpg",
+  "desc": "Barbell bench press, red style: start/mid, benefits, tips",
+  "muscle_group": "chest",
+  "lang": "ar",
+  "size": [
+   1536,
+   1024
+  ]
+ },
+ "barbell_bench_press_v3": {
+  "file": "barbell_bench_press_v3.jpg",
+  "desc": "Barbell bench press: front/back anatomy, start/end, tips",
+  "muscle_group": "chest",
+  "lang": "ar",
+  "size": [
+   1312,
+   1199
+  ]
+ },
+ "barbell_bench_press_v4": {
+  "file": "barbell_bench_press_v4.jpg",
+  "desc": "Barbell bench press: front/back anatomy, start/mid, tips",
+  "muscle_group": "chest",
+  "lang": "ar",
+  "size": [
+   1312,
+   1199
+  ]
+ }
+}
