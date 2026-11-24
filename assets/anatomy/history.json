@@ -112,5 +112,22 @@
    "highplank",
    "side"
   ]
+ },
+ {
+  "date": "2026-11-24T21:27:31.714640+00:00",
+  "lang": "ar",
+  "format": "long",
+  "template": "chapters",
+  "topic": "البطن في البيت كاملاً: الكرنش، V-up، البلانك، تسلق الجبل — ماذا يشغل كل تمرين",
+  "plan_id": "ar-l01",
+  "poses": [
+   "climber",
+   "crunch",
+   "high_knee_hold",
+   "highplank",
+   "pushup3q",
+   "standing_side_crunch",
+   "vup"
+  ]
  }
 ]
