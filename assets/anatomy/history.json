@@ -88,5 +88,17 @@
    "sidelunge",
    "sumo"
   ]
+ },
+ {
+  "date": "2026-11-24T04:10:37.227270+00:00",
+  "lang": "ar",
+  "format": "shorts",
+  "template": "compare",
+  "topic": "الضغط العادي مقابل الضغط المائل (القدمان مرفوعتان)",
+  "plan_id": "ar-s02",
+  "poses": [
+   "decline",
+   "pushup"
+  ]
  }
 ]
