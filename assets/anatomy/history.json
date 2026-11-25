@@ -129,5 +129,21 @@
    "standing_side_crunch",
    "vup"
   ]
+ },
+ {
+  "date": "2026-11-25T02:39:23.715170+00:00",
+  "lang": "ar",
+  "format": "long",
+  "template": "chapters",
+  "topic": "الأرجل بدون أوزان: السكوات، الطعن، الصعود، الجلوس على الحائط",
+  "plan_id": "ar-l02",
+  "poses": [
+   "front",
+   "lunge",
+   "side",
+   "squat",
+   "stepup",
+   "wallsit"
+  ]
  }
 ]
