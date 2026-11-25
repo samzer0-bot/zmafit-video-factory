@@ -145,5 +145,18 @@
    "stepup",
    "wallsit"
   ]
+ },
+ {
+  "date": "2026-11-25T03:56:56.984135+00:00",
+  "lang": "ar",
+  "format": "shorts",
+  "template": "myth",
+  "topic": "خرافات السكوات للمبتدئين (الركبة، العمق، الظهر)",
+  "plan_id": "ar-s03",
+  "poses": [
+   "front",
+   "side",
+   "squat"
+  ]
  }
 ]
