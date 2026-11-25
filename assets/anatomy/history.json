@@ -158,5 +158,17 @@
    "side",
    "squat"
   ]
+ },
+ {
+  "date": "2026-11-25T04:31:55.625518+00:00",
+  "lang": "en",
+  "format": "shorts",
+  "template": "rank",
+  "topic": "Glute kickback: muscles it works, ranked",
+  "plan_id": "en-s03",
+  "poses": [
+   "back",
+   "kickback"
+  ]
  }
 ]
