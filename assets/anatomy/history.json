@@ -184,5 +184,18 @@
    "highplank",
    "jacks"
   ]
+ },
+ {
+  "date": "2026-11-26T01:57:49.783394+00:00",
+  "lang": "ar",
+  "format": "shorts",
+  "template": "rank",
+  "topic": "ترتيب العضلات التي يشغلها تمرين الطعن",
+  "plan_id": "ar-s04",
+  "poses": [
+   "back",
+   "lunge",
+   "side"
+  ]
  }
 ]
