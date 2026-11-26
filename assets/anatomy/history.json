@@ -170,5 +170,19 @@
    "back",
    "kickback"
   ]
+ },
+ {
+  "date": "2026-11-26T00:31:32.882659+00:00",
+  "lang": "en",
+  "format": "long",
+  "template": "chapters",
+  "topic": "Bodyweight cardio anatomy: jumping jacks, mountain climbers, high knees",
+  "plan_id": "en-l03",
+  "poses": [
+   "climber",
+   "high_knee_hold",
+   "highplank",
+   "jacks"
+  ]
  }
 ]
