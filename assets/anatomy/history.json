@@ -197,5 +197,17 @@
    "lunge",
    "side"
   ]
+ },
+ {
+  "date": "2026-11-26T03:44:47.548903+00:00",
+  "lang": "en",
+  "format": "shorts",
+  "template": "mistake",
+  "topic": "Calf raise mistakes (bouncing, short range)",
+  "plan_id": "en-s04",
+  "poses": [
+   "back",
+   "calfraise"
+  ]
  }
 ]
