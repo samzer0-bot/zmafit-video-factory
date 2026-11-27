@@ -98,14 +98,20 @@
  },
  "good_morning_stretch": {
   "name": "Standing Morning Stretch",
-  "fails": 1,
-  "last": "2026-11-23T13:49:35.374045+00:00",
+  "fails": 2,
+  "last": "2026-11-27T13:21:22.634610+00:00",
   "status": "rejected"
  },
  "standing_side_crunch": {
   "name": "Standing Oblique Crunch",
   "fails": 0,
   "last": "2026-11-23T13:53:20.535564+00:00",
+  "status": "added"
+ },
+ "skater_hop": {
+  "name": "Skater Hop",
+  "fails": 0,
+  "last": "2026-11-27T13:13:54.889454+00:00",
   "status": "added"
  }
 }
