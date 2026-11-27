@@ -222,5 +222,17 @@
    "pushup",
    "pushup3q"
   ]
+ },
+ {
+  "date": "2026-11-27T03:55:15.346988+00:00",
+  "lang": "en",
+  "format": "shorts",
+  "template": "compare",
+  "topic": "Crunch vs plank for your core",
+  "plan_id": "en-s05",
+  "poses": [
+   "crunch",
+   "highplank"
+  ]
  }
 ]
