@@ -234,5 +234,18 @@
    "crunch",
    "highplank"
   ]
+ },
+ {
+  "date": "2026-11-28T01:41:55.651726+00:00",
+  "lang": "ar",
+  "format": "shorts",
+  "template": "myth",
+  "topic": "هل تمارين البطن تحرق دهون البطن؟ (خرافة الحرق الموضعي)",
+  "plan_id": "ar-s06",
+  "poses": [
+   "crunch",
+   "front",
+   "vup"
+  ]
  }
 ]
