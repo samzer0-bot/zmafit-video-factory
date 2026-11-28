@@ -247,5 +247,17 @@
    "front",
    "vup"
   ]
+ },
+ {
+  "date": "2026-11-28T03:32:37.524166+00:00",
+  "lang": "en",
+  "format": "shorts",
+  "template": "rank",
+  "topic": "Side lunge: muscles it works, ranked",
+  "plan_id": "en-s06",
+  "poses": [
+   "back",
+   "sidelunge"
+  ]
  }
 ]
